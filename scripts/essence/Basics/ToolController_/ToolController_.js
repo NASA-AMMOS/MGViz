@@ -127,6 +127,11 @@ define(['jquery', 'd3', 'Layers_', 'semantic'], function($, d3, L_, semantic) {
                     }
                 )
                 L_.fullyLoaded()
+
+                // Load Search Tool on startup
+                if (ToolController_.activeToolName == null) {
+                    ToolController_.makeTool( 'SearchTool' );
+                }
             })
         },
         clear() {

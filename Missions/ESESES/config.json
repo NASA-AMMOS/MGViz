@@ -1,0 +1,547 @@
+{
+    "msv": {
+        "mission": "ESESES",
+        "site": "JPL",
+        "masterdb": false,
+        "view": [
+            "34.201694",
+            "-118.171667",
+            "6"
+        ],
+        "radius": {
+            "major": "6378100",
+            "minor": "6356800"
+        },
+        "mapscale": ""
+    },
+    "projection": {
+        "custom": false,
+        "epsg": "3857",
+        "proj": "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext  +no_defs",
+        "globeproj": "webmercator",
+        "xmlpath": "",
+        "bounds": [
+            "-20037508.34278925",
+            "-20037508.34278925",
+            "20037508.34278925",
+            "20037508.34278925"
+        ],
+        "origin": [
+            "-20037508.34278925",
+            "20037508.34278925"
+        ],
+        "reszoomlevel": "13",
+        "resunitsperpixel": "19.109257071294069"
+    },
+    "look": {
+        "pagename": "MGViz",
+        "minimalist": true,
+        "zoomcontrol": true,
+        "graticule": false,
+        "bodycolor": "",
+        "topbarcolor": "",
+        "toolbarcolor": "",
+        "mapcolor": "",
+        "swap": true,
+        "copylink": true,
+        "screenshot": true,
+        "fullscreen": true,
+        "help": true,
+        "logourl": "/Resources/logo.png",
+        "helpurl": "/help"
+    },
+    "panels": [
+        "map"
+    ],
+    "tools": [
+        {
+            "name": "Layers",
+            "icon": "buffer",
+            "js": "LayersTool"
+        },
+        {
+            "name": "Legend",
+            "icon": "format-list-bulleted-type",
+            "js": "LegendTool"
+        },
+        {
+            "name": "Search",
+            "icon": "magnify",
+            "js": "SearchTool",
+            "variables": {
+                "searchfields": {
+                    "Sites": ""
+                }
+            }
+        },
+        {
+            "name": "Chart",
+            "icon": "chart-areaspline",
+            "js": "ChartTool"
+        },
+        {
+            "name": "Velocities",
+            "icon": "arrow-top-right-thick",
+            "js": "VelocitiesTool"
+        }
+    ],
+    "layers": [
+        {
+            "name": "Sites",
+            "kind": "none",
+            "type": "vector",
+            "url": "http://localhost:8888/api/eseses/psite",
+            "legend": "Layers/Sites.csv",
+            "tms": true,
+            "visibility": true,
+            "visibilitycutoff": 5,
+            "initialOpacity": 1,
+            "togglesWithHeader": true,
+            "style": {
+                "className": "sites",
+                "color": "#0000FF",
+                "fillColor": "#00FFFF",
+                "weight": 1,
+                "fillOpacity": 100,
+                "opacity": 1
+            },
+            "variables": {},
+            "radius": 4
+        },
+        {
+            "name": "Velocities",
+            "kind": "none",
+            "type": "vectortile",
+            "url": "http://localhost:8888/api/eseses/velocity/comb",
+            "legend": "Layers/Velocities.csv",
+            "tms": true,
+            "visibility": false,
+            "initialOpacity": 1,
+            "togglesWithHeader": true,
+            "minZoom": 2,
+            "maxNativeZoom": 16,
+            "maxZoom": 22,
+            "style": {
+                "color": "#000080",
+                "fillColor": "#FF0000",
+                "weight": 1,
+                "fillOpacity": 100,
+                "opacity": 1,
+                "vtLayer": {
+                    "Velocities Test": {
+                        "color": "#0000FF",
+                        "fill": true,
+                        "fillColor": "#00FFFF",
+                        "fillOpacity": 1,
+                        "opacity": 0.5,
+                        "radius": 4,
+                        "weight": 1
+                    }
+                },
+                "vtId": "site",
+                "vtKey": "site"
+            },
+            "radius": 3
+        },
+        {
+            "name": "Earthquakes",
+            "type": "header",
+            "initialOpacity": 1,
+            "sublayers": [
+                {
+                    "name": "Recent M2-M3",
+                    "kind": "none",
+                    "type": "vectortile",
+                    "url": "Layers/RecentM2M3.json",
+                    "legend": "Layers/RecentM2M3.csv",
+                    "tms": false,
+                    "visibility": false,
+                    "initialOpacity": 1,
+                    "togglesWithHeader": true,
+                    "minZoom": 2,
+                    "maxNativeZoom": 16,
+                    "maxZoom": 22,
+                    "style": {
+                        "color": "null",
+                        "fillColor": "null",
+                        "weight": null,
+                        "fillOpacity": null,
+                        "opacity": 1,
+                        "vtLayer": {
+                            "HistoricalSignificant": {
+                                "color": "#000000",
+                                "fill": true,
+                                "fillColor": "#FFD700",
+                                "fillOpacity": 1,
+                                "opacity": 1,
+                                "radius": 4,
+                                "weight": 1
+                            }
+                        },
+                        "vtId": "id",
+                        "vtKey": "mag"
+                    },
+                    "radius": 1
+                },
+                {
+                    "name": "Recent M3-M6",
+                    "kind": "none",
+                    "type": "vectortile",
+                    "url": "Layers/RecentM3M6.json",
+                    "legend": "Layers/RecentM3M6.csv",
+                    "tms": false,
+                    "visibility": false,
+                    "initialOpacity": 1,
+                    "togglesWithHeader": true,
+                    "minZoom": 2,
+                    "maxNativeZoom": 16,
+                    "maxZoom": 22,
+                    "style": {
+                        "color": "null",
+                        "fillColor": "null",
+                        "weight": null,
+                        "fillOpacity": null,
+                        "opacity": 1,
+                        "vtLayer": {
+                            "HistoricalSignificant": {
+                                "color": "#000000",
+                                "fill": true,
+                                "fillColor": "#FF8C00",
+                                "fillOpacity": 1,
+                                "opacity": 1,
+                                "radius": 4,
+                                "weight": 1
+                            }
+                        },
+                        "vtId": "id",
+                        "vtKey": "mag"
+                    },
+                    "radius": 1
+                },
+                {
+                    "name": "Recent Significant",
+                    "kind": "none",
+                    "type": "vectortile",
+                    "url": "Layers/RecentSignificant.json",
+                    "legend": "Layers/RecentSignificant.csv",
+                    "tms": false,
+                    "visibility": true,
+                    "initialOpacity": 1,
+                    "togglesWithHeader": true,
+                    "minZoom": 2,
+                    "maxNativeZoom": 16,
+                    "maxZoom": 22,
+                    "style": {
+                        "color": "null",
+                        "fillColor": "null",
+                        "weight": null,
+                        "fillOpacity": null,
+                        "opacity": 1,
+                        "vtLayer": {
+                            "HistoricalSignificant": {
+                                "color": "#000000",
+                                "fill": true,
+                                "fillColor": "#FF8C00",
+                                "fillOpacity": 1,
+                                "opacity": 1,
+                                "radius": 4,
+                                "weight": 1
+                            }
+                        },
+                        "vtId": "id",
+                        "vtKey": "mag"
+                    },
+                    "radius": 1
+                },
+                {
+                    "name": "Historical Significant",
+                    "kind": "none",
+                    "type": "vectortile",
+                    "url": "Layers/HistoricalSignificant.json",
+                    "legend": "Layers/HistoricalSignificant.csv",
+                    "tms": true,
+                    "visibility": true,
+                    "initialOpacity": 1,
+                    "togglesWithHeader": true,
+                    "minZoom": 2,
+                    "maxNativeZoom": 16,
+                    "maxZoom": 22,
+                    "style": {
+                        "color": "#000000",
+                        "fillColor": "#FF4400",
+                        "weight": 1,
+                        "fillOpacity": 100,
+                        "opacity": 1,
+                        "vtLayer": {
+                            "HistoricalSignificant": {
+                                "color": "#000000",
+                                "fill": true,
+                                "fillColor": "#FF4400",
+                                "fillOpacity": 1,
+                                "opacity": 1,
+                                "radius": 4,
+                                "weight": 1
+                            }
+                        },
+                        "vtId": "id",
+                        "vtKey": "mag"
+                    },
+                    "radius": 1
+                }
+            ]
+        },
+        {
+            "name": "Reference Layers",
+            "type": "header",
+            "initialOpacity": 1,
+            "sublayers": [
+                {
+                    "name": "Reference Labels",
+                    "type": "tile",
+                    "url": "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/Reference_Labels/default/GoogleMapsCompatible_Level9/{z}/{y}/{x}.png",
+                    "tms": false,
+                    "visibility": false,
+                    "initialOpacity": 1,
+                    "togglesWithHeader": true,
+                    "minZoom": 3,
+                    "maxNativeZoom": 9,
+                    "maxZoom": 22,
+                    "boundingBox": [
+                        -180,
+                        -90,
+                        180,
+                        90
+                    ]
+                },
+                {
+                    "name": "Reference Features",
+                    "type": "tile",
+                    "url": "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/Reference_Features/default/GoogleMapsCompatible_Level9/{z}/{y}/{x}.png",
+                    "tms": false,
+                    "visibility": false,
+                    "initialOpacity": 1,
+                    "togglesWithHeader": true,
+                    "minZoom": 3,
+                    "maxNativeZoom": 9,
+                    "maxZoom": 22,
+                    "boundingBox": [
+                        -180,
+                        -90,
+                        180,
+                        90
+                    ]
+                },
+                {
+                    "name": "Sites Global View",
+                    "kind": "none",
+                    "type": "vectortile",
+                    "url": "geodatasets:Sites",
+                    "tms": false,
+                    "visibility": true,
+                    "initialOpacity": 1,
+                    "togglesWithHeader": true,
+                    "minZoom": 2,
+                    "maxNativeZoom": 10,
+                    "maxZoom": 4,
+                    "style": {
+                        "color": "#0000FF",
+                        "fillColor": "#00FFFF",
+                        "weight": 1,
+                        "fillOpacity": 100,
+                        "opacity": 1,
+                        "vtLayer": {
+                            "Sites": {
+                                "color": "#0000FF",
+                                "fill": true,
+                                "fillColor": "#00FFFF",
+                                "fillOpacity": 1,
+                                "opacity": 0.5,
+                                "radius": 4,
+                                "weight": 1
+                            }
+                        },
+                        "vtId": "site",
+                        "vtKey": "site"
+                    },
+                    "radius": 1
+                }
+            ]
+        },
+        {
+            "name": "Geological Features",
+            "type": "header",
+            "initialOpacity": 1,
+            "sublayers": [
+                {
+                    "name": "US Faults",
+                    "type": "tile",
+                    "url": "https://earthquake.usgs.gov/basemap/tiles/faults/{z}/{x}/{y}.png",
+                    "tms": false,
+                    "visibility": true,
+                    "initialOpacity": 1,
+                    "togglesWithHeader": true,
+                    "minZoom": 3,
+                    "maxNativeZoom": 12,
+                    "maxZoom": 22,
+                    "boundingBox": [
+                        -180,
+                        -90,
+                        180,
+                        90
+                    ]
+                },
+                {
+                    "name": "Plate Boundaries",
+                    "type": "tile",
+                    "url": "https://earthquake.usgs.gov/basemap/tiles/plates/{z}/{x}/{y}.png",
+                    "tms": false,
+                    "visibility": true,
+                    "initialOpacity": 1,
+                    "togglesWithHeader": true,
+                    "minZoom": 3,
+                    "maxNativeZoom": 12,
+                    "maxZoom": 22,
+                    "boundingBox": [
+                        -180,
+                        -90,
+                        180,
+                        90
+                    ]
+                },
+                {
+                    "name": "US Hazard",
+                    "type": "tile",
+                    "url": "https://earthquake.usgs.gov/basemap/tiles/ushaz/{z}/{x}/{y}.png",
+                    "tms": false,
+                    "visibility": false,
+                    "initialOpacity": 1,
+                    "togglesWithHeader": true,
+                    "minZoom": 3,
+                    "maxNativeZoom": 12,
+                    "maxZoom": 22,
+                    "boundingBox": [
+                        -180,
+                        -90,
+                        180,
+                        90
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Base Maps",
+            "type": "header",
+            "initialOpacity": 1,
+            "sublayers": [
+                {
+                    "name": "World Imagery",
+                    "type": "tile",
+                    "url": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+                    "tms": false,
+                    "visibility": false,
+                    "initialOpacity": 1,
+                    "togglesWithHeader": true,
+                    "minZoom": 0,
+                    "maxNativeZoom": 18,
+                    "maxZoom": 22,
+                    "boundingBox": [
+                        -180,
+                        -90,
+                        180,
+                        90
+                    ]
+                },
+                {
+                    "name": "World Street Map",
+                    "type": "tile",
+                    "url": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}",
+                    "tms": false,
+                    "visibility": false,
+                    "initialOpacity": 1,
+                    "togglesWithHeader": true,
+                    "minZoom": 0,
+                    "maxNativeZoom": 18,
+                    "maxZoom": 22,
+                    "boundingBox": [
+                        -180,
+                        -90,
+                        180,
+                        90
+                    ]
+                },
+                {
+                    "name": "Light Gray Base Map",
+                    "type": "tile",
+                    "url": "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}.jpg",
+                    "tms": false,
+                    "visibility": false,
+                    "initialOpacity": 1,
+                    "togglesWithHeader": true,
+                    "minZoom": 0,
+                    "maxNativeZoom": 16,
+                    "maxZoom": 22,
+                    "boundingBox": [
+                        -180,
+                        -90,
+                        180,
+                        90
+                    ]
+                },
+                {
+                    "name": "Greyscale Shaded Relief",
+                    "type": "tile",
+                    "url": "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/ASTER_GDEM_Greyscale_Shaded_Relief/default/GoogleMapsCompatible_Level12/{z}/{y}/{x}.jpeg",
+                    "tms": false,
+                    "visibility": false,
+                    "initialOpacity": 1,
+                    "togglesWithHeader": true,
+                    "minZoom": 0,
+                    "maxNativeZoom": 12,
+                    "maxZoom": 22,
+                    "boundingBox": [
+                        -180,
+                        -90,
+                        180,
+                        90
+                    ]
+                },
+                {
+                    "name": "Color Shaded Relief",
+                    "type": "tile",
+                    "url": "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/ASTER_GDEM_Color_Shaded_Relief/default/GoogleMapsCompatible_Level12/{z}/{y}/{x}.jpeg",
+                    "tms": false,
+                    "visibility": false,
+                    "initialOpacity": 1,
+                    "togglesWithHeader": true,
+                    "minZoom": 0,
+                    "maxNativeZoom": 12,
+                    "maxZoom": 22,
+                    "boundingBox": [
+                        -180,
+                        -90,
+                        180,
+                        90
+                    ]
+                },
+                {
+                    "name": "National Geographic World Map",
+                    "type": "tile",
+                    "url": "https://services.arcgisonline.com/arcgis/rest/services/NatGeo_World_Map/MapServer/tile/{z}/{y}/{x}",
+                    "tms": false,
+                    "visibility": true,
+                    "initialOpacity": 1,
+                    "togglesWithHeader": true,
+                    "minZoom": 0,
+                    "maxNativeZoom": 16,
+                    "maxZoom": 22,
+                    "boundingBox": [
+                        -180,
+                        -90,
+                        180,
+                        90
+                    ]
+                }
+            ]
+        }
+    ]
+}

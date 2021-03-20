@@ -260,20 +260,19 @@ define([
                     $('#mapScreen #map .leaflet-tile-pane')
                         .children()
                         .each(function(i, elm) {
-                            console.log(i, elm)
                             zIndices.push($(elm).css('z-index'))
                             $(elm).css('z-index', i + 1)
                         })
                     $('.leaflet-control-scalefactor').css('display', 'none')
                     $('.leaflet-control-zoom').css('display', 'none')
                     $('#topBarScreenshotLoading').css('display', 'block')
-                    HTML2Canvas(document.getElementById('mapScreen')).then(
+                    HTML2Canvas(document.getElementById('mapScreen'), {allowTaint: true, useCORS: true}).then(
                         function(canvas) {
                             canvas.id = 'mmgisScreenshot'
                             document.body.appendChild(canvas)
                             F_.downloadCanvas(
                                 canvas.id,
-                                'camp-screenshot',
+                                'mgviz-screenshot',
                                 function() {
                                     canvas.remove()
                                     setTimeout(function() {
@@ -395,6 +394,20 @@ define([
                     }
                 })
 
+            this.barBottom.append( 'i' )
+                .attr( 'id', 'topBarInfo' )
+                .attr( 'title', 'Information' )
+                .attr( 'class', 'mdi mdi-information-variant mdi-18px' )
+                .style( 'padding', '5px 10px' )
+                .style( 'width', '36px' )
+                .style( 'height', '36px' )
+                .style( 'line-height', '26px' )
+                .style( 'color', '#d26100' )
+                .style( 'cursor', 'pointer' )
+                .on( 'click', function() {     
+                  window.open('http://sopac-csrc.ucsd.edu/index.php/measures-2/', '_blank');      
+                } );
+
             this.barBottom
                 .append('i')
                 .attr('id', 'topBarHelp')
@@ -406,14 +419,9 @@ define([
                 .style('line-height', '26px')
                 .style('color', '#d26100')
                 .style('cursor', 'pointer')
-                .on('click', function() {
-                    this.helpOn = !this.helpOn
-                    if (this.helpOn) {
-                        //d3.select('#viewer_Help').style('display', 'inherit')
-                    } else {
-                        d3.select('#viewer_Help').style('display', 'none')
-                    }
-                })
+                .on( 'click', function() {     
+                    window.open('help', '_blank');      
+                } );
 
             this.toolPanel = d3
                 .select('#main-container')
@@ -1021,7 +1029,7 @@ define([
             )
             $('.mouseLngLat').animate(
                 {
-                    bottom: UserInterface.pxIsTools + 'px',
+                    // bottom: UserInterface.pxIsTools + 'px',
                 },
                 {
                     duration: duration,

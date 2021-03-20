@@ -76,7 +76,7 @@ define([
                 .style('display', 'flex')
                 .style('position', 'absolute')
                 .style('top', '0px')
-                .style('right', '0px')
+                .style('right', '35px')
                 .style('z-index', '2006')
                 .style('margin', '5px')
                 .style('color', '#aaa')

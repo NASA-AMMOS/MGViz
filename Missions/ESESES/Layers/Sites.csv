@@ -1,0 +1,4 @@
+color,strokecolor,shape,value
+#00FFFF,#0000FF,circle,Site (Default)
+magenta,#0000FF,circle,Selected Site
+lime,#0000FF,circle,Searched Site

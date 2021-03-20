@@ -420,6 +420,10 @@ define(['Formulae_', 'Description', 'Search'], function (
         },
         resetLayerFills: function () {
             for (key in this.layersGroup) {
+                // Ignore layers that use icons.
+                if (this.layersNamed[key].name == "Velocities") {
+                    continue;
+                }
                 if (
                     this.layersNamed[key] &&
                     (this.layersNamed[key].type == 'point' ||
@@ -445,6 +449,9 @@ define(['Formulae_', 'Description', 'Search'], function (
                                 fillColor: layer.options.fillColor || fillColor,
                                 weight: weight,
                             })
+                            if (layer.options.layerName == "Sites") { // customization for Sites
+                                layer._radius = layer.defaultOptions.radius;
+                            }
                         })
                     }
                 }

@@ -38,6 +38,8 @@ var require = {
         leafletColorFilter: 'external/Leaflet/leaflet-tilelayer-colorfilter',
         leafletTileLayerGL: 'external/Leaflet/leaflet.tilelayer.gl',
         leafletVectorGrid: 'external/Leaflet/leaflet.vectorGrid.bundled',
+        leafletVelocity: 'external/Leaflet/leaflet-velocity.min',
+        leafletRotatedMarker: 'external/Leaflet/leaflet.rotatedMarker',
 
         metricsGraphics: 'external/MetricsGraphics/metricsgraphics.min',
         openSeadragon: 'external/OpenSeadragon/openseadragon.min',
@@ -150,6 +152,8 @@ var require = {
         leafletColorFilter: { deps: ['leaflet'] },
         leafletTileLayerGL: { deps: ['leaflet'] },
         leafletVectorGrid: { deps: ['leaflet'] },
+        leafletVelocity: { deps: ['leaflet'] },
+        leafletRotatedMarker: { deps: ['leaflet'] },
 
         metricsGraphics: { deps: ['jquery', 'd3'] },
         dataTables: { deps: ['jquery'] },

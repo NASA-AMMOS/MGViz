@@ -12,6 +12,8 @@ define([
     'leafletColorFilter',
     'leafletTileLayerGL',
     'leafletVectorGrid',
+    'leafletVelocity',
+    'leafletRotatedMarker',
     'Viewer_',
     'Globe_',
     'ToolController_',
@@ -35,6 +37,8 @@ define([
     leafletColorFilter,
     leafletTileLayerGL,
     leafletVectorGrid,
+    leafletVelocity,
+    leafletRotatedMarker,
     Viewer_,
     Globe_,
     ToolController_,
@@ -55,6 +59,9 @@ define([
         activeLayer: null,
         allLayersLoadedPassed: false,
         player: { arrow: null, lookat: null },
+        vectorExaggeration: 1,
+        vectorFilter: null,
+        vectorOptions: null,
         //Initialize a map based on a config file
         init: function (essenceFinal) {
             essenceFina = essenceFinal
@@ -108,7 +115,6 @@ define([
                 L_.configData.projection.custom == true
             ) {
                 var cp = L_.configData.projection
-                //console.log(cp)
                 var crs = new L.Proj.CRS(
                     'EPSG:' + cp.epsg,
                     cp.proj,
@@ -184,7 +190,10 @@ define([
                 this.map = L.map('map', {
                     zoomControl: hasZoomControl,
                     editable: true,
-                    //crs: crs,
+                    continuousWorld: true,
+                    worldCopyJump: true
+                    // renderer: L.canvas(),
+                    // preferCanvas: true
                     //zoomDelta: 0.05,
                     //zoomSnap: 0,
                     //wheelPxPerZoomLevel: 500,
@@ -341,6 +350,18 @@ define([
             for (var i = 0; i < hasIndex.length; i++) {
                 Map_.map.addLayer(L_.layersGroup[L_.layersOrdered[hasIndex[i]]])
             }
+        },
+        refreshLayer: function(layerObj) {
+            this.map.eachLayer( function (layer) {
+                if (layer.vtId == 'site') {
+                    // Need to overcome some weirdness with points not being removed
+                    Map_.map.removeLayer( layer );
+                    L_.layersLoaded[L_.layersOrdered.indexOf( layerObj.name )] = false;
+                }
+            });
+            Map_.allLayersLoadedPassed = false;
+            makeLayer(layerObj);
+            allLayersLoaded();
         },
         setPlayerArrow(lng, lat, rot) {
             var playerMapArrowOffsets = [
@@ -524,6 +545,10 @@ define([
                             true
                     )
                         return
+                    // Reset if map append selection is on for ChartTool
+                    if ($('input[name=checkAppend]').prop('checked') == false) {
+                        L_.resetLayerFills();
+                    }
                     //Query dataset links if possible and add that data to the feature's properties
                     if (
                         layer.options.layerName &&
@@ -589,6 +614,33 @@ define([
                         layer.setStyle({ fillColor: 'red' })
                         Map_.activeLayer = layer
                         Description.updatePoint(Map_.activeLayer)
+
+                        //Updates for ChartTool
+                        if (ToolController_.activeToolName != 'ChartTool') {
+                            var prevActive = $( '#toolcontroller_incdiv .active' );
+                            prevActive.removeClass( 'active' ).css( { 'color': ToolController_.defaultColor, 'background': 'none' } );
+                            prevActive.parent().css( { 'background': 'none' } );
+                            var newActive = $( '#toolcontroller_incdiv #ChartTool' );
+                            newActive.addClass( 'active' ).css( { 'color': ToolController_.activeColor } );
+                            newActive.parent().css( { 'background': ToolController_.activeBG } );
+                            ToolController_.makeTool( 'ChartTool' );
+                        }
+                        // get a list of already selected sites
+                        var sites = [];
+                        if($('#siteSelect').val() != null) {
+                            $("#siteSelect option").each(function(){
+                                sites.push($(this).val());
+                            });
+                        }
+                        if (sites.includes(propertyValue)) { // unselect previously selected
+                            layer.setStyle({ fillColor: layerObj.style.fillColor});
+                            layer.setRadius(layerObj.radius);
+                            ToolController_.getTool( 'ChartTool' ).remove( feature );
+                        } else {
+                            layer.setStyle({ fillColor: 'magenta' });
+                            layer.setRadius(9);
+                            ToolController_.getTool( 'ChartTool' ).use( feature );
+                        }
 
                         //View images
                         var propImages = propertiesToImages(
@@ -939,6 +991,174 @@ define([
                     }
                 }
 
+          //Set up any custom layer interactions
+          switch ( layerObj.name ) {
+            case 'Historical Significant':
+              leafletLayerObject = {
+                // Same style
+                style: layerObj.style,
+                onEachFeature: function ( feature, layer ) {
+                  //Add a mouseover event to the layer
+                  layer.on( 'mouseover', function() {
+                    CursorInfo.update( feature.properties.title + '<br>' +
+                      new Date(feature.properties.time), null, false);
+                  } );
+                  layer.on( 'mouseout', function() {
+                    CursorInfo.hide();
+                  } );
+                  layer.on( 'click', function() { // disable click
+                  } );
+                }
+              };
+              leafletLayerObject.pointToLayer = function( feature, latlong ) {
+                var radius = layerObj.radius * feature.properties.mag;
+                if (feature.properties.mag > 6) {
+                  radius = radius + (Math.pow(feature.properties.mag,3)/200)
+                }
+                return L.circleMarker( latlong, leafletLayerObject.style ).setRadius( radius );
+              }
+              break;
+            case 'Recent Significant':
+              leafletLayerObject = {
+                // Same style
+                style: layerObj.style,
+                onEachFeature: function ( feature, layer ) {
+                  //Add a mouseover event to the layer
+                  layer.on( 'mouseover', function() {
+                    CursorInfo.update( feature.properties.title + '<br>' +
+                      new Date(feature.properties.time), null, false);
+                  } );
+                  layer.on( 'mouseout', function() {
+                    CursorInfo.hide();
+                  } );
+                  layer.on( 'click', function() { // disable click
+                  } );
+                }
+              };
+              leafletLayerObject.pointToLayer = function( feature, latlong ) {
+                var radius = layerObj.radius * feature.properties.mag;
+                if (feature.properties.mag > 6) {
+                  radius = radius + (Math.pow(feature.properties.mag,3)/200)
+                }
+                return L.circleMarker( latlong, leafletLayerObject.style ).setRadius( radius );
+              }
+              break;
+            case 'Recent M3-M6':
+              leafletLayerObject = {
+                // Same style
+                style: layerObj.style,
+                onEachFeature: function ( feature, layer ) {
+                  //Add a mouseover event to the layer
+                  layer.on( 'mouseover', function() {
+                    CursorInfo.update( feature.properties.title + '<br>' +
+                      new Date(feature.properties.time), null, false);
+                  } );
+                  layer.on( 'mouseout', function() {
+                    CursorInfo.hide();
+                  } );
+                  layer.on( 'click', function() { // disable click
+                  } );
+                }
+              };
+              leafletLayerObject.pointToLayer = function( feature, latlong ) {
+                var radius = layerObj.radius * feature.properties.mag;
+                return L.circleMarker( latlong, leafletLayerObject.style ).setRadius( radius );
+              }
+              break;
+            case 'Recent M2-M3':
+              leafletLayerObject = {
+                // Same style
+                style: layerObj.style,
+                onEachFeature: function ( feature, layer ) {
+                  //Add a mouseover event to the layer
+                  layer.on( 'mouseover', function() {
+                    CursorInfo.update( feature.properties.title + '<br>' +
+                      new Date(feature.properties.time), null, false);
+                  } );
+                  layer.on( 'mouseout', function() {
+                    CursorInfo.hide();
+                  } );
+                  layer.on( 'click', function() { // disable click
+                  } );
+                }
+              };
+              leafletLayerObject.pointToLayer = function( feature, latlong ) {
+                var radius = layerObj.radius * feature.properties.mag;
+                return L.circleMarker( latlong, leafletLayerObject.style ).setRadius( radius );
+              }
+              break;
+            //Velocities
+            case 'Velocities':
+              leafletLayerObject = {
+                // Same style
+                style: layerObj.style,
+                onEachFeature: function ( feature, layer ) {
+                  //Add a mouseover event to the layer
+                  layer.on( 'mouseover', function() {
+                    values = 'N vel: ' + feature.properties.n_vel + ' mm/yr<br> E vel: ' + feature.properties.e_vel +
+                    ' mm/yr<br> U vel: ' + feature.properties.u_vel + ' mm/yr';
+                    CursorInfo.update( 'Site: ' + feature.properties.site + '<br>' +
+                                        values, null, false);
+                  } );
+                  layer.on( 'mouseout', function() {
+                    CursorInfo.hide();
+                  } );
+                  layer['useKeyAsName'] = layerObj.name;
+                }
+              };
+              leafletLayerObject.pointToLayer = function( feature, latlong ) {
+                n = parseFloat(feature.properties.n_vel);
+                e = parseFloat(feature.properties.e_vel);
+                u = parseFloat(feature.properties.u_vel);
+                if (Map_.vectorFilter == 'greater') { // Don't display points < 20 in any direction
+                  if (Map_.vectorOptions == 'vertical') {
+                    if ((Math.abs(u)>=20) == false) {
+                      return;
+                    }
+                  } else {
+                    if ((Math.abs(n)>=20 || Math.abs(e)>=20) == false) {
+                      return;
+                    }
+                  }
+                }
+                if (Map_.vectorOptions == 'vertical') {
+                  magScale = 2 * Map_.vectorExaggeration;
+                  logScaledU = Math.log(Math.abs(u) * 100);
+                  if (u < 0) {
+                    icon = 'css/external/images/arrow-inc-blue.png';
+                    yAnchor = 0;
+                  } else if (u > 0) {
+                    icon = 'css/external/images/arrow-inc-red.png';
+                    yAnchor = (magScale * logScaledU)*2;
+                  } else {
+                    return; // don't draw if zero
+                  }
+                  var smallIcon = new L.Icon({
+                    iconSize: [magScale * logScaledU, (magScale * logScaledU)*2],
+                    iconAnchor: [(magScale * logScaledU)/2, yAnchor],
+                    iconUrl: icon
+                  });
+                  return L.marker(latlong, {
+                    icon: smallIcon
+                  });
+                } else {
+                  mag = Math.sqrt((n*n) + (e*e));
+                  magScale = 0.8 * Map_.vectorExaggeration;
+                  angle = Math.atan2(e,n) * (180 / Math.PI);
+                  var smallIcon = new L.Icon({
+                    iconSize: [(magScale * mag)/4, magScale * mag],
+                    iconAnchor: [(magScale * mag)/8, 0],
+                    iconUrl: 'css/external/images/arrow-purple-small.png'
+                  });
+                  return L.marker(latlong, {
+                    icon: smallIcon, 
+                    rotationAngle: angle + 180
+                  });
+                }
+              }
+              break;
+            }
+
                 //If it's a drawing layer
                 if (layerObj.name.toLowerCase().indexOf('draw') != -1) {
                     F_.sortGeoJSONFeatures(data)
@@ -1025,6 +1245,7 @@ define([
         }
 
         function makeVectorTileLayer() {
+            var geoJSON = '';
             var layerUrl = layerObj.url
             if (!F_.isUrlAbsolute(layerUrl))
                 layerUrl = L_.missionPath + layerUrl
@@ -1039,6 +1260,34 @@ define([
                     '/API/geodatasets/get?layer=' +
                     urlSplit[1] +
                     '&type=mvt&x={x}&y={y}&z={z}'
+            }
+            else {
+                $.ajax( {
+                    type:'GET',
+                    url: layerUrl,
+                    dataType: 'json',
+                    async: false,
+                    success: function(data) {
+                        geoJSON = data;
+                    }, 
+                    error: function (jqXHR, textStatus, errorThrown) {
+                    //Tell the console council about what happened
+                    console.warn(
+                        'ERROR! ' +
+                            textStatus +
+                            ' in ' +
+                            layerObj.url +
+                            ' /// ' +
+                            errorThrown
+                    )
+                    //Say that this layer was loaded, albeit erroneously
+                    L_.layersLoaded[
+                        L_.layersOrdered.indexOf(layerObj.name)
+                    ] = true
+                    //Check again to see if all layers have loaded
+                    allLayersLoaded()
+                    }
+                });
             }
 
             var bb = null
@@ -1098,11 +1347,152 @@ define([
                 )
             }
 
+            switch ( layerObj.name ) {
+                case 'Historical Significant':
+                    layerObj.style.vtLayer = {
+                        "sliced": 
+                            function(properties, zoom) {
+                              var radius = 1 * properties.mag;
+                              if (properties.mag > 6) {
+                                radius = radius + (Math.pow(properties.mag,3)/200)
+                              }
+                                return {
+                                  "color": "#000000",
+                                  "fill": true,
+                                  "fillColor": "#FF4400",
+                                  "fillOpacity": 0.8,
+                                  "opacity": 1,
+                                  "radius": radius,
+                                  "weight": 1
+                                }
+                            }
+                    }
+                break;
+                case 'Recent Significant':
+                    layerObj.style.vtLayer = {
+                        "sliced": 
+                            function(properties, zoom) {
+                              var radius = 1 * properties.mag;
+                              if (properties.mag > 6) {
+                                radius = radius + (Math.pow(properties.mag,3)/200)
+                              }
+                                return {
+                                  "color": "#000000",
+                                  "fill": true,
+                                  "fillColor": "#FF8C00",
+                                  "fillOpacity": 0.9,
+                                  "opacity": 1,
+                                  "radius": radius,
+                                  "weight": 1
+                                }
+                            }
+                    }
+                break;
+                case 'Recent M3-M6':
+                    layerObj.style.vtLayer = {
+                        "sliced": 
+                            function(properties, zoom) {
+                              var radius = 1 * properties.mag;
+                                return {
+                                  "color": "#000000",
+                                  "fill": true,
+                                  "fillColor": "#FF8C00",
+                                  "fillOpacity": 0.9,
+                                  "opacity": 1,
+                                  "radius": radius,
+                                  "weight": 1
+                                }
+                            }
+                    }
+                break;
+                case 'Recent M2-M3':
+                    layerObj.style.vtLayer = {
+                        "sliced": 
+                            function(properties, zoom) {
+                              var radius = 1 * properties.mag;
+                                return {
+                                  "color": "#000000",
+                                  "fill": true,
+                                  "fillColor": "#FFD700",
+                                  "fillOpacity": 1,
+                                  "opacity": 1,
+                                  "radius": radius,
+                                  "weight": 1
+                                }
+                            }
+                    }
+                break;
+                case 'Velocities':
+                    layerObj.style.vtLayer = {
+                        "sliced": 
+                            function(properties, zoom) {
+                                n = parseFloat(properties.n_vel);
+                                e = parseFloat(properties.e_vel);
+                                u = parseFloat(properties.u_vel);
+                                hide = false
+                                if (Map_.vectorFilter == 'greater') { // Don't display points < 20 in any direction
+                                  if (Map_.vectorOptions == 'vertical') {
+                                    if ((Math.abs(u)>=20) == false) {
+                                        hide  = true
+                                    }
+                                  } else {
+                                    if ((Math.abs(n)>=20 || Math.abs(e)>=20) == false) {
+                                        hide = true
+                                    }
+                                  }
+                                }
+                                if (Map_.vectorOptions == 'vertical') {
+                                  magScale = 2 * Map_.vectorExaggeration;
+                                  logScaledU = Math.log(Math.abs(u) * 100);
+                                  if (u < 0) {
+                                    icon = 'css/external/images/arrow-inc-blue.png';
+                                    yAnchor = 0;
+                                  } else if (u > 0) {
+                                    icon = 'css/external/images/arrow-inc-red.png';
+                                    yAnchor = (magScale * logScaledU)*2;
+                                  }
+                                  var smallIcon = new L.Icon({
+                                    iconSize: hide ? 0 : [magScale * logScaledU, (magScale * logScaledU)*2],
+                                    iconAnchor: [(magScale * logScaledU)/2, yAnchor],
+                                    iconUrl: icon
+                                  });
+                                  return {
+                                    icon: smallIcon
+                                  };
+                                } else {
+                                  mag = Math.sqrt((n*n) + (e*e));
+                                  magScale = 1.5 * Map_.vectorExaggeration;
+                                  iconsize = (magScale * mag);
+                                  if (iconsize > 150) {
+                                    iconsize = 150; // cap at 50
+                                  }
+                                  else if (iconsize < 20) {
+                                      iconsize = 20; // min 20
+                                  }
+                                  angle = Math.atan2(e,n) * (180 / Math.PI);
+                                  deg = (Math.round(angle));
+                                  if (deg < 0) {
+                                      deg = 360 + deg;
+                                  }
+                                  var smallIcon = new L.Icon({
+                                    iconSize: hide ? 0 : [iconsize, iconsize],
+                                    iconAnchor: [iconsize/2, iconsize/2],
+                                    iconUrl: 'css/external/images/arrows/arrow-'+deg+'.png'
+                                  });
+                                  return {
+                                    icon: smallIcon
+                                  };
+                                }
+                            }
+                    }
+                break;
+            }
             var vectorTileOptions = {
                 layerName: layerObj.name,
-                rendererFactory: L.canvas.tile,
+                rendererFactory: ('Velocities' == layerObj.name) ? L.canvas.tile : L.svg.tile,
                 vectorTileLayerStyles: layerObj.style.vtLayer || {},
                 interactive: true,
+                buffer: 1000,
                 minZoom: layerObj.minZoom,
                 maxZoom: layerObj.maxZoom,
                 maxNativeZoom: layerObj.maxNativeZoom,
@@ -1118,80 +1508,99 @@ define([
                     }
                 })(layerObj.style.vtId),
             }
+            if ('sliced' in layerObj.style.vtLayer) {
+                L_.layersGroup[layerObj.name] = L.vectorGrid.slicer(geoJSON, vectorTileOptions);
+            } else {
+                L_.layersGroup[layerObj.name] = L.vectorGrid.protobuf(layerUrl, vectorTileOptions)
+            }
+            L_.layersGroup[layerObj.name]
+                // .on('click', function (e) {
+                //     let layerName = e.target.options.layerName
+                //     let vtId = L_.layersGroup[layerName].vtId
+                //     clearHighlight()
+                //     L_.layersGroup[layerName].highlight =
+                //         e.layer.properties[vtId]
+                //     L_.layersGroup[layerName].setFeatureStyle(
+                //         L_.layersGroup[layerName].highlight,
+                //         {
+                //             weight: 2,
+                //             color: 'red',
+                //             opacity: 1,
+                //             fillColor: 'red',
+                //             fill: true,
+                //             radius: 4,
+                //             fillOpacity: 1,
+                //         }
+                //     )
+                //     L_.layersGroup[layerName].activeFeatures =
+                //         L_.layersGroup[layerName].activeFeatures || []
+                //     L_.layersGroup[layerName].activeFeatures.push({
+                //         type: 'Feature',
+                //         properties: e.layer.properties,
+                //         geometry: {},
+                //     })
+                //     Map_.activeLayer = e.sourceTarget._layer
+                //     let p = e.sourceTarget._point
 
-            L_.layersGroup[layerObj.name] = L.vectorGrid
-                .protobuf(layerUrl, vectorTileOptions)
-                .on('click', function (e) {
-                    let layerName = e.sourceTarget._layerName
-                    let vtId = L_.layersGroup[layerName].vtId
-                    clearHighlight()
-                    L_.layersGroup[layerName].highlight =
-                        e.layer.properties[vtId]
-                    L_.layersGroup[layerName].setFeatureStyle(
-                        e.layer.properties[vtId],
-                        {
-                            weight: 2,
-                            color: 'red',
-                            opacity: 1,
-                            fillColor: 'red',
-                            fill: true,
-                            radius: 4,
-                            fillOpacity: 1,
-                        }
-                    )
-                    L_.layersGroup[layerName].activeFeatures =
-                        L_.layersGroup[layerName].activeFeatures || []
-                    L_.layersGroup[layerName].activeFeatures.push({
-                        type: 'Feature',
-                        properties: e.layer.properties,
-                        geometry: {},
-                    })
-                    Map_.activeLayer = e.sourceTarget._layer
-                    let p = e.sourceTarget._point
+                //     for (var i in e.layer._renderer._features) {
+                //         if (
+                //             e.layer._renderer._features[i].feature._pxBounds.min
+                //                 .x <= p.x &&
+                //             e.layer._renderer._features[i].feature._pxBounds.max
+                //                 .x >= p.x &&
+                //             e.layer._renderer._features[i].feature._pxBounds.min
+                //                 .y <= p.y &&
+                //             e.layer._renderer._features[i].feature._pxBounds.max
+                //                 .y >= p.y &&
+                //             e.layer._renderer._features[i].feature.properties[
+                //                 vtId
+                //             ] != e.layer.properties[vtId]
+                //         ) {
+                //             L_.layersGroup[layerName].activeFeatures.push({
+                //                 type: 'Feature',
+                //                 properties:
+                //                     e.layer._renderer._features[i].feature
+                //                         .properties,
+                //                 geometry: {},
+                //             })
+                //         }
+                //     }
+                //     timedSelect(e.sourceTarget._layer, layerName, e)
 
-                    for (var i in e.layer._renderer._features) {
-                        if (
-                            e.layer._renderer._features[i].feature._pxBounds.min
-                                .x <= p.x &&
-                            e.layer._renderer._features[i].feature._pxBounds.max
-                                .x >= p.x &&
-                            e.layer._renderer._features[i].feature._pxBounds.min
-                                .y <= p.y &&
-                            e.layer._renderer._features[i].feature._pxBounds.max
-                                .y >= p.y &&
-                            e.layer._renderer._features[i].feature.properties[
-                                vtId
-                            ] !== e.layer.properties[vtId]
-                        ) {
-                            L_.layersGroup[layerName].activeFeatures.push({
-                                type: 'Feature',
-                                properties:
-                                    e.layer._renderer._features[i].feature
-                                        .properties,
-                                geometry: {},
-                            })
-                        }
-                    }
-                    timedSelect(e.sourceTarget._layer, layerName, e)
-
-                    //L.DomEvent.stop(e)
-                })
+                //     L.DomEvent.stop(e)
+                // })
                 .on(
                     'mouseover',
                     (function (vtKey) {
                         return function (e, a, b, c) {
-                            if (vtKey != null)
+                            if (e.layer.properties['title'] != null) {
                                 CursorInfo.update(
-                                    vtKey + ': ' + e.layer.properties[vtKey],
+                                    e.layer.properties['title'] + '<br>' +
+                                    'Depth: ' + e.layer.properties['depth'] + ' km' + '<br>' +
+                                    new Date(e.layer.properties.time).toUTCString(),
                                     null,
                                     false
                                 )
+                            }
+                            else if (e.layer.properties['n_vel'] != null) {
+                                values = 'N vel: ' + e.layer.properties.n_vel + ' mm/yr<br> E vel: ' + e.layer.properties.e_vel +
+                                ' mm/yr<br> U vel: ' + e.layer.properties.u_vel + ' mm/yr';
+                                CursorInfo.update( 'Site: ' + e.layer.properties.site + '<br>' +
+                                                            values, null, false);
+                            }
+                            else if (vtKey != null) {
+                                CursorInfo.update(
+                                    vtKey.replace(/^./, vtKey[0].toUpperCase()) + ': ' + e.layer.properties[vtKey],
+                                    null,
+                                    false
+                                )
+                            }
                         }
                     })(layerObj.style.vtKey)
                 )
                 .on('mouseout', function () {
                     CursorInfo.hide()
-                })
+                });
 
             L_.layersGroup[layerObj.name].vtId = layerObj.style.vtId
             L_.layersGroup[layerObj.name].vtKey = layerObj.style.vtKey
@@ -1255,6 +1664,16 @@ define([
             enforceVisibilityCutoffs()
 
             //OTHER TEMPORARY TEST STUFF THINGS
+
+            // activate Search tool icon on startup
+            if (ToolController_.activeToolName == null) {
+                var prevActive = $( '#toolcontroller_incdiv .active' );
+                prevActive.removeClass( 'active' ).css( { 'color': ToolController_.defaultColor, 'background': 'none' } );
+                prevActive.parent().css( { 'background': 'none' } );
+                var newActive = $( '#toolcontroller_incdiv #SearchTool' );
+                newActive.addClass( 'active' ).css( { 'color': ToolController_.activeColor } );
+                newActive.parent().css( { 'background': ToolController_.activeBG } );
+            }
         }
     }
 
@@ -1392,6 +1811,8 @@ define([
 
         Map_.toolBar = d3
             .select('#mapToolBar')
+            .style('position', 'absolute')
+            .style('top', '10px')
             .append('div')
             .attr('class', 'ui padded grid')
             .append('div')

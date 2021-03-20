@@ -33,7 +33,7 @@ define(['three', 'container', 'WebVR'], function(THREE, container, WebVR) {
         gl.enable(gl.SAMPLE_ALPHA_TO_COVERAGE)
 
         renderer.xr.enabled = true
-        container.appendChild(WebVR.createButton(renderer))
+        // container.appendChild(WebVR.createButton(renderer))
 
         container.appendChild(renderer.domElement)
 

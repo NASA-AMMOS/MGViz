@@ -1,4 +1,11 @@
-# MMGIS (Multi-Mission Geographic Information System)
+# MGViz - MMGIS GNSS Visualizer
+
+**This is a fork of [MMGIS](https://github.com/NASA-AMMOS/MMGIS) (Multi-Mission Geographic Information System)
+developed for the NASA MEaSUREs project “Extended Solid Earth Science ESDR System” (ESESES)**
+
+**Project specific documentation and setup can be found here: [Missions/ESESES/README.md](Missions/ESESES/README.md)**
+
+## MMGIS
 
 Spatial Data Infrastructure for Planetary Missions
 
@@ -114,3 +121,4 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 Dr. Fred J. Calef III - fred.calef@jpl.nasa.gov  
 Tariq K. Soliman - tariq.k.soliman@jpl.nasa.gov
+Joe T. Roberts - joe.t.roberts@jpl.nasa.gov

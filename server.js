@@ -782,6 +782,54 @@ setups.getBackendSetups(function (setups) {
       );
     }
   );
+  
+//psite
+app.get('/api/eseses/psite', function(req, res) {
+  execFile('python', ['private/eseses/psite.py'], {maxBuffer: 1024 * 1024},
+  function(error, stdout, stderr) { res.send(stdout);});
+});
+
+//velocity
+app.get('/api/eseses/velocity/:source', function(req, res) {
+  const source = encodeURIComponent(req.params.source);
+  execFile('python', ['private/eseses/velocity.py', source], {maxBuffer: 1024 * 1024},
+  function(error, stdout, stderr) { res.send(stdout);});
+});
+
+//site metadata
+app.get('/api/eseses/site/:site/:source/:fil/:type', function(req, res) {
+  const site = encodeURIComponent(req.params.site);
+  const source = encodeURIComponent(req.params.source);
+  const fil = encodeURIComponent(req.params.fil);
+  const type = encodeURIComponent(req.params.type);
+  execFile('python', ['private/eseses/site.py', site, source, fil, type], {maxBuffer: 1024 * 1024},
+  function(error, stdout, stderr) { res.send(stdout); console.log(stderr);});
+});
+
+//site xml
+app.get('/api/eseses/sitexml/:site', function(req, res) {
+  const site = encodeURIComponent(req.params.site);
+  const file = 'private/eseses/metadata/' + site;
+  res.download(file);
+});
+
+//neu
+app.get('/api/eseses/neu/:site/:source/:fil/:type/:neu', function(req, res) {
+  const site = encodeURIComponent(req.params.site);
+  const source = encodeURIComponent(req.params.source);
+  const fil = encodeURIComponent(req.params.fil);
+  const type = encodeURIComponent(req.params.type);
+  const neu = encodeURIComponent(req.params.neu);
+  execFile('python', ['private/eseses/neu.py', site, source, fil, type, neu], {maxBuffer: 1024 * 1024},
+  function(error, stdout, stderr) { res.send(stdout); console.log(stderr);});
+});
+
+//help
+app.get('/help', ensureGroup(permissions.users), (req, res) => {
+	  const user = ( process.env.AUTH === 'csso' ) ? req.user : null;
+	  res.render('help', {user: user, AUTH: process.env.AUTH, NODE_ENV: process.env.NODE_ENV});
+});
+  
   //END OF TODO
 
   //////Setups Init//////

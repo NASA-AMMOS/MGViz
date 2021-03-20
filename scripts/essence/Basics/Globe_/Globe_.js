@@ -320,7 +320,7 @@ define([
             var starsphereMaterial = new THREE.MeshBasicMaterial({
                 color: 0xaaaaaa,
             })
-            starsphereMaterial.map = loader.load('public/images/eso0932a.jpg')
+            //starsphereMaterial.map = loader.load('public/images/eso0932a.jpg')
             starsphereMaterial.opacity = 1
             Globe_.starsphere = new THREE.Mesh(
                 starsphereGeometry,

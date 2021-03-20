@@ -1,0 +1,10 @@
+{
+    "defaultIcon": "arrow-top-right-thick",
+    "description": "Options for displaying velocity vectors.",
+    "descriptionFull": "",
+    "hasVars": false,
+    "name": "Velocities",
+    "paths": {
+        "VelocitiesTool": "essence/MMGIS-Private-Tools/Velocities/VelocitiesTool"
+    }
+}

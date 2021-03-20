@@ -93,6 +93,16 @@ mmgisglobal.attributions = [
         githublink: 'https://github.com/jquery/jquery-ui',
     },
     {
+        library: 'jsPDF',
+        librarylink: 'https://parall.ax/products/jspdf',
+        version: '2.0.0',
+        author: 'James Hall',
+        authorlink: 'https://github.com/MrRio',
+        license: 'MIT',
+        licenselink: 'https://github.com/MrRio/jsPDF/blob/master/MIT-LICENSE.txt',
+        githublink: 'https://github.com/MrRio/jsPDF',
+    },
+    {
         library: 'Leaflet',
         librarylink: 'https://leafletjs.com/',
         version: '1.4.0',
@@ -180,6 +190,28 @@ mmgisglobal.attributions = [
         licenselink:
             'https://github.com/mapbox/leaflet-pip/blob/gh-pages/LICENSE',
         githublink: 'https://github.com/mapbox/leaflet-pip',
+    },
+    {
+        library: 'leaflet.RotatedMarker',
+        librarylink: 'https://github.com/bbecquet/Leaflet.RotatedMarker',
+        version: '0',
+        author: 'Benjamin Becquet',
+        authorlink: 'https://github.com/bbecquet',
+        license: 'MIT',
+        licenselink:
+            'https://github.com/bbecquet/Leaflet.RotatedMarker/blob/master/LICENSE',
+        githublink: 'https://github.com/bbecquet/Leaflet.RotatedMarker',
+    },
+    {
+        library: 'leaflet-velocity',
+        librarylink: 'https://github.com/danwild/leaflet-velocity',
+        version: '1.7.0',
+        author: 'Dan Wild',
+        authorlink: 'https://github.com/danwild',
+        license: 'MIT',
+        licenselink:
+            'https://github.com/danwild/leaflet-velocity/blob/master/LICENSE',
+        githublink: 'https://github.com/danwild/leaflet-velocity',
     },
     {
         library: 'Proj4Leaflet',
@@ -310,6 +342,16 @@ mmgisglobal.attributions = [
         licenselink:
             'https://github.com/mbostock/shapefile/blob/master/LICENSE.txt',
         githublink: 'https://github.com/mbostock/shapefile',
+    },
+    {
+        library: 'svg2pdf',
+        librarylink: 'https://github.com/yWorks/svg2pdf.jsf',
+        version: '1.3.1',
+        author: 'yWorks GmbH',
+        authorlink: 'https://www.yworks.com/',
+        license: 'MIT',
+        licenselink: 'https://github.com/yWorks/svg2pdf.js/blob/master/LICENSE',
+        githublink: 'https://github.com/yWorks/svg2pdf.js',
     },
     {
         library: 'three.js',

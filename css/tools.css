@@ -21,3 +21,18 @@
 .searchToolSelect {
   width: 188px;
 }
+
+
+/*ESESES CHART TOOL*/
+.site-table {
+    border: solid 1px rgb(70, 70, 70);
+    border-collapse: collapse;
+    border-spacing: 1px;
+    font-size: 12px;
+}
+.site-table tbody td {
+    border: solid 1px #DDEEEE;
+    color: #fff;
+    padding: 3px;
+    background-color: rgb(40, 40, 40);
+}
