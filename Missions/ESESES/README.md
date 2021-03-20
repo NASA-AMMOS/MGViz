@@ -24,10 +24,7 @@ The Multi-Mission Geographic Information System (MMGIS) Global Navigation Satell
 `/` will always refer to the repo's root directory
 
 1. Clone the repo  
-   `git clone https://github.com/NASA-AMMOS/MMGIS`
-   
-1. Clone the private tools repo in the `scripts/essence/MMGIS-Private-Tools` directory
-   `git clone https://github.com/NASA-AMMOS/MMGIS-Private-Tools scripts/essence/MMGIS-Private-Tools`
+   `git clone https://github.com/NASA-AMMOS/MGViz`
 
 1. From within `/`  
    `npm install`
