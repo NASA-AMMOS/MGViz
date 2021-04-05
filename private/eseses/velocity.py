@@ -23,7 +23,7 @@ if os.path.exists(src+'.json'):
             print(out.read())
         sys.exit()
 
-url = 'http://geoapp03.ucsd.edu/gpseDB/vel?op=getSingleVelNEUFile&coord='+src+'&site_list=all&out=GMT&fil=unf'
+url = 'http://geoapp02.ucsd.edu:8080/gpseDB/vel?op=getSingleVelNEUFile&coord='+src+'&site_list=all&out=GMT&fil=unf'
 try:
     reader = csv.reader(urllib.urlopen(url), delimiter=' ')
 except Exception as e:
