@@ -81,6 +81,11 @@ def getModelTerms(site,f,source,fil):
                 modelTerms['North']['RMS'].append(li.split(':')[1].split(',')[0] + ' mm')
                 modelTerms['East']['RMS'].append(li.split(':')[1].split(',')[1] + ' mm')
                 modelTerms['Up']['RMS'].append(li.split(':')[1].split(',')[2] + ' mm')
+            elif 'available' in li:
+                modelTerms['North']['Model']=['Not available']
+                modelTerms['East']['Model']=['Not available']
+                modelTerms['Up']['Model']=['Not available']
+         
     return(modelTerms)
 
 allModelTerms = OrderedDict()
