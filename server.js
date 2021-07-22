@@ -793,7 +793,7 @@ app.get('/api/eseses/psite', function(req, res) {
 app.get('/api/eseses/velocity/:source', function(req, res) {
   const source = encodeURIComponent(req.params.source);
   execFile('python', ['private/eseses/velocity.py', source], {maxBuffer: 1024 * 1024},
-  function(error, stdout, stderr) { res.send(stdout);});
+  function(error, stdout, stderr) { res.send(stdout); console.log(stderr);});
 });
 
 //site metadata
