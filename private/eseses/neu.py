@@ -11,18 +11,19 @@ import urllib2
 import re
 
 # Get args
-if str(sys.argv[1]).isalnum():
+if str(sys.argv[1]).isalnum():   # site
     site = sys.argv[1]
-if str(sys.argv[2]).isalnum():
+if str(sys.argv[2]).isalnum():   # source
     source = sys.argv[2]
-if str(sys.argv[3]).isalnum():
+if str(sys.argv[3]).isalnum():   # Type
     fil = sys.argv[3]
-if str(sys.argv[4]).isalnum():
+if str(sys.argv[4]).isalnum():   # Trend/Detrend
     ttype = sys.argv[4]
-if str(sys.argv[5]).isalnum():
+if str(sys.argv[5]).isalnum():   # n e u
     neu = sys.argv[5]
 
 sources = {'comb' : 'Comb',
+        'combg' : 'Combg',
         'jpl' : 'JPL',
         'sopac' : 'SOPAC'}
 
@@ -54,13 +55,13 @@ if raw_file is not None:
     if os.path.exists(raw_file):
         rawf = open(raw_file, 'r')
     else:
-        print('{"err": "Data not found for ' + site + '/' + source + '/' + fil + '/' + ttype + '/' + neu + '."}')
+        print('{"err": "Data not found for ' + site + '/' + source + '/' + fil + '/' + ttype + '/' + neu + '. ' + raw_file +'." }')
         sys.exit()
 
 if os.path.exists(neu_file):
     f = open(neu_file, 'r')
 else:
-    print('{"err": "Data not found for ' + site + '/' + source + '/' + fil + '/' + ttype + '/' + neu + '."}')
+    print('{"err": "Data not found for ' + site + '/' + source + '/' + fil + '/' + ttype + '/' + neu + '. ' + neu_file + '."}')
     if raw_file is not None:
         rawf.close()
     sys.exit()
@@ -72,12 +73,6 @@ scaling_factor_idx = None
 times = []
 
 plotline_dict = {"color": "green", "dashStyle": "solid", "width": 1}
-
-# velMmPerYr={}
-# annAmpMm={}
-# semiAmpMm={}
-# annPhsDeg={}
-# semiPhsDeg={}
 
 def parse_component(idx_start, idx_stop, lines):
     component = {'site':site, 'name':name}
@@ -108,6 +103,12 @@ def velTerm(t,velMmPerYr,refDecYr,startDate,endDate):
   else:
     return(0.0)
 
+def velCumulative(t,model):
+  velTotalTerm = 0
+  for a in model['slope']:
+     velTotalTerm=velTotalTerm+velTerm(t,a['slopeMmPerYear'],modelTerms['refDecYr'],a['startDate'],a['endDate'])
+  return(velTotalTerm)
+
 def annTerm(t,annAmpMm,annPhsDeg,refDecYr):
   annPhsRad=annPhsDeg*math.pi/180
   return(annAmpMm*math.sin(2*math.pi*(t-refDecYr//1)+annPhsRad))
@@ -117,7 +118,7 @@ def semiAnnTerm(t,semiAmpMm,semiPhsDeg,refDecYr):
   return(semiAmpMm*math.sin(4*math.pi*(t-refDecYr//1)+semiPhsRad))
 
 def offsetTerm(t,offsetMm,offsetDecYear):
-  if t > offsetDecYear:
+  if t >= offsetDecYear:
     return(offsetMm)
   else:
     return(0.0)
@@ -208,6 +209,38 @@ def getModelTerms(site,f,source,fil):
       
     return(modelTerms)
 
+def modeledCoord(y,model,ttype,coordZero):
+    modelPt = 0
+    for a in model['annual']:
+        modelPt=modelPt+annTerm(y,a['annAmpMm'],a['annPhsDeg'],modelTerms['refDecYr'])
+    for a in model['semiAnnual']:
+        modelPt=modelPt+semiAnnTerm(y,a['semiAmpMm'],a['semiPhsDeg'],modelTerms['refDecYr'])
+    for a in model['expDecay']:
+        modelPt=modelPt+expDecayTerm(y,a['expDecayMmPerYear'],a['tauDays'],a['startDate'])
+    for a in model['logDecay']:
+        modelPt=modelPt+logDecayTerm(y,a['logDecayMmPerYear'],a['tauDays'],a['startDate'])
+  
+    # Hang on to offset term; will want it for plotting estimated points
+    offsetTotal=0.
+    try:
+        for a in model['coSeisOffset']:
+            offsetTotal=offsetTotal+offsetTerm(y,a['coSeisOffsetMm'],a['startDate'])
+        #for a in model['nonSeisOffset']:
+        #    offsetTotal=offsetTotal+offsetTerm(y,a['coSeisOffsetMm'],a['startDate'])
+    except KeyError:
+        #No offsets of that type
+        pass
+  
+    if 'raw_' in ttype:
+        modelPt=modelPt+offsetTotal+coordZero
+    else:
+        modelPt=modelPt+offsetTotal
+    return(modelPt)
+
+def floatRange(start,stop,step):
+  while start < stop:
+    yield float(start)
+    start += step
 
 def calculate_points(modelTerms, f, neu_component, ttype):
     # modelTermsJSON=json.dumps(modelTerms,sort_keys=True,indent=2)
@@ -225,23 +258,23 @@ def calculate_points(modelTerms, f, neu_component, ttype):
             num_columns = len(li.split())
             if 'raw_' in ttype:
                 if num_columns == 7:
-                    [y,n,e,u,x_sig,y_sig,z_sig]=li.split()
+                    [y,n,e,u,x_sig,y_sig,z_sig]=li.rstrip().split()
                 else:
-                    [y,n,e,u,x_sig,y_sig,z_sig,corr_ne,corr_nu,corr_eu]=li.split()
+                    [y,n,e,u,x_sig,y_sig,z_sig,corr_ne,corr_nu,corr_eu]=li.rstrip().split()[:10]
                 coord['N'].append(float(n) * 1000)
                 coord['E'].append(float(e) * 1000)
                 coord['U'].append(float(u) * 1000)
             elif 'rawm' in ttype:
-                if num_columns == 12:
-                    [y,yyyy,ddd,n,e,u,n_sig,e_sig,u_sig,corr_ne,corr_nu,corr_eu]=li.split()
+                if num_columns >9:
+                    [y,yyyy,ddd,n,e,u,n_sig,e_sig,u_sig,corr_ne,corr_nu,corr_eu]=li.split()[:12]
                 else:
                     [y,yyyy,ddd,n,e,u,n_sig,e_sig,u_sig]=li.split()
                 coord['N'].append(float(n) * 1000)
                 coord['E'].append(float(e) * 1000)
                 coord['U'].append(float(u) * 1000)
             else:
-                if num_columns == 12:
-                    [y,yyyy,ddd,n,e,u,n_sig,e_sig,u_sig,corr_ne,corr_nu,corr_eu]=li.split()
+                if num_columns > 9:
+                    [y,yyyy,ddd,n,e,u,n_sig,e_sig,u_sig,corr_ne,corr_nu,corr_eu]=li.split()[:12]
                 else:
                     [y,yyyy,ddd,n,e,u,n_sig,e_sig,u_sig]=li.split()
                 coord['N'].append(float(n))
@@ -253,74 +286,58 @@ def calculate_points(modelTerms, f, neu_component, ttype):
     ix=0
     deTrend=[]
     trend=[]
+   
     modelDeTrend=[]
     modelTrend=[]
-    model=modelTerms[c]
+    if c in modelTerms:
+      model=modelTerms[c]
     for y in year:
-        modelPt=0.
-        for a in model['annual']:
-            modelPt=modelPt+annTerm(y,a['annAmpMm'],a['annPhsDeg'],modelTerms['refDecYr'])
-        for a in model['semiAnnual']:
-            modelPt=modelPt+semiAnnTerm(y,a['semiAmpMm'],a['semiPhsDeg'],modelTerms['refDecYr'])
-        for a in model['expDecay']:
-            modelPt=modelPt+expDecayTerm(y,a['expDecayMmPerYear'],a['tauDays'],a['startDate'])
-        for a in model['logDecay']:
-            modelPt=modelPt+logDecayTerm(y,a['logDecayMmPerYear'],a['tauDays'],a['startDate'])
+      if c in modelTerms:
+  
+          modelPt = modeledCoord(y,model,ttype,coord[c][0])
 
-        # Hang on to offset term; will want it for plotting estimated points
-        offsetTotal=0.
-        try:
-            for a in model['coSeisOffset']:
-                offsetTotal=offsetTotal+offsetTerm(y,a['coSeisOffsetMm'],a['startDate'])
-        except KeyError:
-            #No offsets of that type
-            pass
+          slopeMmPerYear = 0.
+          slopeMmPerYear = model['slope'][-1]['slopeMmPerYear']
+          velTotalTerm = velCumulative(y,model)
+           
+          # Add a line break if outage is detected
+          if len(modelDeTrend) > 0:
+              if (y - modelDeTrend[-1][0]) > 0.1:
+                  for yy in floatRange(modelDeTrend[-1][0],y,1/365.25):
+                    modelDeTrend.append([yy,modeledCoord(yy,model,ttype,coord[c][0])])
+                    modelTrend.append([yy,modeledCoord(yy,model,ttype,coord[c][0])+velCumulative(yy,model)])
+                  #modelDeTrend.append([modelDeTrend[-1][0]+0.1, None])
+  
+          modelDeTrend.append([y,round(modelPt,2)])
+          modelTrend.append([y,round(modelPt+velTotalTerm,2)])
+  
 
-        if 'raw_' in ttype:
-            modelPt=modelPt+offsetTotal+coord[c][0]
+      # add back offsets to estimated point, which have been removed in tar file, and remove velocity term for detrended
+      if modelTerms != {}:
+        if  'raw_' in ttype or 'rawm' in ttype:
+          deTrend.append([y,round((coord[c][ix] - (y - year[0]) * slopeMmPerYear),2)])
         else:
-            modelPt=modelPt+offsetTotal
-
-        # Add a line break if outage is detected
-        if len(modelDeTrend) > 0:
-            if (y - modelDeTrend[-1][0]) > 0.1:
-                modelDeTrend.append([modelDeTrend[-1][0]+0.1, None])
-
-        # Done with detrended model
-        modelDeTrend.append([y,round(modelPt,2)])
-
-        # Hang on to velocity term; will want it for detrending estimated points
-        velTotalTerm=0.
-        slopeMmPerYear = 0.
-        for a in model['slope']:
-            velTotalTerm=velTotalTerm+velTerm(y,a['slopeMmPerYear'],modelTerms['refDecYr'],a['startDate'],a['endDate'])
-            slopeMmPerYear = a['slopeMmPerYear']
-        modelPt=modelPt+velTotalTerm
+          deTrend.append([y,round((coord[c][ix]),2)])
+      if 'resid' not in ttype:
+        trend.append([y,round((coord[c][ix]),2)])
+      else:
+        trend.append([y,round((coord[c][ix]),2)])
         
-        # Add a line break if outage is detected
-        if len(modelTrend) > 0:
-            if (y - modelTrend[-1][0]) > 0.1:
-                modelTrend.append([modelTrend[-1][0]+0.1, None])
-
-        # Done with trended model
-        modelTrend.append([y,round(modelPt,2)])
-
-        # add back offsets to estimated point, which have been removed in tar file, and remove velocity term for detrended
-        if 'raw_' in ttype or 'rawm' in ttype:
-            deTrend.append([y,round((coord[c][ix] - (y - year[0]) * slopeMmPerYear),2)])
-        else:
-            deTrend.append([y,round((coord[c][ix]),2)])
-        if 'resid' not in ttype:
-          trend.append([y,round((coord[c][ix]),2)])
-        else:
-          trend.append([y,round((coord[c][ix]),2)])
-        
-        ix=ix+1
-    del modelTrend[-1]
+      ix=ix+1
+    try:
+      del modelTrend[-1]
+    except:
+      pass
     if 'detrend' not in ttype:
-        return (trend, [] if 'raw' in ttype or 'resid' in ttype else modelTrend)
+        try:
+          return (trend, [] if 'raw' in ttype or 'resid' in ttype else modelTrend)
+        except:
+          return (trend,[])
     else:
-        return (deTrend, [] if 'raw' in ttype or 'resid' in ttype else modelDeTrend)
+        try:
+          return (deTrend, [] if 'raw' in ttype or 'resid' in ttype else modelDeTrend)
+        except:
+          return (deTrend,[])
 
 
 lines = f.readlines()
@@ -340,20 +357,28 @@ for idx, line in enumerate(lines):
         if scaling_factor_idx is None:
             scaling_factor_idx = idx
 
-modelTerms = getModelTerms(site,f,str(sources[source]),fil if fil=='flt' else 'unf')
-n_component = parse_component (n_component_idx, e_component_idx-1, lines)
-e_component = parse_component (e_component_idx, u_component_idx-1, lines)
-u_component = parse_component (u_component_idx, scaling_factor_idx, lines)
-time_min = min(times)
-time_max = max(times)
-n_component['time_min'] = time_min
-e_component['time_min'] = time_min
-u_component['time_min'] = time_min
-n_component['time_max'] = time_max
-e_component['time_max'] = time_max
-u_component['time_max'] = time_max
+try:
+  modelTerms = getModelTerms(site,f,str(sources[source]),fil if fil=='flt' else 'unf')
+  n_component = parse_component (n_component_idx, e_component_idx-1, lines)
+  e_component = parse_component (e_component_idx, u_component_idx-1, lines)
+  u_component = parse_component (u_component_idx, scaling_factor_idx, lines)
+  time_min = min(times)
+  time_max = max(times)
+  n_component['time_min'] = time_min
+  e_component['time_min'] = time_min
+  u_component['time_min'] = time_min
+  n_component['time_max'] = time_max
+  e_component['time_max'] = time_max
+  u_component['time_max'] = time_max
 
-if raw_file is not None:
+except:
+  modelTerms = {}
+  n_component = {'site':site, 'name':name, 'plotlines':[]}
+  e_component = {'site':site, 'name':name, 'plotlines':[]}
+  u_component = {'site':site, 'name':name, 'plotlines':[]}
+  pass
+if raw_file is not None: 
+
     n_component['data'],n_component['trace'] = calculate_points(modelTerms, rawf, 'N', ttype)
     e_component['data'],e_component['trace'] = calculate_points(modelTerms, rawf, 'E', ttype)
     u_component['data'],u_component['trace'] = calculate_points(modelTerms, rawf, 'U', ttype)
