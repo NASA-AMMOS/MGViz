@@ -128,7 +128,6 @@
     $stmt->bindParam(':password', $pass);
     
     try {
-      // $conn->exec( $sql );
       $stmt->execute();
       $conn = null;
       return true;
