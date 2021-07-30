@@ -42,7 +42,7 @@ with open('out.csv', 'wb') as csvfile:
             if "'Error'" in str(row): # use the old version if there is an error
                 with open('out.json', 'r') as out:
                     print(out.read())
-                    # should we sys.exit() at this point?  Why repeat for every row?  Why write csv if Error?
+                    sys.exit()
             site = row[1]
             if float(row[3]) > 180:
                 x = float(row[3]) - 360
