@@ -376,7 +376,10 @@ except:
   n_component = {'site':site, 'name':name, 'plotlines':[]}
   e_component = {'site':site, 'name':name, 'plotlines':[]}
   u_component = {'site':site, 'name':name, 'plotlines':[]}
-  pass
+  if ttype == 'detrend':
+    print('{"err": "Cannot detrend ' + site + '/' + source + '/' + fil + '/' + ttype + '/' + neu + '." }')
+    sys.exit()
+
 if raw_file is not None: 
 
     n_component['data'],n_component['trace'] = calculate_points(modelTerms, rawf, 'N', ttype)
