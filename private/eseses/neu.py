@@ -192,7 +192,7 @@ def getModelTerms(site,f,source,fil):
           offsetType='nonSeisOffset'
           if li[1] == '*':
             offsetType='coSeisOffset'
-          m=re.search('offset\s\d:\s*(?P<Mm>\S+)\s.*?\[(?P<startDate>\S+)\]',li)
+          m=re.search('offset\s\d\d?:\s*(?P<Mm>\S+)\s.*?\[(?P<startDate>\S+)\]',li)
           modelTerms[c][offsetType].append({offsetType+'Mm':float(m.group('Mm')),"startDate":float(m.group('startDate'))})
         elif ' decay' in li and 'postseismic' not in li:
           decayType='expDecay'
