@@ -15,6 +15,8 @@ if not os.path.exists('./data/jpl'):
     os.makedirs('data/jpl')
 if not os.path.exists('./data/comb'):
     os.makedirs('data/comb')
+if not os.path.exists('./data/combg'):
+    os.makedirs('data/combg')
 if not os.path.exists('./data/sopac'):
     os.makedirs('data/sopac')
 
@@ -60,20 +62,26 @@ def fetch_data(server, directory):
             extract_dir = './data'
             if '_jpl_' in file:
                 extract_dir = extract_dir + "/jpl"
-            if '_comb_' in file:
+            if '_combwm_' in file:
                 extract_dir = extract_dir + "/comb"
+            if '_combg_' in file:
+                extract_dir = extract_dir + "/combg"
             if '_sopac_' in file:
                 extract_dir = extract_dir + "/sopac"
+            # need to limit to the relevant filename!
+            #for oldF in [f for f in os.listdir(extract_dir)]:
+            #  os.remove(os.path.join(extract_dir,oldF))
             tar.extractall(extract_dir)
             tar.close()
 
     # extract Z files
+    print 'Uncompressing files...'
     for file in glob.glob('data/*/*.Z'):
         unzip_command = ['unzip', '-o', file, '-d', os.path.dirname(file)]
         process = subprocess.Popen(unzip_command,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
         process.wait()
-        for output in process.stdout:
-            print output
+        #for output in process.stdout:
+            #print output
         for error in process.stderr:
             print error
         os.remove(file)
