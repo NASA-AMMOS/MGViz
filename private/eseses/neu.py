@@ -144,6 +144,7 @@ def getModelTerms(site,f,source,fil):
     modelTerms={}
     for coord in ["E","N","U"]:
         modelTerms[coord]={}
+        modelTerms[coord]["bias"]=[]
         modelTerms[coord]["slope"]=[]
         modelTerms[coord]["expDecay"]=[]
         modelTerms[coord]["logDecay"]=[]
@@ -185,6 +186,9 @@ def getModelTerms(site,f,source,fil):
             c='N'
         elif 'Up' in li or 'u component' in li:
             c='U'
+        elif 'bias' in li:
+          m=re.search('bias\s\d:\s*(?P<biasMm>\S+)',li)
+          modelTerms[c]['bias'].append({"biasMm":float(m.group('biasMm'))})
         elif 'slope' in li:
           m=re.search('slope\s\d:\s*(?P<slopeMmPerYear>\S+)\s.*?\s\[(?P<startDate>\S+)\]\s.*?\s\[(?P<endDate>\S+)\]',li)
           modelTerms[c]['slope'].append({"slopeMmPerYear":float(m.group('slopeMmPerYear')),"startDate":float(m.group('startDate')),"endDate":float(m.group('endDate'))})
