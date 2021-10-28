@@ -144,7 +144,7 @@ def getModelTerms(site,f,source,fil):
     modelTerms={}
     for coord in ["E","N","U"]:
         modelTerms[coord]={}
-        modelTerms[coord]["bias"]=[]
+        modelTerms[coord]["intercept"]={'interceptMm':0.}
         modelTerms[coord]["slope"]=[]
         modelTerms[coord]["expDecay"]=[]
         modelTerms[coord]["logDecay"]=[]
@@ -186,9 +186,9 @@ def getModelTerms(site,f,source,fil):
             c='N'
         elif 'Up' in li or 'u component' in li:
             c='U'
-        elif 'bias' in li:
-          m=re.search('bias\s\d:\s*(?P<biasMm>\S+)',li)
-          modelTerms[c]['bias'].append({"biasMm":float(m.group('biasMm'))})
+        elif 'intercept' in li:
+          m=re.search('intercept:\s*(?P<interceptMm>\S+)',li)
+          modelTerms[c]['intercept']={"interceptMm":float(m.group('interceptMm'))}
         elif 'slope' in li:
           m=re.search('slope\s\d:\s*(?P<slopeMmPerYear>\S+)\s.*?\s\[(?P<startDate>\S+)\]\s.*?\s\[(?P<endDate>\S+)\]',li)
           modelTerms[c]['slope'].append({"slopeMmPerYear":float(m.group('slopeMmPerYear')),"startDate":float(m.group('startDate')),"endDate":float(m.group('endDate'))})
@@ -309,11 +309,11 @@ def calculate_points(modelTerms, f, neu_component, ttype):
               if (y - modelDeTrend[-1][0]) > 0.1:
                   for yy in floatRange(modelDeTrend[-1][0],y,1/365.25):
                     modelDeTrend.append([yy,modeledCoord(yy,model,ttype,coord[c][0])])
-                    modelTrend.append([yy,modeledCoord(yy,model,ttype,coord[c][0])+velCumulative(yy,model)])
+                    modelTrend.append([yy,modeledCoord(yy,model,ttype,coord[c][0])+velCumulative(yy,model)+modelTerms[c]['intercept']['interceptMm']])
                   #modelDeTrend.append([modelDeTrend[-1][0]+0.1, None])
   
           modelDeTrend.append([y,round(modelPt,2)])
-          modelTrend.append([y,round(modelPt+velTotalTerm,2)])
+          modelTrend.append([y,round(modelPt+velTotalTerm+modelTerms[c]['intercept']['interceptMm'],2)])
   
 
       # add back offsets to estimated point, which have been removed in tar file, and remove velocity term for detrended
