@@ -186,9 +186,9 @@ def getModelTerms(site,f,source,fil):
             c='N'
         elif 'Up' in li or 'u component' in li:
             c='U'
-        elif 'intercept' in li:
-          m=re.search('intercept:\s*(?P<interceptMm>\S+)',li)
-          modelTerms[c]['intercept']={"interceptMm":float(m.group('interceptMm'))}
+        #elif 'intercept' in li:
+        #  m=re.search('intercept:\s*(?P<interceptMm>\S+)',li)
+        #  modelTerms[c]['intercept']={"interceptMm":float(m.group('interceptMm'))}
         elif 'slope' in li:
           m=re.search('slope\s\d:\s*(?P<slopeMmPerYear>\S+)\s.*?\s\[(?P<startDate>\S+)\]\s.*?\s\[(?P<endDate>\S+)\]',li)
           modelTerms[c]['slope'].append({"slopeMmPerYear":float(m.group('slopeMmPerYear')),"startDate":float(m.group('startDate')),"endDate":float(m.group('endDate'))})
