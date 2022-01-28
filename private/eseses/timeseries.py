@@ -24,7 +24,7 @@ def fetch_data(server, directory):
 
     lines = []
     files = []
-    existing_files = glob.glob('data/*.tar')
+    existing_files = glob.glob('data/*.tar.gz')
 
     ftp = FTP(server)
     ftp.login()
@@ -35,7 +35,7 @@ def fetch_data(server, directory):
     for line in lines:
         tokens = line.split()
         name = tokens[8]
-        if str(name).endswith('.tar'): 
+        if str(name).endswith('.tar.gz'): 
             files.append(name)
 
     # download files
@@ -53,7 +53,7 @@ def fetch_data(server, directory):
     ftp.quit()
 
     # extract tar files
-    for file in glob.glob('data/*.tar'):
+    for file in glob.glob('data/*.tar.gz'):
         if file in existing_files:
             print 'Skipping already extracted ' + file
         else:
@@ -62,7 +62,7 @@ def fetch_data(server, directory):
             extract_dir = './data'
             if '_jpl_' in file:
                 extract_dir = extract_dir + "/jpl"
-            if '_combwm_' in file:
+            if '_comb_' in file:
                 extract_dir = extract_dir + "/comb"
             if '_combg_' in file:
                 extract_dir = extract_dir + "/combg"
