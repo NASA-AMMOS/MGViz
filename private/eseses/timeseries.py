@@ -39,34 +39,38 @@ def fetch_data(server, directory):
             files.append(name)
 
     # download files
-    for file in files:
-        if 'data/' + file in existing_files:
-            print 'Skipping already downloaded ' + file
+    for targzfile in files:
+        if 'data/' + targzfile in existing_files:
+            print 'Skipping already downloaded ' + targzfile
         else:
-            for old_file in glob.glob('data/'+file[:-12]+'*'):
+            for old_file in glob.glob('data/'+targzfile[:-12]+'*'):
                 print 'Removing ' + old_file
                 os.remove(old_file)
-            print 'Downloading ' + file
-            f = open('./data/' + file, 'wb')
-            ftp.retrbinary('RETR %s' % file, f.write)
+            print 'Downloading ' + targzfile
+            f = open('./data/' + targzfile, 'wb')
+            ftp.retrbinary('RETR %s' % targzfile, f.write)
             f.close()
     ftp.quit()
 
     # extract tar files
-    for file in glob.glob('data/*.tar.gz'):
-        if file in existing_files:
-            print 'Skipping already extracted ' + file
+    for gztar in glob.glob('data/*.tar.gz'):
+        tarfn = os.path.splitext(gztar)[0]
+        if gztar in existing_files:
+            print 'Skipping already extracted ' + gztar
         else:
-            print 'Extracting ' + file
-            tar = tarfile.open(file)
+            print 'Extracting ' + gztar
+            with gzip.open(gztar,'rb') as f_in:
+              with open(tarfn,'wb') as f_out:
+                shutil.copyfileobj(f_in,f_out)
+            tar = tarfile.open(tarfn)
             extract_dir = './data'
-            if '_jpl_' in file:
+            if '_jpl_' in tarfn:
                 extract_dir = extract_dir + "/jpl"
-            if '_comb_' in file:
+            if '_comb_' in tarfn:
                 extract_dir = extract_dir + "/comb"
-            if '_combg_' in file:
+            if '_combg_' in tarfn:
                 extract_dir = extract_dir + "/combg"
-            if '_sopac_' in file:
+            if '_sopac_' in tarfn:
                 extract_dir = extract_dir + "/sopac"
             # need to limit to the relevant filename!
             #for oldF in [f for f in os.listdir(extract_dir)]:
@@ -76,23 +80,23 @@ def fetch_data(server, directory):
 
     # extract Z files
     print 'Uncompressing files...'
-    for file in glob.glob('data/*/*.Z'):
-        unzip_command = ['unzip', '-o', file, '-d', os.path.dirname(file)]
+    for tsfile in glob.glob('data/*/*.Z'):
+        unzip_command = ['unzip', '-o', tsfile, '-d', os.path.dirname(tsfile)]
         process = subprocess.Popen(unzip_command,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
         process.wait()
         #for output in process.stdout:
             #print output
         for error in process.stderr:
             print error
-        os.remove(file)
+        os.remove(tsfile)
         
     # truncate files
-    for file in files:
-        if 'data/' + file in existing_files:
-            print 'Skipping already processed ' + file
+    for targzfile in files:
+        if 'data/' + targzfile in existing_files:
+            print 'Skipping already processed ' + targzfile
         else:
-            with open('data/' + file, 'w') as fp: # truncate file to save disk space
-                print 'Truncating data/' + file
+            with open('data/' + targzfile, 'w') as fp: # truncate file to save disk space
+                print 'Truncating data/' + targzfile
 
 server = 'sopac-ftp.ucsd.edu'
 # fetch global data
