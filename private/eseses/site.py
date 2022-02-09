@@ -20,7 +20,6 @@ if str(sys.argv[4]).isalnum():
     ttype = sys.argv[4]
 
 sources = {'comb' : 'Combination',
-        'combg' : 'CombinationG',
         'jpl' : 'JPL',
         'sopac' : 'SOPAC'}
 
