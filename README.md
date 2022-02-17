@@ -46,7 +46,7 @@ Spatial Data Infrastructure for Planetary Missions
 `/` will always refer to the repo's root directory
 
 1. Clone the repo  
-   `git clone https://github.com/NASA-AMMOS/MMGIS`
+   `git clone https://github.com/NASA-AMMOS/MGViz`
 
 1. From within `/`  
    `npm install`
