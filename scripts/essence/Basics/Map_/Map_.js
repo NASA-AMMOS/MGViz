@@ -1348,6 +1348,22 @@ define([
             }
 
             switch ( layerObj.name ) {
+                case 'Sites Global View':
+                    layerObj.style.vtLayer = {
+                        "sliced": 
+                            function(properties, zoom) {
+                                return {
+                                    "color": "#0000FF",
+                                    "fill": true,
+                                    "fillColor": "#00FFFF",
+                                    "fillOpacity": 1,
+                                    "opacity": 0.5,
+                                    "radius": 4,
+                                    "weight": 1
+                                }
+                            }
+                    }
+                break;
                 case 'Historical Significant':
                     layerObj.style.vtLayer = {
                         "sliced": 
