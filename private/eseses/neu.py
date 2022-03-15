@@ -57,14 +57,14 @@ if raw_file is not None:
     else:
         print('{"err": "Data not found for ' + site + '/' + source + '/' + fil + '/' + ttype + '/' + neu + '. ' + raw_file +'." }')
         sys.exit()
-
-if os.path.exists(neu_file):
-    f = open(neu_file, 'r')
-else:
-    print('{"err": "Data not found for ' + site + '/' + source + '/' + fil + '/' + ttype + '/' + neu + '. ' + neu_file + '."}')
-    if raw_file is not None:
-        rawf.close()
-    sys.exit()
+if neu_file is not None:
+    if os.path.exists(neu_file):
+        f = open(neu_file, 'r')
+    else:
+        print('{"err": "Data not found for ' + site + '/' + source + '/' + fil + '/' + ttype + '/' + neu + '. ' + neu_file + '."}')
+        if raw_file is not None:
+            rawf.close()
+        sys.exit()
 
 n_component_idx = None
 e_component_idx = None
@@ -394,6 +394,7 @@ else:
     n_component['data'],n_component['trace'] = calculate_points(modelTerms, f, 'N', ttype)
     e_component['data'],e_component['trace'] = calculate_points(modelTerms, f, 'E', ttype)
     u_component['data'],u_component['trace'] = calculate_points(modelTerms, f, 'U', ttype)    
+    f.close()
 
 data = {}
 if 'n' in neu:
@@ -403,6 +404,5 @@ if 'e' in neu:
 if 'u' in neu:
     data['u'] = u_component
 
-f.close()
 print(json.dumps(data))
 sys.exit()
