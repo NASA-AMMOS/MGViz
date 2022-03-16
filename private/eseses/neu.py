@@ -4,7 +4,6 @@ import gzip
 import shutil
 import os
 import os.path
-import numpy as np
 import json
 import math
 import urllib2
