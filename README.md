@@ -25,47 +25,47 @@ Spatial Data Infrastructure for Planetary Missions
 ### For RHEL8:
 
 via yum:
-	httpd (add ProxyRequests off to httpd.conf)
-	jasper-devel
-	libcurl-devel
-	libtiff-devel
-	nodejs
-	nodejs-devel
-	libxml2
-	libxml2-devel
-	php
-	php-devel
-	protobuf
-	protobuf-c-devel
-	json-c
-	json-c-devel
+-	httpd (add ProxyRequests off to httpd.conf)
+-	jasper-devel
+-	libcurl-devel
+-	libtiff-devel
+-	nodejs
+-	nodejs-devel
+-	libxml2
+-	libxml2-devel
+-	php
+-	php-devel
+-	protobuf
+-	protobuf-c-devel
+-	json-c
+-	json-c-devel
 
 special:
-	dnf install https://download.postgresql.org/pub/repos/yum/reporpms/EL-8-x86_64/pgdg-redhat-repo-latest.noarch.rpm
-	yum --enablerepo pgdg13
-	dnf install postgresql13 postgresql13-server
-	mkdir -p /var/lib/pgsql/13/data
-	/usr/pgsql-13/bin/postgresql-13-setup initdb
-	systemctl start postgresql-13
+-	dnf install https://download.postgresql.org/pub/repos/yum/reporpms/EL-8-x86_64/pgdg-redhat-repo-latest.noarch.rpm
+-	yum --enablerepo pgdg13
+-	dnf install postgresql13 postgresql13-server
+-	mkdir -p /var/lib/pgsql/13/data
+-	/usr/pgsql-13/bin/postgresql-13-setup initdb
+-	systemctl start postgresql-13
 
 from source:
-	geos
-		./configure
+-	geos
+*		./configure
 		make
 		make install
 		cd /usr/lib64
 		ln -s /usr/local/lib/libgeos_c.so.1
-	gdal
-		./configure
+-	gdal
+*		./configure
 		make
 		make install
-	postgis
-		./configure --prefix=/usr/pgsql-13/usr --with-pgconfig=/usr/pgsql-13/bin/pg_config --with-gdal=/usr/local	
+-	postgis
+*		./configure --prefix=/usr/pgsql-13/usr --with-pgconfig=/usr/pgsql-13/bin/pg_config --with-gdal=/usr/local	
 		make
 		make install
       
- enable postgis in postgresql
-		su - postgres
+enable postgis in postgresql
+*		su - postgres
 		psql postgres
 		alter user postgres with password 'new_password';
 		create extension postgis;
