@@ -15,8 +15,6 @@ if not os.path.exists('./data/jpl'):
     os.makedirs('data/jpl')
 if not os.path.exists('./data/comb'):
     os.makedirs('data/comb')
-if not os.path.exists('./data/combg'):
-    os.makedirs('data/combg')
 if not os.path.exists('./data/sopac'):
     os.makedirs('data/sopac')
 
@@ -58,25 +56,35 @@ def fetch_data(server, directory):
         if gztar in existing_files:
             print 'Skipping already extracted ' + gztar
         else:
-            print 'Extracting ' + gztar
+            print 'Unzipping ' + gztar
             with gzip.open(gztar,'rb') as f_in:
               with open(tarfn,'wb') as f_out:
                 shutil.copyfileobj(f_in,f_out)
             tar = tarfile.open(tarfn)
             extract_dir = './data'
             if '_jpl_' in tarfn:
-                extract_dir = extract_dir + "/jpl"
+                source = 'jpl'
             if '_comb_' in tarfn:
-                extract_dir = extract_dir + "/comb"
-            if '_combg_' in tarfn:
-                extract_dir = extract_dir + "/combg"
+                source = 'comb'
             if '_sopac_' in tarfn:
-                extract_dir = extract_dir + "/sopac"
-            # need to limit to the relevant filename!
-            #for oldF in [f for f in os.listdir(extract_dir)]:
-            #  os.remove(os.path.join(extract_dir,oldF))
-            tar.extractall(extract_dir)
-            tar.close()
+                source = 'sopac'
+            if source in ['jpl','comb','sopac']:  # if not one of these, file will be discarded
+              print 'Untarring ' + tarfn
+              extract_dir = extract_dir + "/" + source
+              # need to limit to the relevant filename!
+              #for oldF in [f for f in os.listdir(extract_dir)]:
+              #  os.remove(os.path.join(extract_dir,oldF))
+              tar.extractall(extract_dir)
+              tar.close()
+              # truncate files
+              if  gztar in existing_files:
+                  print 'Skipping already processed ' + gztar
+              else:
+                  with open(gztar, 'w') as fp: # truncate file to save disk space
+                      print 'Truncating data/' + gztar
+            print 'Unlinking ' + tarfn
+            os.unlink(tarfn)
+
 
     # extract Z files
     print 'Uncompressing files...'
@@ -90,13 +98,6 @@ def fetch_data(server, directory):
             print error
         os.remove(tsfile)
         
-    # truncate files
-    for targzfile in files:
-        if 'data/' + targzfile in existing_files:
-            print 'Skipping already processed ' + targzfile
-        else:
-            with open('data/' + targzfile, 'w') as fp: # truncate file to save disk space
-                print 'Truncating data/' + targzfile
 
 server = 'sopac-ftp.ucsd.edu'
 # fetch global data
