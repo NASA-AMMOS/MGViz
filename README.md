@@ -22,24 +22,59 @@ Spatial Data Infrastructure for Planetary Missions
 
 ## Installation
 
-### System Requirements
+### For RHEL8:
 
-1. Install the latest version of [Node.js v10.10+](https://nodejs.org/en/download/).
+via yum:
+	httpd (add ProxyRequests off to httpd.conf)
+	jasper-devel
+	libcurl-devel
+	libtiff-devel
+	nodejs
+	nodejs-devel
+	libxml2
+	libxml2-devel
+	php
+	php-devel
+	protobuf
+	protobuf-c-devel
+	json-c
+	json-c-devel
 
-1. Install [PostgreSQL v9.6+](https://www.enterprisedb.com/downloads/postgres-postgresql-downloads)
-1. And do so with the [PostGIS 2.5+](https://postgis.net/install/) extension enabled.
-   Agree to any possible postgis installions in the gui or run `CREATE EXTENSION postgis;` afterwards.
-1. Make a new PostgreSQL database and remember the user, password and database name.
+special:
+	dnf install https://download.postgresql.org/pub/repos/yum/reporpms/EL-8-x86_64/pgdg-redhat-repo-latest.noarch.rpm
+	yum --enablerepo pgdg13
+	dnf install postgresql13 postgresql13-server
+	mkdir -p /var/lib/pgsql/13/data
+	/usr/pgsql-13/bin/postgresql-13-setup initdb
+	systemctl start postgresql-13
 
-1. PHP, GDAL and Python2 are weaker dependencies (without them not everything will work)
-
-   - PHP 5.4.16+ \* php-pdo php-mysqli pdo_sqlite modules enabled
-   - GDAL 2.0.2 or 1.11.4 with Python bindings
-   - Python 2.75+
-
-   Possible commands to install them all:  
-   `apt-get update`  
-   `apt-get install -y php7.0-cli php-db php-sqlite3 gdal-bin libgdal-dev python-pip python-gdal`
+from source:
+	geos
+		./configure
+		make
+		make install
+		cd /usr/lib64
+		ln -s /usr/local/lib/libgeos_c.so.1
+	gdal
+		./configure
+		make
+		make install
+	postgis
+		./configure --prefix=/usr/pgsql-13/usr --with-pgconfig=/usr/pgsql-13/bin/pg_config --with-gdal=/usr/local	
+		make
+		make install
+      
+ enable postgis in postgresql
+		su - postgres
+		psql postgres
+		alter user postgres with password 'new_password';
+		create extension postgis;
+		create extension postgis_topology;
+		[confirm with:
+			select PostGIS_version();
+			select PostGIS_full_version();
+         
+Check pgsql13's pg_hba.conf file "methods" at bottom of file
 
 ### Setup
 
@@ -85,6 +120,8 @@ Spatial Data Infrastructure for Planetary Missions
    (Use the mission name `"Test"` (case-sensitive) to make the sample mission)
 
 Go to `http://localhost:8888` to see the `Test` mission
+
+Update Missions/<MISSION>/config.json with the correct server name in the urls for psite and velocity
 
 ## Documentation
 
