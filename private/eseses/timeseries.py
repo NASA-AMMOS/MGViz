@@ -39,12 +39,12 @@ def fetch_data(server, directory):
     # download files
     for targzfile in files:
         if 'data/' + targzfile in existing_files:
-            print 'Skipping already downloaded ' + targzfile
+            print('Skipping already downloaded ' + targzfile)
         else:
             for old_file in glob.glob('data/'+targzfile[:-12]+'*'):
-                print 'Removing ' + old_file
+                print('Removing ' + old_file)
                 os.remove(old_file)
-            print 'Downloading ' + targzfile
+            print('Downloading ' + targzfile)
             f = open('./data/' + targzfile, 'wb')
             ftp.retrbinary('RETR %s' % targzfile, f.write)
             f.close()
@@ -54,9 +54,9 @@ def fetch_data(server, directory):
     for gztar in glob.glob('data/*.tar.gz'):
         tarfn = os.path.splitext(gztar)[0]
         if gztar in existing_files:
-            print 'Skipping already extracted ' + gztar
+            print('Skipping already extracted ' + gztar)
         else:
-            print 'Unzipping ' + gztar
+            print('Unzipping ' + gztar)
             with gzip.open(gztar,'rb') as f_in:
               with open(tarfn,'wb') as f_out:
                 shutil.copyfileobj(f_in,f_out)
@@ -69,7 +69,7 @@ def fetch_data(server, directory):
             if '_sopac_' in tarfn:
                 source = 'sopac'
             if source in ['jpl','comb','sopac']:  # if not one of these, file will be discarded
-              print 'Untarring ' + tarfn
+              print('Untarring ' + tarfn)
               extract_dir = extract_dir + "/" + source
               # need to limit to the relevant filename!
               #for oldF in [f for f in os.listdir(extract_dir)]:
@@ -78,16 +78,16 @@ def fetch_data(server, directory):
               tar.close()
               # truncate files
               if  gztar in existing_files:
-                  print 'Skipping already processed ' + gztar
+                  print('Skipping already processed ' + gztar)
               else:
                   with open(gztar, 'w') as fp: # truncate file to save disk space
-                      print 'Truncating data/' + gztar
-            print 'Unlinking ' + tarfn
+                      print('Truncating data/' + gztar)
+            print('Unlinking ' + tarfn)
             os.unlink(tarfn)
 
 
     # extract Z files
-    print 'Uncompressing files...'
+    print('Uncompressing files...')
     for tsfile in glob.glob('data/*/*.Z'):
         unzip_command = ['unzip', '-o', tsfile, '-d', os.path.dirname(tsfile)]
         process = subprocess.Popen(unzip_command,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
@@ -95,7 +95,7 @@ def fetch_data(server, directory):
         #for output in process.stdout:
             #print output
         for error in process.stderr:
-            print error
+            print(error)
         os.remove(tsfile)
         
 
