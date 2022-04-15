@@ -6,7 +6,6 @@ import os
 import os.path
 import json
 import math
-import urllib2
 import re
 
 # Get args
@@ -54,13 +53,13 @@ if raw_file is not None:
     if os.path.exists(raw_file):
         rawf = open(raw_file, 'r')
     else:
-        print('{"err": "Data not found for ' + site + '/' + source + '/' + fil + '/' + ttype + '/' + neu + '. ' + raw_file +'." }')
+        print(('{"err": "Data not found for ' + site + '/' + source + '/' + fil + '/' + ttype + '/' + neu + '. ' + raw_file +'." }'))
         sys.exit()
 if neu_file is not None:
     if os.path.exists(neu_file):
         f = open(neu_file, 'r')
     else:
-        print('{"err": "Data not found for ' + site + '/' + source + '/' + fil + '/' + ttype + '/' + neu + '. ' + neu_file + '."}')
+        print(('{"err": "Data not found for ' + site + '/' + source + '/' + fil + '/' + ttype + '/' + neu + '. ' + neu_file + '."}'))
         if raw_file is not None:
             rawf.close()
         sys.exit()
@@ -152,14 +151,6 @@ def getModelTerms(site,f,source,fil):
         modelTerms[coord]["annual"]=[]
         modelTerms[coord]["semiAnnual"]=[]
   
-    # url='http://geoapp03.ucsd.edu/gpseDB/coord?op=getModelTerms&source='+source+'&site='+site+'&fil='+fil
-    # try:
-    #     request=urllib2.Request(url)
-    #     response=urllib2.urlopen(request)
-    # except:
-    #     raise Exception('Could not access model terms from ' + url)
-    # modelTermsOp=response.read().decode('utf-8').split("\n")
-
     f.seek(0)
     modelTermsOp=f.read().splitlines()
 
@@ -380,7 +371,7 @@ except:
   e_component = {'site':site, 'name':name, 'plotlines':[]}
   u_component = {'site':site, 'name':name, 'plotlines':[]}
   if ttype == 'detrend':
-    print('{"err": "Cannot detrend ' + site + '/' + source + '/' + fil + '/' + ttype + '/' + neu + '." }')
+    print(('{"err": "Cannot detrend ' + site + '/' + source + '/' + fil + '/' + ttype + '/' + neu + '." }'))
     sys.exit()
 
 if raw_file is not None: 
@@ -403,5 +394,5 @@ if 'e' in neu:
 if 'u' in neu:
     data['u'] = u_component
 
-print(json.dumps(data))
+print((json.dumps(data)))
 sys.exit()
