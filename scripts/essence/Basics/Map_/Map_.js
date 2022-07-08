@@ -421,6 +421,24 @@ define([
     }
 
     //Specific internal functions likely only to be used once
+    function get_browser() {    // Thank you stackoverflow
+    var ua=navigator.userAgent,tem,M=ua.match(/(opera|chrome|safari|firefox|msie|trident(?=\/))\/?\s*(\d+)/i) || []; 
+    if(/trident/i.test(M[1])){
+        tem=/\brv[ :]+(\d+)/g.exec(ua) || []; 
+        return {name:'IE',version:(tem[1]||'')};
+        }   
+    if(M[1]==='Chrome'){
+        tem=ua.match(/\bOPR|Edge\/(\d+)/)
+        if(tem!=null)   {return {name:'Opera', version:tem[1]};}
+        }   
+    M=M[2]? [M[1], M[2]]: [navigator.appName, navigator.appVersion, '-?'];
+    if((tem=ua.match(/version\/(\d+)/i))!=null) {M.splice(1,1,tem[1]);}
+    return {
+      name: M[0],
+      version: M[1]
+    };
+ }
+
     function getLayersChosenNamePropVal(feature, layer) {
         //These are what you'd think they'd be (Name could be thought of as key)
         var propertyName, propertyValue
@@ -1348,6 +1366,22 @@ define([
             }
 
             switch ( layerObj.name ) {
+                case 'Sites Global View':
+                    layerObj.style.vtLayer = {
+                        "sliced": 
+                            function(properties, zoom) {
+                                return {
+                                    "color": "#0000FF",
+                                    "fill": true,
+                                    "fillColor": "#00FFFF",
+                                    "fillOpacity": 1,
+                                    "opacity": 0.5,
+                                    "radius": 4,
+                                    "weight": 1
+                                }
+                            }
+                    }
+                break;
                 case 'Historical Significant':
                     layerObj.style.vtLayer = {
                         "sliced": 
@@ -1667,6 +1701,10 @@ define([
 
             // activate Search tool icon on startup
             if (ToolController_.activeToolName == null) {
+		var browser = get_browser();
+		if (browser.name == 'Firefox' && (browser.version.startsWith('99') || browser.version.startsWith('10'))) {
+		    alert('highcharts issue #17182 affects timeseries zoom in Firefox versions >=99.0.1. For best results, please use an alternate browser.');
+		}
                 var prevActive = $( '#toolcontroller_incdiv .active' );
                 prevActive.removeClass( 'active' ).css( { 'color': ToolController_.defaultColor, 'background': 'none' } );
                 prevActive.parent().css( { 'background': 'none' } );

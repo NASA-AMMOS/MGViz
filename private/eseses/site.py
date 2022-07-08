@@ -2,6 +2,7 @@ import sys
 import os
 import os.path
 import json
+import csv
 from lxml import etree
 import collections
 from collections import OrderedDict 
@@ -31,6 +32,16 @@ types = {'detrend' : 'Detrend',
         'trend' : 'Trend',
         'resid' : 'Resid',
         'strain' : 'Strain'}
+
+def getSubOptimal(site):
+  csvFile = 'private/eseses/metadata/subOptimalSites.csv'
+  cautionSites = []
+  with open(csvFile) as f:
+    subOptimalReader = csv.reader(f)
+    for row in subOptimalReader:
+        if site == row[0]:
+            return(True)
+    return(False)
 
 def dms2dec(dmsStr):
   [d,m,s]=dmsStr.split()
@@ -81,10 +92,15 @@ def getModelTerms(site,f,source,fil):
                 modelTerms['North']['RMS'].append(li.split(':')[1].split(',')[0] + ' mm')
                 modelTerms['East']['RMS'].append(li.split(':')[1].split(',')[1] + ' mm')
                 modelTerms['Up']['RMS'].append(li.split(':')[1].split(',')[2] + ' mm')
+            elif 'available' in li:
+                modelTerms['North']['Model']=['Not available']
+                modelTerms['East']['Model']=['Not available']
+                modelTerms['Up']['Model']=['Not available']
+         
     return(modelTerms)
 
 allModelTerms = OrderedDict()
-for sourceKey in sorted(sources.iterkeys()):
+for sourceKey in sorted(sources.keys()):
     for ft in ['Filter','Clean']:
         model = sources[sourceKey] + ' - ' + ft
         neu_file = 'private/eseses/data/' + sourceKey + '/' + site + ft + 'Detrend.neu'
@@ -105,6 +121,8 @@ doc = xml.getroot()
 indivSiteProcMetadata = doc.findall('.//{http://sopac.ucsd.edu/ns/geodesy/2014}indivSiteProcMetadata')[0]
 sopacSiteID = indivSiteProcMetadata.attrib['sopacSiteID']
 m['SOPAC Site ID'] = sopacSiteID
+if getSubOptimal(site):
+  m['Timeseries QA'] = "<span style=\"color:#ff0000\">Caution</span> <a href=https://urldefense.us/v3/__https://docs.google.com/spreadsheets/d/e/2PACX-1vQ02siHNOTZ-yYFOQEghz-ZvF3X2s4AUf7zhkY2V57ggPlheYaF9SzRWfbdJJEnng/pub?gid=646720245&single=true&output=csv__;!!PvBDto6Hs4WbVuu7!YS-wBn4VDgP4prp-04KsYQDNTzoUZpxt3x-_eJlRZ48InC4RwPr-h2nDahk3XJfrrjjAfGHITA$>(info)</a>"
 m['XML File'] = 'api/eseses/sitexml/' + site + '.xml'
 
 neuMotionModelTerms = doc.findall('.//{http://sopac.ucsd.edu/ns/geodesy/2014}neuMotionModelTerms')[0]
@@ -166,5 +184,5 @@ for equipmentMetadataEntry in equipmentMetadataEntries:
     equipment.append(e)
 m['Equipment'] = equipment
 
-print(json.dumps(m))
+print((json.dumps(m)))
 sys.exit()

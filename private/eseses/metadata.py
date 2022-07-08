@@ -9,7 +9,7 @@ if not os.path.exists('./metadata'):
     os.makedirs('metadata')
 for filename in os.listdir('./metadata'):
     if filename.endswith('.tar'):
-        print 'Removing ' + filename
+        print('Removing ' + filename)
         os.remove('./metadata/' + filename)
 
 ftp = FTP('garner.ucsd.edu')
@@ -23,11 +23,11 @@ f = open(mfile, 'wb')
 ftp.retrbinary('RETR %s' % max(files), f.write)
 f.close()
 ftp.quit()
-print 'Downloaded ' + mfile
+print('Downloaded ' + mfile)
 tar = tarfile.open(mfile)
 tar.extractall('./metadata')
 tar.close()
-print 'Extracted ' + mfile
+print('Extracted ' + mfile)
 
 for filename in os.listdir('./metadata'):
     if filename.endswith('.gz'):

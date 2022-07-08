@@ -22,7 +22,7 @@ def fetch_data(server, directory):
 
     lines = []
     files = []
-    existing_files = glob.glob('data/*.tar')
+    existing_files = glob.glob('data/*.tar.gz')
 
     ftp = FTP(server)
     ftp.login()
@@ -33,58 +33,71 @@ def fetch_data(server, directory):
     for line in lines:
         tokens = line.split()
         name = tokens[8]
-        if str(name).endswith('.tar'): 
+        if str(name).endswith('.tar.gz'): 
             files.append(name)
 
     # download files
-    for file in files:
-        if 'data/' + file in existing_files:
-            print 'Skipping already downloaded ' + file
+    for targzfile in files:
+        if 'data/' + targzfile in existing_files:
+            print('Skipping already downloaded ' + targzfile)
         else:
-            for old_file in glob.glob('data/'+file[:-12]+'*'):
-                print 'Removing ' + old_file
+            for old_file in glob.glob('data/'+targzfile[:-12]+'*'):
+                print('Removing ' + old_file)
                 os.remove(old_file)
-            print 'Downloading ' + file
-            f = open('./data/' + file, 'wb')
-            ftp.retrbinary('RETR %s' % file, f.write)
+            print('Downloading ' + targzfile)
+            f = open('./data/' + targzfile, 'wb')
+            ftp.retrbinary('RETR %s' % targzfile, f.write)
             f.close()
     ftp.quit()
 
     # extract tar files
-    for file in glob.glob('data/*.tar'):
-        if file in existing_files:
-            print 'Skipping already extracted ' + file
+    for gztar in glob.glob('data/*.tar.gz'):
+        tarfn = os.path.splitext(gztar)[0]
+        if gztar in existing_files:
+            print('Skipping already extracted ' + gztar)
         else:
-            print 'Extracting ' + file
-            tar = tarfile.open(file)
+            print('Unzipping ' + gztar)
+            with gzip.open(gztar,'rb') as f_in:
+              with open(tarfn,'wb') as f_out:
+                shutil.copyfileobj(f_in,f_out)
+            tar = tarfile.open(tarfn)
             extract_dir = './data'
-            if '_jpl_' in file:
-                extract_dir = extract_dir + "/jpl"
-            if '_comb_' in file:
-                extract_dir = extract_dir + "/comb"
-            if '_sopac_' in file:
-                extract_dir = extract_dir + "/sopac"
-            tar.extractall(extract_dir)
-            tar.close()
+            if '_jpl_' in tarfn:
+                source = 'jpl'
+            if '_comb_' in tarfn:
+                source = 'comb'
+            if '_sopac_' in tarfn:
+                source = 'sopac'
+            if source in ['jpl','comb','sopac']:  # if not one of these, file will be discarded
+              print('Untarring ' + tarfn)
+              extract_dir = extract_dir + "/" + source
+              # need to limit to the relevant filename!
+              #for oldF in [f for f in os.listdir(extract_dir)]:
+              #  os.remove(os.path.join(extract_dir,oldF))
+              tar.extractall(extract_dir)
+              tar.close()
+              # truncate files
+              if  gztar in existing_files:
+                  print('Skipping already processed ' + gztar)
+              else:
+                  with open(gztar, 'w') as fp: # truncate file to save disk space
+                      print('Truncating data/' + gztar)
+            print('Unlinking ' + tarfn)
+            os.unlink(tarfn)
+
 
     # extract Z files
-    for file in glob.glob('data/*/*.Z'):
-        unzip_command = ['unzip', '-o', file, '-d', os.path.dirname(file)]
+    print('Uncompressing files...')
+    for tsfile in glob.glob('data/*/*.Z'):
+        unzip_command = ['unzip', '-o', tsfile, '-d', os.path.dirname(tsfile)]
         process = subprocess.Popen(unzip_command,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
         process.wait()
-        for output in process.stdout:
-            print output
+        #for output in process.stdout:
+            #print output
         for error in process.stderr:
-            print error
-        os.remove(file)
+            print(error)
+        os.remove(tsfile)
         
-    # truncate files
-    for file in files:
-        if 'data/' + file in existing_files:
-            print 'Skipping already processed ' + file
-        else:
-            with open('data/' + file, 'w') as fp: # truncate file to save disk space
-                print 'Truncating data/' + file
 
 server = 'sopac-ftp.ucsd.edu'
 # fetch global data
