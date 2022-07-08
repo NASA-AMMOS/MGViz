@@ -1702,7 +1702,7 @@ define([
             // activate Search tool icon on startup
             if (ToolController_.activeToolName == null) {
 		var browser = get_browser();
-		if (browser.name == 'Firefox' && (browser.version.startsWith('99') || browser.version.startsWith('100'))) {
+		if (browser.name == 'Firefox' && (browser.version.startsWith('99') || browser.version.startsWith('10'))) {
 		    alert('highcharts issue #17182 affects timeseries zoom in Firefox versions >=99.0.1. For best results, please use an alternate browser.');
 		}
                 var prevActive = $( '#toolcontroller_incdiv .active' );

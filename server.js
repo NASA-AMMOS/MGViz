@@ -785,14 +785,14 @@ setups.getBackendSetups(function (setups) {
   
 //psite
 app.get('/api/eseses/psite', function(req, res) {
-  execFile('python', ['private/eseses/psite.py'], {maxBuffer: 1024 * 1024},
+  execFile('python2', ['private/eseses/psite.py'], {maxBuffer: 1024 * 1024},
   function(error, stdout, stderr) { res.send(stdout);});
 });
 
 //velocity
 app.get('/api/eseses/velocity/:source', function(req, res) {
   const source = encodeURIComponent(req.params.source);
-  execFile('python', ['private/eseses/velocity.py', source], {maxBuffer: 1024 * 1024},
+  execFile('python2', ['private/eseses/velocity.py', source], {maxBuffer: 1024 * 1024},
   function(error, stdout, stderr) { res.send(stdout); console.log(stderr);});
 });
 

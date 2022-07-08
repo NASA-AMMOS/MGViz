@@ -21,7 +21,11 @@ except Exception as e:   # On error, print the saved version and exit
     if os.path.exists(json):
         with open(json, 'r') as out:
             print(out.read())
+            
+    else:
+        print(e)
     sys.exit()
+
 
 # save a copy of the web service response
 csvLines = []
