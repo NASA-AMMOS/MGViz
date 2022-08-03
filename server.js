@@ -802,7 +802,7 @@ app.get('/api/eseses/site/:site/:source/:fil/:type', function(req, res) {
   const source = encodeURIComponent(req.params.source);
   const fil = encodeURIComponent(req.params.fil);
   const type = encodeURIComponent(req.params.type);
-  execFile('python', ['private/eseses/site.py', site, source, fil, type], {maxBuffer: 1024 * 1024},
+  execFile('python3', ['private/eseses/site.py', site, source, fil, type], {maxBuffer: 1024 * 1024},
   function(error, stdout, stderr) { res.send(stdout); console.log(stderr);});
 });
 
@@ -820,7 +820,7 @@ app.get('/api/eseses/neu/:site/:source/:fil/:type/:neu', function(req, res) {
   const fil = encodeURIComponent(req.params.fil);
   const type = encodeURIComponent(req.params.type);
   const neu = encodeURIComponent(req.params.neu);
-  execFile('python', ['private/eseses/neu.py', site, source, fil, type, neu], {maxBuffer: 1024 * 1024},
+  execFile('python3', ['private/eseses/neu.py', site, source, fil, type, neu], {maxBuffer: 1024 * 1024},
   function(error, stdout, stderr) { res.send(stdout); console.log(stderr);});
 });
 

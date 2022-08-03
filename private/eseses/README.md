@@ -2,7 +2,7 @@
 
 ## metadata
 
-./metadata.py runs as a script that will download and extract site metadata from garner.ucsd.edu. It will replace existing site metadata with new contents. Execute the following to run manually `python metadata.py`
+./metadata.py runs as a script that will download and extract site metadata from garner.ucsd.edu. It will replace existing site metadata with new contents. Execute the following to run manually `python3 metadata.py`
 
 ## neu
 
@@ -42,7 +42,7 @@ http://localhost:8888/api/eseses/site/{site}/{source}/{filter}/{type}
 
 ## timeseries
 
-./timeseries.py runs as a script that will download and extract time series data from sopac-ftp.ucsd.edu. It will replace existing time series data if new contents are found. An empty file containing the tar filename is left remaining to let the script know the current version of the data, which is used to determine if download and extraction of the most recent version of the file are necessary. Execute the following to run manually `python timeseries.py`
+./timeseries.py runs as a script that will download and extract time series data from sopac-ftp.ucsd.edu. It will replace existing time series data if new contents are found. An empty file containing the tar filename is left remaining to let the script know the current version of the data, which is used to determine if download and extraction of the most recent version of the file are necessary. Execute the following to run manually `python3 timeseries.py`
 
 ## velocity
 
