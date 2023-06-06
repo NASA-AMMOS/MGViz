@@ -29,6 +29,9 @@ let Map_ = {
     activeLayer: null,
     allLayersLoadedPassed: false,
     player: { arrow: null, lookat: null },
+    vectorExaggeration: 1,
+    vectorFilter: null,
+    vectorOptions: null,
     //Initialize a map based on a config file
     init: function (essenceFinal) {
         essenceFina = essenceFinal
@@ -122,11 +125,8 @@ let Map_ = {
             this.map = L.map('map', {
                 zoomControl: hasZoomControl,
                 editable: true,
-                fadeAnimation: shouldFade,
-                //crs: crs,
-                //zoomDelta: 0.05,
-                //zoomSnap: 0,
-                //wheelPxPerZoomLevel: 500,
+                continuousWorld: true,
+                worldCopyJump: true
             })
             // Default CRS
             const projString = `+proj=merc +lon_0=0 +k=1 +x_0=0 +y_0=0 +a=${F_.radiusOfPlanetMajor} +b=${F_.radiusOfPlanetMinor} +towgs84=0,0,0,0,0,0,0 +units=m +no_defs`
@@ -392,7 +392,7 @@ let Map_ = {
         for (var i = L_._layersOrdered.length - 1; i >= 0; i--) {
             if (
                 L_.layers.data[L_._layersOrdered[i]] &&
-                L_.layers.data[L_._layersOrdered[i]].type == 'vector' &&
+                L_.layers.data[L_._layersOrdered[i]].type in ['vector', 'vectortile'] &&
                 L_.layers.data[L_._layersOrdered[i]].name == layerObj.name
             ) {
                 const wasOn = L_.layers.on[layerObj.name]
@@ -696,6 +696,40 @@ async function makeLayer(layerObj, evenIfOff, forceGeoJSON) {
         }
 
         function keepGoing() {
+            L_.setLastActivePoint(layer)
+            L_.resetLayerFills()
+            layer.setStyle({ fillColor: 'red' })
+            Map_.activeLayer = layer
+            Description.updatePoint(Map_.activeLayer)
+
+            //Updates for ChartTool
+            if (ToolController_.activeToolName != 'ChartTool') {
+                var prevActive = $( '#toolcontroller_incdiv .active' );
+                prevActive.removeClass( 'active' ).css( { 'color': ToolController_.defaultColor, 'background': 'none' } );
+                prevActive.parent().css( { 'background': 'none' } );
+                var newActive = $( '#toolcontroller_incdiv #ChartTool' );
+                newActive.addClass( 'active' ).css( { 'color': ToolController_.activeColor } );
+                newActive.parent().css( { 'background': ToolController_.activeBG } );
+                ToolController_.makeTool( 'ChartTool' );
+            }
+            // get a list of already selected sites
+            var sites = [];
+            if($('#siteSelect').val() != null) {
+                $("#siteSelect option").each(function(){
+                    sites.push($(this).val());
+                });
+            }
+            var pv = getLayersChosenNamePropVal(feature, layer)
+            if (sites.includes(pv.site)) { // unselect previously selected
+                layer.setStyle({ fillColor: layerObj.style.fillColor});
+                layer.setRadius(layerObj.radius);
+                ToolController_.getTool( 'ChartTool' ).remove( feature );
+            } else {
+                layer.setStyle({ fillColor: 'magenta' });
+                layer.setRadius(9);
+                ToolController_.getTool( 'ChartTool' ).use( feature );
+            }
+            
             //View images
             var propImages = propertiesToImages(
                 feature.properties,
@@ -704,15 +738,15 @@ async function makeLayer(layerObj, evenIfOff, forceGeoJSON) {
                     : ''
             )
 
-            Kinds.use(
-                L_.layers.data[layerObj.name].kind,
-                Map_,
-                feature,
-                layer,
-                layer.options.layerName,
-                propImages,
-                e
-            )
+            // Kinds.use(
+            //     L_.layers.data[layerObj.name].kind,
+            //     Map_,
+            //     feature,
+            //     layer,
+            //     layer.options.layerName,
+            //     propImages,
+            //     e
+            // )
 
             //update url
             if (layer != null && layer.hasOwnProperty('options')) {
@@ -882,6 +916,7 @@ async function makeLayer(layerObj, evenIfOff, forceGeoJSON) {
     }
 
     function makeVectorTileLayer() {
+        var geoJSON = '';
         var layerUrl = layerObj.url
         if (!F_.isUrlAbsolute(layerUrl)) layerUrl = L_.missionPath + layerUrl
 
@@ -896,6 +931,34 @@ async function makeLayer(layerObj, evenIfOff, forceGeoJSON) {
                     window.mmgisglobal.ROOT_PATH || ''
                 }/api/geodatasets/get?layer=${urlSplit[1]}` +
                 '&type=mvt&x={x}&y={y}&z={z}'
+        }
+        else {
+            $.ajax( {
+                type:'GET',
+                url: layerUrl,
+                dataType: 'json',
+                async: false,
+                success: function(data) {
+                    geoJSON = data;
+                }, 
+                error: function (jqXHR, textStatus, errorThrown) {
+                //Tell the console council about what happened
+                console.warn(
+                    'ERROR! ' +
+                        textStatus +
+                        ' in ' +
+                        layerObj.url +
+                        ' /// ' +
+                        errorThrown
+                )
+                //Say that this layer was loaded, albeit erroneously
+                L_.layersLoaded[
+                    L_.layersOrdered.indexOf(layerObj.name)
+                ] = true
+                //Check again to see if all layers have loaded
+                allLayersLoaded()
+                }
+            });
         }
 
         var bb = null
@@ -953,11 +1016,170 @@ async function makeLayer(layerObj, evenIfOff, forceGeoJSON) {
             )
         }
 
+        switch ( layerObj.display_name ) {
+            case 'Sites Global View':
+                layerObj.style.vtLayer = {
+                    "sliced": 
+                        function(properties, zoom) {
+                            return {
+                                "color": "#0000FF",
+                                "fill": true,
+                                "fillColor": "#00FFFF",
+                                "fillOpacity": 1,
+                                "opacity": 0.5,
+                                "radius": 4,
+                                "weight": 1
+                            }
+                        }
+                }
+            break;
+            case 'Historical Significant':
+                layerObj.style.vtLayer = {
+                    "sliced": 
+                        function(properties, zoom) {
+                          var radius = 1 * properties.mag;
+                          if (properties.mag > 6) {
+                            radius = radius + (Math.pow(properties.mag,3)/200)
+                          }
+                            return {
+                              "color": "#000000",
+                              "fill": true,
+                              "fillColor": "#FF4400",
+                              "fillOpacity": 0.8,
+                              "opacity": 1,
+                              "radius": radius,
+                              "weight": 1
+                            }
+                        }
+                }
+            break;
+            case 'Recent Significant':
+                layerObj.style.vtLayer = {
+                    "sliced": 
+                        function(properties, zoom) {
+                          var radius = 1 * properties.mag;
+                          if (properties.mag > 6) {
+                            radius = radius + (Math.pow(properties.mag,3)/200)
+                          }
+                            return {
+                              "color": "#000000",
+                              "fill": true,
+                              "fillColor": "#FF8C00",
+                              "fillOpacity": 0.9,
+                              "opacity": 1,
+                              "radius": radius,
+                              "weight": 1
+                            }
+                        }
+                }
+            break;
+            case 'Recent M3-M6':
+                layerObj.style.vtLayer = {
+                    "sliced": 
+                        function(properties, zoom) {
+                          var radius = 1 * properties.mag;
+                            return {
+                              "color": "#000000",
+                              "fill": true,
+                              "fillColor": "#FF8C00",
+                              "fillOpacity": 0.9,
+                              "opacity": 1,
+                              "radius": radius,
+                              "weight": 1
+                            }
+                        }
+                }
+            break;
+            case 'Recent M2-M3':
+                layerObj.style.vtLayer = {
+                    "sliced": 
+                        function(properties, zoom) {
+                          var radius = 1 * properties.mag;
+                            return {
+                              "color": "#000000",
+                              "fill": true,
+                              "fillColor": "#FFD700",
+                              "fillOpacity": 1,
+                              "opacity": 1,
+                              "radius": radius,
+                              "weight": 1
+                            }
+                        }
+                }
+            break;
+            case 'Velocities':
+                layerObj.style.vtLayer = {
+                    "sliced": 
+                        function(properties, zoom) {
+                            var n = parseFloat(properties.n_vel);
+                            var e = parseFloat(properties.e_vel);
+                            var u = parseFloat(properties.u_vel);
+                            var hide = false
+                            if (Map_.vectorFilter == 'greater') { // Don't display points < 20 in any direction
+                                if (Map_.vectorOptions == 'vertical') {
+                                    if ((Math.abs(u)>=20) == false) {
+                                        hide  = true
+                                    }
+                                } else {
+                                    if ((Math.abs(n)>=20 || Math.abs(e)>=20) == false) {
+                                        hide = true
+                                    }
+                                }
+                            }
+                            if (Map_.vectorOptions == 'vertical') {
+                                var magScale = 2 * Map_.vectorExaggeration;
+                                var logScaledU = Math.log(Math.abs(u) * 100);
+                                var icon = 'Missions/MGViz/Images/arrow-inc-blue.png';
+                                var yAnchor = 0;
+                                if (u < 0) {
+                                    icon = 'Missions/MGViz/Images/arrow-inc-blue.png';
+                                    yAnchor = 0;
+                                } else if (u > 0) {
+                                    icon = 'Missions/MGViz/Images/arrow-inc-red.png';
+                                    yAnchor = (magScale * logScaledU)*2;
+                                }
+                                var smallIcon = new L.Icon({
+                                    iconSize: hide ? 0 : [magScale * logScaledU, (magScale * logScaledU)*2],
+                                    iconAnchor: [(magScale * logScaledU)/2, yAnchor],
+                                    iconUrl: icon
+                                });
+                                return {
+                                    icon: smallIcon
+                                };
+                            } else {
+                                var mag = Math.sqrt((n*n) + (e*e));
+                                var magScale = 1.5 * Map_.vectorExaggeration;
+                                var iconsize = (magScale * mag);
+                                if (iconsize > 150) {
+                                    iconsize = 150; // cap at 50
+                                }
+                                else if (iconsize < 20) {
+                                    iconsize = 20; // min 20
+                                }
+                                var angle = Math.atan2(e,n) * (180 / Math.PI);
+                                var deg = (Math.round(angle));
+                                if (deg < 0) {
+                                    deg = 360 + deg;
+                                }
+                                var smallIcon = new L.Icon({
+                                    iconSize: hide ? 0 : [iconsize, iconsize],
+                                    iconAnchor: [iconsize/2, iconsize/2],
+                                    iconUrl: 'Missions/MGViz/Images/arrows/arrow-'+deg+'.png'
+                                });
+                                return {
+                                    icon: smallIcon
+                                };
+                            }
+                        }
+                }
+            break;
+        }
         var vectorTileOptions = {
-            layerName: layerObj.name,
-            rendererFactory: L.canvas.tile,
+            layerName: layerObj.display_name,
+            rendererFactory: ('Velocities' == layerObj.display_name) ? L.canvas.tile : L.svg.tile,
             vectorTileLayerStyles: layerObj.style.vtLayer || {},
             interactive: true,
+            buffer: 1000,
             minZoom: layerObj.minZoom,
             maxZoom: layerObj.maxZoom,
             maxNativeZoom: layerObj.maxNativeZoom,
@@ -973,84 +1195,108 @@ async function makeLayer(layerObj, evenIfOff, forceGeoJSON) {
                 }
             })(layerObj.style.vtId),
         }
+        if ('sliced' in layerObj.style.vtLayer) {
+            L_.layers.layer[layerObj.name] = L.vectorGrid.slicer(geoJSON, vectorTileOptions);
+            // Set all vector tile points on top with same z index so that they're all selectable
+            L_.layers.layer[layerObj.name].setZIndex(999999);
+        } else {
+            L_.layers.layer[layerObj.name] = L.vectorGrid
+                .protobuf(layerUrl, vectorTileOptions)
+                .on('click', function (e) {
+                    let layerName = e.sourceTarget._layerName
+                    let vtId = L_.layers.layer[layerName].vtId
+                    clearHighlight()
+                    L_.layers.layer[layerName].highlight = e.layer.properties[vtId]
 
-        L_.layers.layer[layerObj.name] = L.vectorGrid
-            .protobuf(layerUrl, vectorTileOptions)
-            .on('click', function (e) {
-                let layerName = e.sourceTarget._layerName
-                let vtId = L_.layers.layer[layerName].vtId
-                clearHighlight()
-                L_.layers.layer[layerName].highlight = e.layer.properties[vtId]
+                    L_.layers.layer[layerName].setFeatureStyle(
+                        L_.layers.layer[layerName].highlight,
+                        {
+                            weight: 2,
+                            color: 'red',
+                            opacity: 1,
+                            fillColor: 'red',
+                            fill: true,
+                            radius: 4,
+                            fillOpacity: 1,
+                        }
+                    )
+                    L_.layers.layer[layerName].activeFeatures =
+                        L_.layers.layer[layerName].activeFeatures || []
+                    L_.layers.layer[layerName].activeFeatures.push({
+                        type: 'Feature',
+                        properties: e.layer.properties,
+                        geometry: {},
+                    })
 
-                L_.layers.layer[layerName].setFeatureStyle(
-                    L_.layers.layer[layerName].highlight,
-                    {
-                        weight: 2,
-                        color: 'red',
-                        opacity: 1,
-                        fillColor: 'red',
-                        fill: true,
-                        radius: 4,
-                        fillOpacity: 1,
+                    Map_.activeLayer = e.sourceTarget._layer
+                    if (Map_.activeLayer) L_.Map_._justSetActiveLayer = true
+
+                    let p = e.sourceTarget._point
+
+                    for (var i in e.layer._renderer._features) {
+                        if (
+                            e.layer._renderer._features[i].feature._pxBounds.min
+                                .x <= p.x &&
+                            e.layer._renderer._features[i].feature._pxBounds.max
+                                .x >= p.x &&
+                            e.layer._renderer._features[i].feature._pxBounds.min
+                                .y <= p.y &&
+                            e.layer._renderer._features[i].feature._pxBounds.max
+                                .y >= p.y &&
+                            e.layer._renderer._features[i].feature.properties[
+                                vtId
+                            ] != e.layer.properties[vtId]
+                        ) {
+                            L_.layers.layer[layerName].activeFeatures.push({
+                                type: 'Feature',
+                                properties:
+                                    e.layer._renderer._features[i].feature
+                                        .properties,
+                                geometry: {},
+                            })
+                        }
                     }
-                )
-                L_.layers.layer[layerName].activeFeatures =
-                    L_.layers.layer[layerName].activeFeatures || []
-                L_.layers.layer[layerName].activeFeatures.push({
-                    type: 'Feature',
-                    properties: e.layer.properties,
-                    geometry: {},
+
+                    timedSelect(e.sourceTarget._layer, layerName, e)
+                    L.DomEvent.stop(e)
                 })
-
-                Map_.activeLayer = e.sourceTarget._layer
-                if (Map_.activeLayer) L_.Map_._justSetActiveLayer = true
-
-                let p = e.sourceTarget._point
-
-                for (var i in e.layer._renderer._features) {
-                    if (
-                        e.layer._renderer._features[i].feature._pxBounds.min
-                            .x <= p.x &&
-                        e.layer._renderer._features[i].feature._pxBounds.max
-                            .x >= p.x &&
-                        e.layer._renderer._features[i].feature._pxBounds.min
-                            .y <= p.y &&
-                        e.layer._renderer._features[i].feature._pxBounds.max
-                            .y >= p.y &&
-                        e.layer._renderer._features[i].feature.properties[
-                            vtId
-                        ] != e.layer.properties[vtId]
-                    ) {
-                        L_.layers.layer[layerName].activeFeatures.push({
-                            type: 'Feature',
-                            properties:
-                                e.layer._renderer._features[i].feature
-                                    .properties,
-                            geometry: {},
-                        })
+        }
+        L_.layers.layer[layerObj.name].on(
+            'mouseover',
+            (function (vtKey) {
+                return function (e, a, b, c) {
+                    if (e.layer.properties['title'] != null) {
+                        CursorInfo.update(
+                            e.layer.properties['title'] + '<br>' +
+                            'Depth: ' + e.layer.properties['depth'] + ' km' + '<br>' +
+                            new Date(e.layer.properties.time).toUTCString(),
+                            null,
+                            false,
+                            null,
+                            null,
+                            null,
+                            true
+                        )
+                    }
+                    else if (e.layer.properties['n_vel'] != null) {
+                        var values = 'N vel: ' + e.layer.properties.n_vel + ' mm/yr<br> E vel: ' + e.layer.properties.e_vel +
+                        ' mm/yr<br> U vel: ' + e.layer.properties.u_vel + ' mm/yr';
+                        CursorInfo.update( 'Site: ' + e.layer.properties.site + '<br>' +
+                                                    values, null, false, null, null, null, true);
+                    }
+                    else if (vtKey != null) {
+                        CursorInfo.update(
+                            vtKey + ': ' + e.layer.properties[vtKey],
+                            null,
+                            false
+                        )
                     }
                 }
-
-                timedSelect(e.sourceTarget._layer, layerName, e)
-
-                L.DomEvent.stop(e)
-            })
-            .on(
-                'mouseover',
-                (function (vtKey) {
-                    return function (e, a, b, c) {
-                        if (vtKey != null)
-                            CursorInfo.update(
-                                vtKey + ': ' + e.layer.properties[vtKey],
-                                null,
-                                false
-                            )
-                    }
-                })(layerObj.style.vtKey)
-            )
-            .on('mouseout', function () {
-                CursorInfo.hide()
-            })
+            })(layerObj.style.vtKey)
+        )
+        .on('mouseout', function () {
+            CursorInfo.hide()
+        })
 
         L_.layers.layer[layerObj.name].vtId = layerObj.style.vtId
         L_.layers.layer[layerObj.name].vtKey = layerObj.style.vtKey

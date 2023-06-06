@@ -1,7 +1,7 @@
 .vscode
 .DS_Store
 .env
-
+.*project
 /node_modules/
 /API/logs/*
 /Missions/*
