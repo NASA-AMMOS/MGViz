@@ -1,0 +1,19 @@
+.site-table {
+    border: solid 1px rgb(70, 70, 70);
+    border-collapse: collapse;
+    border-spacing: 1px;
+    font-size: 12px;
+}
+.site-table tbody td {
+    border: solid 1px #DDEEEE;
+    color: #fff;
+    padding: 3px;
+    background-color: rgb(40, 40, 40);
+}
+.flatpickr-calendar {
+    transform: scale(.75);
+    animation: none !important;
+}
+.flatpickr-data-date {
+  border: 1px solid red !important;
+}

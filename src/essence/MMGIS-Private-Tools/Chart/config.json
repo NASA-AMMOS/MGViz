@@ -1,0 +1,10 @@
+{
+    "defaultIcon": "information",
+    "description": "Displays charts of selected data.",
+	"descriptionFull": "",
+    "hasVars": false,
+    "name": "Chart",
+    "paths": {
+        "ChartTool": "essence/MMGIS-Private-Tools/Chart/ChartTool"
+    }
+}
