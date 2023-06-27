@@ -677,6 +677,17 @@ setups.getBackendSetups(function (setups) {
     execFile('python3', ['private/eseses/neu.py', site, source, fil, type, neu], {maxBuffer: 1024 * 1024},
     function(error, stdout, stderr) { res.send(stdout); console.log(stderr);});
   });
+
+  //tacls
+  app.get('/api/eseses/tacls/:site/:source/:fil/:type/:neu', function(req, res) {
+    const site = encodeURIComponent(req.params.site);
+    const source = encodeURIComponent(req.params.source);
+    const fil = encodeURIComponent(req.params.fil);
+    const type = encodeURIComponent(req.params.type);
+    const neu = encodeURIComponent(req.params.neu);
+    execFile('python3', ['private/eseses/tacls.py', site, source, fil, type, neu], {maxBuffer: 1024 * 1024},
+    function(error, stdout, stderr) { res.send(stdout); console.log(stderr);});
+  });
   // TODO: Remove or move to Setup structure. Some are definitely still used.
 
   //utils getprofile

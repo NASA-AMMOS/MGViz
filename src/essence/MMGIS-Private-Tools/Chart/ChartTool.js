@@ -357,7 +357,7 @@ var ChartTool = {
         ToolController_.activeTool.site = selectedSite;
         var features = { properties: { site: selectedSite } };
         ToolController_.activeTool.use(features);
-        ToolController_.getTool('SearchTool').search([String(selectedSite)], 'Sites');
+        // ToolController_.getTool('SearchTool').search([String(selectedSite)], 'Sites');
       }
     });
     $('#siteSelect').on('change', function () {
@@ -837,7 +837,7 @@ var ChartTool = {
         usePreAllocated: true
       },
       exporting: {
-        libURL: '/scripts/external/Highcharts/modules',
+        libURL: '/Missions/MGViz/Modules',
         buttons: {
           contextButton: {
             menuItems: [
@@ -1152,6 +1152,26 @@ var ChartTool = {
               } else {
                 optionse.xAxis.plotLines = datae['plotlines'];
               }
+              // experimental tacls data
+              if (site == 'p058') {
+                console.log('Getting tacls data')
+                let sync_tacls = $.ajax({
+                  url: 'api/eseses/tacls/' + site + '/' + source + '/' + fil + '/' + type + '/e',
+                  dataType: 'json',
+                  async: false,
+                  success: function (data) {
+                    for (i in optionse.xAxis.plotLines) {
+                      data.push(optionse.xAxis.plotLines[i])
+                    }
+                    optionse.xAxis.plotLines = data;
+                    console.log(optionse.xAxis.plotLines);
+                  },
+                  error: function (jqXHR, textStatus, errorThrown) {
+                    console.log(errorThrown);
+                  }
+                })
+              }
+
             },
             error: function (jqXHR, textStatus, errorThrown) {
               optionse = null;
