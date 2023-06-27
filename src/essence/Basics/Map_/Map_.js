@@ -1560,7 +1560,10 @@ function clearOnMapClick(event) {
             }
 
             function checkBounds(layer) {
-                if (layer.feature.geometry.type.toLowerCase() === 'polygon') {
+                if (
+                    layer.feature &&
+                    layer.feature.geometry.type.toLowerCase() === 'polygon'
+                ) {
                     if (
                         L.leafletPip.pointInLayer(
                             [latlng.lng, latlng.lat],

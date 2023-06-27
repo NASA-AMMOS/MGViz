@@ -188,6 +188,15 @@ const L_ = {
             }
         } else console.log('Failure updating to new site')
     },
+    _onLayerToggleSubscriptions: {},
+    subscribeOnLayerToggle: function (fid, func) {
+        if (typeof func === 'function')
+            L_._onLayerToggleSubscriptions[fid] = func
+    },
+    unsubscribeOnLayerToggle: function (fid) {
+        if (L_._onLayerToggleSubscriptions[fid] != null)
+            delete L_._onLayerToggleSubscriptions[fid]
+    },
     //Takes in config layer obj
     //Toggles a layer on and off and accounts for sublayers
     //Takes in a config layer object
@@ -198,6 +207,10 @@ const L_ = {
         else on = false
 
         await L_.toggleLayerHelper(s, on)
+
+        Object.keys(L_._onLayerToggleSubscriptions).forEach((k) => {
+            L_._onLayerToggleSubscriptions[k](s.name, !on)
+        })
     },
     toggleLayerHelper: async function (s, on, ignoreToggleStateChange) {
         if (s.type !== 'header') {
@@ -913,6 +926,7 @@ const L_ = {
                 const savedOptions = JSON.parse(JSON.stringify(layer.options))
                 layer.setStyle({
                     color: color,
+                    stroke: color,
                 })
                 layer.options = savedOptions
             }
@@ -1528,6 +1542,7 @@ const L_ = {
                                 fillColor: layer.options.fillColor || fillColor,
                                 weight: parseInt(weight),
                                 color: layer.options.color || color,
+                                stroke: layer.options.color || color,
                             })
                         } catch (err) {
                             if (layer._icon) layer._icon.style.filter = ''
@@ -1593,6 +1608,7 @@ const L_ = {
                         if (typeof layer.setStyle === 'function')
                             layer.setStyle({
                                 color: color,
+                                stroke: color,
                             })
                         else if (layer._icon?.style) {
                             layer._icon.style.filter = 'unset'
@@ -2921,7 +2937,9 @@ function parseConfig(configData, urlOnLayers) {
 
                 //relative or full path?
                 let legendPath = d[i].legend
-                if (legendPath != undefined) {
+                if (d[i]?.variables?.legend) {
+                    L_.layers.data[d[i].name]._legend = d[i].variables.legend
+                } else if (legendPath != undefined) {
                     if (!F_.isUrlAbsolute(legendPath))
                         legendPath = L_.missionPath + legendPath
                     $.get(
