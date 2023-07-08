@@ -32,7 +32,7 @@ types = {'detrend': 'Detrend',
          'raw': 'Raw'}
 
 name = site + ': ' + str(sources[source]) + '/' + filters[fil] + '/' + types[ttype] + ' -'
-test_file = 'private/eseses/tacls/selections-iforest.json'
+test_file = 'private/eseses/tacls/' + site + '.json'
 if os.path.exists(test_file):
     with open(test_file, 'r') as f:
         tacls = json.load(f)
@@ -41,7 +41,7 @@ else:
     print(f'{test_file} does not exist')
     exit()
 
-plotline_dict = {"color": "blue", "dashStyle": "solid", "width": 1}
+plotline_dict = {"color": "blue", "dashStyle": "solid", "width": 2}
 plotlines = []
 
 for detection in tacls['detections']:

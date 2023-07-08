@@ -118,6 +118,7 @@ var ChartTool = {
       '<span style="padding-top:5px;padding-bottom:8px;float:left;font-size:11px;"><input type="checkbox" name="checkAppend" value="true" checked="checked"> Append Site Selection</span>',
       '<input id="textGroup" type="text" name="groupname" value="Default Group" align="center" style="color:#000000;text-align:center;width:143px;float:left;padding:3px;margin:3px;"/>',
       '<br><input id="inputImport" type="file" name="Import" style="display: none;"/>',
+      '<button id="buttonDrawBox" style="color:#000000;width:143px;padding:3px;margin:3px;">Draw Box</button>',
       '<button id="buttonImport" style="color:#000000;width:143px;padding:3px;margin:3px;">Load Saved Sites</button>',
       '<button id="buttonExport" style="color:#000000;width:143px;padding:3px;margin:3px;">Export Selected</button>',
       '<button id="buttonClear" style="color:#000000;width:143px;padding:3px;margin:3px;">Clear Selected</button>',
@@ -1153,7 +1154,7 @@ var ChartTool = {
                 optionse.xAxis.plotLines = datae['plotlines'];
               }
               // experimental tacls data
-              if (site == 'p058') {
+              if (['p058', 'p158'].includes(site)) {
                 console.log('Getting tacls data')
                 let sync_tacls = $.ajax({
                   url: 'api/eseses/tacls/' + site + '/' + source + '/' + fil + '/' + type + '/e',
