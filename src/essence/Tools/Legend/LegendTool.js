@@ -13,6 +13,11 @@ var LegendTool = {
     MMWebGISInterface: null,
     targetId: null,
     made: false,
+    displayOnStart: false,
+    initialize: function () {
+        //Get tool variables
+        this.displayOnStart = L_.getToolVars('legend')['displayOnStart']
+    },
     make: function (targetId) {
         this.targetId = targetId
         this.MMWebGISInterface = new interfaceWithMMWebGIS()
@@ -220,8 +225,11 @@ function drawLegends(tools, _legend, layerUUID, display_name, opacity) {
                 .style('height', '100%')
                 .style('line-height', '19px')
                 .style('font-size', '14px')
-                .style('overflow', 'auto')
+                .style('overflow', 'hidden')
                 .style('white-space', 'nowrap')
+                .style('max-width', '270px')
+                .style('text-overflow', 'ellipsis')
+                .attr('title', _legend[d].value)
                 .text(_legend[d].value)
         } else if (shape == 'continuous' || shape == 'discreet') {
             if (lastShape != shape) {
