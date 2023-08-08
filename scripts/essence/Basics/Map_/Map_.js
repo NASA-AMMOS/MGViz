@@ -1036,6 +1036,28 @@ define([
                 return L.circleMarker( latlong, leafletLayerObject.style ).setRadius( radius );
               }
               break;
+            case 'Historical Moderate':
+              leafletLayerObject = {
+                // Same style
+                style: layerObj.style,
+                onEachFeature: function ( feature, layer ) {
+                  //Add a mouseover event to the layer
+                  layer.on( 'mouseover', function() {
+                    CursorInfo.update( feature.properties.title + '<br>' +
+                      new Date(feature.properties.time), null, false);
+                  } );
+                  layer.on( 'mouseout', function() {
+                    CursorInfo.hide();
+                  } );
+                  layer.on( 'click', function() { // disable click
+                  } );
+                }
+              };
+              leafletLayerObject.pointToLayer = function( feature, latlong ) {
+                var radius = layerObj.radius * feature.properties.mag;
+                return L.circleMarker( latlong, leafletLayerObject.style ).setRadius( radius );
+              }
+              break;
             case 'Recent Significant':
               leafletLayerObject = {
                 // Same style
@@ -1395,6 +1417,23 @@ define([
                                   "fill": true,
                                   "fillColor": "#FF4400",
                                   "fillOpacity": 0.8,
+                                  "opacity": 1,
+                                  "radius": radius,
+                                  "weight": 1
+                                }
+                            }
+                    }
+                break;
+                case 'Historical Moderate':
+                    layerObj.style.vtLayer = {
+                        "sliced":
+                            function(properties, zoom) {
+                              var radius = 1 * properties.mag;
+                                return {
+                                  "color": "#000000",
+                                  "fill": true,
+                                  "fillColor": "#FF8C00",
+                                  "fillOpacity": 0.9,
                                   "opacity": 1,
                                   "radius": radius,
                                   "weight": 1
