@@ -676,7 +676,7 @@ async function makeLayer(layerObj, evenIfOff, forceGeoJSON) {
                     sites.push($(this).val());
                 });
             }
-            var pv = getLayersChosenNamePropVal(feature, layer)
+            var pv = L_.getLayersChosenNamePropVal(feature, layer)
             if (sites.includes(pv.site)) { // unselect previously selected
                 layer.setStyle({ fillColor: layerObj.style.fillColor});
                 layer.setRadius(layerObj.radius);
