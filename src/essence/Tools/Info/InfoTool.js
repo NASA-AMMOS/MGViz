@@ -3,9 +3,6 @@ import * as d3 from 'd3'
 import F_ from '../../Basics/Formulae_/Formulae_'
 import L_ from '../../Basics/Layers_/Layers_'
 import Map_ from '../../Basics/Map_/Map_'
-import Globe_ from '../../Basics/Globe_/Globe_'
-import Login from '../../Ancillary/Login/Login'
-import CursorInfo from '../../Ancillary/CursorInfo'
 import { Kinds } from '../../../pre/tools'
 import Dropy from '../../../external/Dropy/dropy'
 
@@ -223,7 +220,7 @@ var InfoTool = {
         Dropy.init($('#infoToolSelectedDropdown'), function (idx) {
             let e = JSON.parse(JSON.stringify(InfoTool.initialEvent))
             Kinds.use(
-                L_.layers.data[InfoTool.currentLayerName].kind,
+                L_.layers.data[InfoTool.currentLayerName]?.kind || null,
                 Map_,
                 InfoTool.info[idx],
                 InfoTool.featureLayers[idx] || InfoTool.currentLayer,
