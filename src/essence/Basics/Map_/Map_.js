@@ -1054,6 +1054,23 @@ async function makeLayer(layerObj, evenIfOff, forceGeoJSON) {
                         }
                 }
             break;
+            case 'Historical Moderate':
+                layerObj.style.vtLayer = {
+                    "sliced": 
+                        function(properties, zoom) {
+                          var radius = 1 * properties.mag;
+                            return {
+                              "color": "#000000",
+                              "fill": true,
+                              "fillColor": "#FF8C00",
+                              "fillOpacity": 0.9,
+                              "opacity": 1,
+                              "radius": radius,
+                              "weight": 1
+                            }
+                        }
+                }
+            break;
             case 'Recent Significant':
                 layerObj.style.vtLayer = {
                     "sliced": 
