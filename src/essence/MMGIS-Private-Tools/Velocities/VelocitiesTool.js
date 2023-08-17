@@ -15,8 +15,9 @@ import Map_ from '../../../../src/essence/Basics/Map_/Map_'
 var markup = [].join('\n');
 
 var VelocitiesTool = {
-  height: 'threefourths',
-  width: 230,
+  height: 0,
+  width: 200,
+  toolsDiv: null,
   source: 'comb',
   direction: 'horizontal',
   vectorExaggeration: 1,
@@ -52,16 +53,19 @@ var VelocitiesTool = {
         '<span style="font-size:10px">Exaggerate the size<br>of arrows.</span><br>',
         '<br>'].join('\n');
 
-    var tools = d3.select( '#tools' );
+    var tools = d3.select( '#toolPanel' );
     tools.selectAll( '*' ).remove();
+    tools.style('width', '200px')
     this.velocitiesDiv = tools.append( 'div' )
     .attr('id', 'velocitiesDiv')
-    .style( 'width', '230px' )
+    .style( 'width', '200px' )
     .style( 'position', 'relative' )
     .style( 'float', 'left')
     .style( 'padding', '20px')
-    .style( 'height', '100%')
+    .style( 'height', '50%')
     .html(velocityOptions);
+
+
     $("#selectVelocitySource").val(this.source);
     $("#selectDirection").val(this.direction);
     $("#selectDisplay").val(this.vectorFilter);
@@ -71,7 +75,6 @@ var VelocitiesTool = {
     var vname = L_.layers.nameToUUID['Velocities'][0];
     if (L_.layers.on[vname] ==  false) {
       L_.toggleLayer(L_.layers.data[vname]);
-      console.log(L_.layers.data[vname]);
     }
 
     $('#selectVelocitySource').on('change', function(e) {
@@ -79,7 +82,6 @@ var VelocitiesTool = {
       var velocitiesUrl = L_.layers.data[vname].url.substring(0, L_.layers.data[vname].url.lastIndexOf('/') + 1);
       ToolController_.activeTool.source = this.value;
       L_.layers.data[vname].url = velocitiesUrl + this.value;
-      console.log(L_.layers.data[vname]);
       Map_.refreshLayer( L_.layers.data[vname]);
     });
 
@@ -124,6 +126,7 @@ function interfaceWithMMGIS() {
   //Add a semantic container
   tools = tools.append( 'div' )
     .attr('class', 'center aligned ui padded grid' )
+    .style('overflow', 'auto')
     .style( 'height', '100%' );
   //Add the markup to tools or do it manually
   //tools.html( markup );
