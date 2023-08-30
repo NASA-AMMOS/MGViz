@@ -2,6 +2,7 @@ import sys
 import os
 import os.path
 import json
+import glob
 
 # Get args
 if str(sys.argv[1]).isalnum():   # site
@@ -32,7 +33,12 @@ types = {'detrend': 'Detrend',
          'raw': 'Raw'}
 
 name = site + ': ' + str(sources[source]) + '/' + filters[fil] + '/' + types[ttype] + ' -'
-test_file = 'private/eseses/tacls/' + site + '.json'
+# test_file = 'private/eseses/tacls/' + site + '.json'
+file_list = glob.glob('private/eseses/tacls/' + 
+                      site + '-WNAM_' + filters[fil].replace(' ', '_') + '_' + types[ttype] +
+                      'NeuTimeSeries_' + source + '_*.json')
+for f in sorted(file_list):
+    test_file = f
 if os.path.exists(test_file):
     with open(test_file, 'r') as f:
         tacls = json.load(f)
