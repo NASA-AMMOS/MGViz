@@ -47,6 +47,11 @@ var markup = [].join('\n');
 //   toolHeight = window.innerHeight - 55;
 // }
 
+var separatedDiv = d3.select('#splitscreens')
+separatedDiv.style('left', '800px')
+separatedDiv.style('width', 'calc(100% - 800px)')
+// 188px
+
 let distLineToMouse = null
 let distMousePoint = null
 const availableModes = ['segment', 'continuous', 'continuous_color']
@@ -62,7 +67,7 @@ let profileData = []
 var ChartTool = {
   clickedLatLngs: [],
   height: 0,
-  width: 188,
+  width: 800,
   features: null,
   toolsDiv: null,
   contentDiv: null,
@@ -202,11 +207,11 @@ var ChartTool = {
       .attr('id', 'chart3')
       .style('height', '280px')
       .style('padding', '6px');
-    if (window.innerHeight < 1255) {
-      this.height = window.innerHeight - 35;
-    } else {
-      this.height = 1200; //recommended min height to avoid scrolling
-    }
+    // if (window.innerHeight < 1255) {
+    //   this.height = window.innerHeight - 35;
+    // } else {
+    //   this.height = 1200; //recommended min height to avoid scrolling
+    // }
 
     // Hide info; show charts by default
     $('#showCharts').html('&#171; Hide Charts');
@@ -492,7 +497,7 @@ var ChartTool = {
       $('#infoDiv').hide();
       $('#showInfo').show();
       if ($('#contentDiv').is(":hidden")) {
-        // $('#toolPanel').width('0px');
+        $('#toolPanel').width('800px');
         ChartTool.destroy();
       } else {
         $('#hideInfo').html('&#171; Hide Site Info');
@@ -505,7 +510,7 @@ var ChartTool = {
       $('#infoDiv').show();
       $('#hideInfo').show();
       $('#showInfo').hide();
-      // $('#toolsWrapper').width('1080px');
+      $('#toolsWrapper').width('1080px');
       $('#toolPanel').width('1080px');
       $('#contentDiv').css('left', '466px');
       $('#contentDiv').css('width', '58%');

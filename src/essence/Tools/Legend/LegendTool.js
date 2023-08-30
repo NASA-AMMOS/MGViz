@@ -22,11 +22,13 @@ var LegendTool = {
         if (this.justification == 'right') {
             var toolController = d3.select('#toolcontroller_sepdiv')
             var toolContent = d3.select('#toolContentSeparated_Legend')
-            toolController.style('top', '110px')
+            toolController.style('top', '40px')
             toolController.style('left', null)
-            toolController.style('right', '5px')
+            toolController.style('right', '40px')
             toolContent.style('left', null)
             toolContent.style('right', '0px')
+
+            d3.select('#toolSeparated_Legend').style('top', '5px')
         }        
     },
     make: function (targetId) {

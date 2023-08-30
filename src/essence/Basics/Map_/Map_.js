@@ -1420,6 +1420,23 @@ function allLayersLoaded() {
                 document.dispatchEvent(_event)
             }
         }
+        // Turn on search if displayOnStart is true
+        if ('SearchTool' in ToolController_.toolModules) {
+            if (
+                ToolController_.toolModules['SearchTool'].displayOnStart == true
+            ) {
+                ToolController_.toolModules['SearchTool'].make(
+                    'toolContentSeparated_Search'
+                )
+                let _event = new CustomEvent('toggleSeparatedTool', {
+                    detail: {
+                        toggledToolName: 'SearchTool',
+                        visible: true,
+                    },
+                })
+                document.dispatchEvent(_event)
+            }
+        }
     }
 }
 
