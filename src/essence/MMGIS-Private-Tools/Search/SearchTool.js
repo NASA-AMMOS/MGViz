@@ -1,6 +1,7 @@
 import $ from 'jquery'
 import * as d3 from 'd3'
 import jqueryUI from '../../../external/JQuery/jquery-ui'
+import Dropy from '../../../external/Dropy/dropy'
 import '../../../external/JQuery/jquery.autocomplete'
 
 import F_ from '../../../../src/essence/Basics/Formulae_/Formulae_'
@@ -9,12 +10,14 @@ import ToolController_ from '../../../../src/essence/Basics/ToolController_/Tool
 import Viewer_ from '../../../../src/essence/Basics/Viewer_/Viewer_'
 import Map_ from '../../../../src/essence/Basics/Map_/Map_'
 
+import './Search.css'
+
 var markup = [
   "<div id='searchTool' class='flexbetween'>",
   "<div style='padding-left: 8px; padding-right: 8px; color: var(--color-mmgis); line-height: 43px;'>Search</div>",
   "<select id='searchToolType' style='height: 43px; width: 80px' class='ui dropdown short lower searchToolSelect'>",
   "</select>",
-    "<p style='padding-left: 8px; line-height: 43px;'>for</p>",
+    "<p style='padding-left: 8px; line-height: 43px;'><span id='searchType'>for</span></p>",
   "<div class='ui-widget' style='display: inline-block; padding: 9px 8px 8px 8px;'>",
     "<input id='auto_search' style='color: #111;'></input>",
   "</div>",
@@ -35,6 +38,8 @@ var markup = [
   made: false,
   vars: {},
   searchFields: {},
+  adjustedFieldUUIDs: [],
+  adjustedFieldNames: [],
   crossMarker: {},
   initialize: function () {
     //Get tool variables
@@ -59,7 +64,7 @@ var markup = [
   //    searchWithURLParams();
   //  }
   },
-  make: function( targetId ) {
+  make: function(targetId ) {
     this.targetId = targetId
     this.MMGISInterface = new interfaceWithMMGIS();
 
@@ -83,7 +88,7 @@ var markup = [
   }
 };
 
-function interfaceWithMMGIS() {
+function interfaceWithMMGIS(classSel) {
   this.separateFromMMGIS = function(){ separateFromMMGIS(); }
 
   this.vars = L_.getToolVars( 'search' );
@@ -94,6 +99,29 @@ function interfaceWithMMGIS() {
 
   SearchTool.lname = null;
   SearchTool.arrayToSearch = [];
+
+
+  SearchTool.adjustedFieldUUIDs = []
+  SearchTool.adjustedFieldNames = []
+  for (let l in SearchTool.searchFields) {
+      if (
+          L_.layers.data[l] &&
+          (L_.layers.data[l].type == 'vector' ||
+              L_.layers.data[l].type == 'vectortile')
+      ) {
+        SearchTool.adjustedFieldUUIDs.push(l)
+        SearchTool.adjustedFieldNames.push(L_.layers.data[l].display_name)
+      }
+  }
+
+  $('#SearchType').html(
+      Dropy.construct(SearchTool.adjustedFieldNames, 'Search Layer...', 0)
+  )
+  Dropy.init($('#SearchType'), function (idx) {
+      changeSearchField(SearchTool.adjustedFieldUUIDs[idx])
+  })
+  changeSearchField(SearchTool.adjustedFieldUUIDs[0])
+
 
   let tools = d3.select(
     SearchTool.targetId ? `#${SearchTool.targetId}` : '#toolPanel'
@@ -124,6 +152,9 @@ function interfaceWithMMGIS() {
   //   direction: 'upward'
   // } );
 
+  d3.select( '#searchToolType' ).on('change', function() {
+    changeSearchField(  d3.select(this).property('value') )
+  })
 
 
   d3.select("#searchToolGo").on("click", searchGo);
@@ -209,7 +240,7 @@ function changeSearchField( val ) {
       $('#searchType').html('for')
     } else if (val == 'Distance') {
       $('#auto_search').val('lat,lon (33,-117)');
-      $('#searchType').html("<input id='distance_search' style='color: #111; width:40px' title='Distance in km' value='25'></input> km of")
+      $('#searchType').html("<input id='distance_search' style='color: #111; width:40px' title='Distance in km' value='25'></input> km")
     }
 
     // $.getJSON( L_.missionPath + searchFile, function(data) {
@@ -249,7 +280,7 @@ function doWithSearch( doX, forceX, forceSTS, isURLSearch ) {
 
   // Create/clear crosshair for coordinate search
   var smallIcon = new L.Icon({
-    iconUrl: 'css/external/images/target.svg',
+    iconUrl: 'Missions/MGViz/Images/target.svg',
     iconSize: [30,30],
     iconAnchor: [15, 15]
   });
@@ -314,13 +345,13 @@ function doWithSearch( doX, forceX, forceSTS, isURLSearch ) {
           latlng = [lat,lng];
         }
         if (latlng.length >= 2) {
-          radiusInKm = 25; //default search
-          kmInLongitudeDegree = 111.320 * Math.cos( parseFloat(latlng[0]) / 180.0 * Math.PI);
+          var radiusInKm = 25; //default search
+          var kmInLongitudeDegree = 111.320 * Math.cos( parseFloat(latlng[0]) / 180.0 * Math.PI);
           if (isNaN($('#distance_search').val()) == false) {
             radiusInKm = parseFloat($('#distance_search').val());
           }
-          deltaLat = radiusInKm / 111.1;
-          deltaLong = radiusInKm / kmInLongitudeDegree;
+          var deltaLat = radiusInKm / 111.1;
+          var deltaLong = radiusInKm / kmInLongitudeDegree;
           // Search for sites within radius 
           if ((Math.abs(props.x - parseFloat(latlng[1])) <= deltaLong) && (Math.abs(props.y - parseFloat(latlng[0])) <= deltaLat)) {
             shouldSearch = true;
@@ -404,7 +435,7 @@ function doWithSearch( doX, forceX, forceSTS, isURLSearch ) {
       var coordinate = getMapZoomCoordinate([gotoLayers[gotoLayers.length-1]]);
       if (ToolController_.activeToolName == 'ChartTool' && $('#contentDiv').is(":hidden") == false) {
         // shift center slightly if Chart tool is visible
-        coordinate.longitude = coordinate.longitude - 1.75;
+        coordinate.longitude = coordinate.longitude // - 1.75;
       }
       Map_.map.setView([coordinate.latitude, coordinate.longitude], coordinate.zoomLevel);
     } else if (doX == 'goto') {
@@ -415,14 +446,14 @@ function doWithSearch( doX, forceX, forceSTS, isURLSearch ) {
         var coordinate = getMapZoomCoordinate(dummyLayers);
         if (ToolController_.activeToolName == 'ChartTool' && $('#contentDiv').is(":hidden") == false) {
           // shift center slightly if Chart tool is visible
-          coordinate.longitude = coordinate.longitude - 1.75;
+          coordinate.longitude = coordinate.longitude // - 1.75;
         }
         Map_.map.setView([coordinate.latitude, coordinate.longitude], coordinate.zoomLevel);
       }
     }
     // Add crosshair to map if coordinates were provided
     if (latlng.length > 0) {
-      crossMarker = L.marker(latlng, {
+      var crossMarker = L.marker(latlng, {
         icon: smallIcon
       }).addTo(Map_.map);
       crossMarker._icon.className = "leaflet-marker-icon leaflet-zoom-animated";
