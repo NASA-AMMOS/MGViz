@@ -5,10 +5,6 @@
 import $ from 'jquery'
 import * as d3 from 'd3'
 import * as Highcharts from 'highcharts'
-import * as jsPDF from 'jspdf'
-// import * as svg2pdf from 'svg2pdf'
-//import jsPDF from 'jsPDF'
-//import svg2pdf from 'svg2pdf'
 require('highcharts/modules/exporting')(Highcharts);
 require('highcharts/modules/export-data')(Highcharts);
 require('highcharts/modules/offline-exporting')(Highcharts);
@@ -26,8 +22,9 @@ import { mmgisAPI } from '../../../../src/essence/mmgisAPI/mmgisAPI.js'
 
 import './ChartTool.css'
 
-window.jsPDF = jsPDF.default;
-// window.svg2pdf = svg2pdf;
+window.jspdf = require("jspdf/dist/jspdf.es.min.js")
+window.svg2pdf = require("./external/svg2pdf.js")
+
 function SiteOptions(sites, source, fil, type) {
   this.sites = sites;
   this.source = source;
