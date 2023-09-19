@@ -9,12 +9,14 @@ import L_ from '../../../../src/essence/Basics/Layers_/Layers_'
 import ToolController_ from '../../../../src/essence/Basics/ToolController_/ToolController_'
 import Viewer_ from '../../../../src/essence/Basics/Viewer_/Viewer_'
 import Map_ from '../../../../src/essence/Basics/Map_/Map_'
+import ChartTool from '../../../../src/essence/MMGIS-Private-Tools/Chart/ChartTool'
 
 import './Search.css'
 
 var markup = [
   "<div id='searchTool' class='flexbetween'>",
-  "<div style='padding-left: 8px; padding-right: 8px; color: var(--color-mmgis); line-height: 43px;'>Search</div>",
+  "<div style='padding-left: 8px; padding-right: 8px; color: var(--color-mmgis); line-height: 43px;'>",
+    "<i id='searchPolygon' class='mdi mdi-vector-square mdi-18px' style='cursor: pointer;'></i></div>",
   "<select id='searchToolType' style='height: 43px; width: 80px' class='ui dropdown short lower searchToolSelect'>",
   "</select>",
     "<p style='padding-left: 8px; line-height: 43px;'><span id='searchType'>for</span></p>",
@@ -85,6 +87,9 @@ var markup = [
   },
   remove: function (forceX, forceSTS) {
     doWithSearch('remove', forceX, forceSTS, false);
+  },
+  searchPoly: function (coords) {
+    searchWithin(coords)
   }
 };
 
@@ -156,7 +161,7 @@ function interfaceWithMMGIS(classSel) {
     changeSearchField(  d3.select(this).property('value') )
   })
 
-
+  d3.select("#searchPolygon").on("click", searchPolygon);
   d3.select("#searchToolGo").on("click", searchGo);
   d3.select("#searchToolSelect").on("click", searchSelect);
   d3.select("#searchToolBoth").on("click", searchBoth);
@@ -260,6 +265,37 @@ function changeSearchField( val ) {
   }
 }
 
+function searchPolygon() {
+  ChartTool.clickedLatLngs = [];
+  ChartTool.drawing = new L.Draw.Polygon(Map_.map, {
+    showArea: true,
+    allowIntersection: false,
+    guidelineDistance: 15,
+    icon: new L.DivIcon({
+        iconSize: new L.Point(10, 10),
+        className: 'leaflet-div-icon leaflet-editing-icon',
+    }),
+    shapeOptions: {
+      color: 'red',
+      fillColor: '#f03',
+      fillOpacity: 0
+   },
+  })
+  ChartTool.drawing.enable()
+  Map_.map
+      .on('click', ChartTool.clickMap)
+      .on('draw:drawstop', ChartTool.drawStop)
+}
+
+function searchWithin( coords ) {
+  // TODO: make this search within polygon
+  var coord = coords[0].lat + ',' + coords[0].lon
+  $('#searchToolType').val('Distance')
+  $('#auto_search').val(coord)
+  console.log(coord)
+  doWithSearch("both", "false", "false", false)
+}
+
 function searchGo() {
   doWithSearch("goto", "false", "false", false);
 }
@@ -269,6 +305,7 @@ function searchSelect() {
 function searchBoth() {
   doWithSearch("both", "false", "false", false);
 }
+
 //doX is either "goto", "select" or "both"
 //forceX overrides searchbar entry, "false" for default
 //forceSTS overrides dropdown, "false" for default

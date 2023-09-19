@@ -21,7 +21,6 @@ import Viewer_ from '../../../../src/essence/Basics/Viewer_/Viewer_'
 import Map_ from '../../../../src/essence/Basics/Map_/Map_'
 import Globe_ from '../../../../src/essence/Basics/Globe_/Globe_'
 import CursorInfo from '../../Ancillary/CursorInfo'
-import Search from '../../../../src/essence/Ancillary/Search.js'
 import Formulae_ from '../../../../src/essence/Basics/Formulae_/Formulae_.js'
 import { mmgisAPI } from '../../../../src/essence/mmgisAPI/mmgisAPI.js'
 
@@ -65,6 +64,7 @@ let profileData = []
 
 
 var ChartTool = {
+  drawing: null,
   clickedLatLngs: [],
   height: 0,
   width: 800,
@@ -137,7 +137,7 @@ var ChartTool = {
       '<span style="padding-top:5px;padding-bottom:8px;float:left;font-size:11px;"><input type="checkbox" name="checkAppend" value="true" checked="checked"> Append Site Selection</span>',
       '<input id="textGroup" type="text" name="groupname" value="Default Group" align="center" style="color:#000000;text-align:center;width:143px;float:left;padding:3px;margin:3px;"/>',
       '<br><input id="inputImport" type="file" name="Import" style="display: none;"/>',
-      '<button id="buttonDrawBox" style="color:#000000;width:143px;padding:3px;margin:3px;">Draw Box</button>',
+      '<button id="buttonDrawBox" style="color:#000000;width:143px;padding:3px;margin:3px;">Polygon Select</button>',
       '<button id="buttonImport" style="color:#000000;width:143px;padding:3px;margin:3px;">Load Saved Sites</button>',
       '<button id="buttonExport" style="color:#000000;width:143px;padding:3px;margin:3px;">Export Selected</button>',
       '<button id="buttonClear" style="color:#000000;width:143px;padding:3px;margin:3px;">Clear Selected</button>',
@@ -412,10 +412,24 @@ var ChartTool = {
     });
     $('#buttonDrawBox').click(function () {
       ChartTool.clickedLatLngs = [];
+      ChartTool.drawing = new L.Draw.Polygon(Map_.map, {
+        showArea: true,
+        allowIntersection: false,
+        guidelineDistance: 15,
+        icon: new L.DivIcon({
+            iconSize: new L.Point(10, 10),
+            className: 'leaflet-div-icon leaflet-editing-icon',
+        }),
+        shapeOptions: {
+          color: 'red',
+          fillColor: '#f03',
+          fillOpacity: 0
+       },
+      })
+      ChartTool.drawing.enable()
       Map_.map
           .on('click', ChartTool.clickMap)
-          .on('mousemove', ChartTool.moveMap)
-          .on('mouseout', ChartTool.mouseOutMap)
+          .on('draw:drawstop', ChartTool.drawStop)
     });
     $('#buttonImport').click(function () {
       $('#inputImport').trigger('click');
@@ -1787,69 +1801,19 @@ var ChartTool = {
     return '';
   },
   clickMap: function (e) {
-    if (mode === 'segment' && ChartTool.clickedLatLngs.length >= 1) {
-        ChartTool.clickedLatLngs = []
-        profileData = []
-        Map_.map
-            .off('click', ChartTool.clickMap)
-            .off('mousemove', ChartTool.moveMap)
-            .off('mouseout', ChartTool.mouseOutMap)
-        Map_.rmNotNull(distLineToMouse)
-        Map_.rmNotNull(distMousePoint)
-    }
     CursorInfo.hide()
-
-    var xy = { x: e.latlng.lat, y: e.latlng.lng }
+    var xy = { lat: e.latlng.lat, lon: e.latlng.lng }
     ChartTool.clickedLatLngs.push(xy)
-    console.log(ChartTool.clickedLatLngs)
-
   },
-  moveMap: function (e) {
-      if (ChartTool.clickedLatLngs.length === 1)
-        makeGhostLine(e.latlng.lng, e.latlng.lat)
-  },
-  mouseOutMap: function (e) {
-      if (distLineToMouse != null) {
-          Map_.map.removeLayer(distLineToMouse)
-          Globe_.litho.removeLayer('_measure')
-          distLineToMouse = null
-      }
-      if (distMousePoint != null) {
-          Map_.map.removeLayer(distMousePoint)
-          distMousePoint = null
-      }
-      CursorInfo.hide()
-  },
-};
-
-function makeGhostLine(lng, lat) {
-  if (ChartTool.clickedLatLngs.length > 0) {
-      if (distLineToMouse != null) {
-          Map_.map.removeLayer(distLineToMouse)
-          distLineToMouse = null
-      }
-      if (distMousePoint != null) {
-          Map_.map.removeLayer(distMousePoint)
-          distMousePoint = null
-      }
-
-      var i1 = ChartTool.clickedLatLngs.length - 1
-      var endDC = ChartTool.clickedLatLngs[i1]
-
-      distLineToMouse = new L.rectangle(
-          [new L.LatLng(endDC['x'], endDC['y']), { lat: lat, lng: lng }],
-          {
-            shapeOptions: {
-              color: '#bada55'
-            }
-          }
-      ).addTo(Map_.map)
-      distMousePoint = new L.circleMarker(
-          { lat: lat, lng: lng },
-          { className: 'noPointerEvents', color: 'red' }
-      ).setRadius(3)
+  drawStop: function (e) {
+    if (ChartTool.clickedLatLngs.length > 0) {
+      console.log(ChartTool.clickedLatLngs)
+      ToolController_.getTool('SearchTool').searchPoly(ChartTool.clickedLatLngs, 'Distance');
+    }
+    ChartTool.clickedLatLngs = []
+    ChartTool.drawing.disable()
   }
-}
+};
 
 //
 function interfaceWithMMGIS() {
