@@ -921,7 +921,7 @@ var ChartTool = {
           fontSize: '10px'
         },
         verticalAlign: 'bottom',
-        y: -16
+        y: -12
       },
       credits: {
         enabled: false
@@ -1510,7 +1510,7 @@ var ChartTool = {
                 marginBottom: legend1Enabled ? 90 : 150
               },
               subtitle: {
-                y: legend1Enabled ? -16 : -75
+                y: legend1Enabled ? -12 : -75
               },
               legend: {
                 enabled: legend1Enabled ? false : true,
@@ -1619,7 +1619,7 @@ var ChartTool = {
                 marginBottom: legend2Enabled ? 90 : 150
               },
               subtitle: {
-                y: legend2Enabled ? -16 : -75
+                y: legend2Enabled ? -12 : -75
               },
               legend: {
                 enabled: legend2Enabled ? false : true,
@@ -1728,7 +1728,7 @@ var ChartTool = {
                 marginBottom: legend3Enabled ? 90 : 150
               },
               subtitle: {
-                y: legend3Enabled ? -16 : -75
+                y: legend3Enabled ? -12 : -75
               },
               legend: {
                 enabled: legend3Enabled ? false : true,
