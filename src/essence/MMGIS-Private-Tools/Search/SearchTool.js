@@ -186,8 +186,8 @@ function interfaceWithMMGIS(classSel) {
   });
   
   // Clear out any existing crosshairs
-  if (typeof crossMarker !== 'undefined') {
-    Map_.map.removeLayer(crossMarker);
+  if (typeof SearchTool.crossMarker !== 'undefined') {
+    Map_.map.removeLayer(SearchTool.crossMarker);
   };
 
   function separateFromMMGIS() {
@@ -321,8 +321,8 @@ function doWithSearch( doX, forceX, forceSTS, isURLSearch ) {
     iconSize: [30,30],
     iconAnchor: [15, 15]
   });
-  if (typeof crossMarker !== 'undefined') {
-    Map_.map.removeLayer(crossMarker);
+  if (typeof SearchTool.crossMarker !== 'undefined') {
+    Map_.map.removeLayer(SearchTool.crossMarker);
   };
 
   if(forceX == "false" && !isURLSearch){
@@ -490,10 +490,10 @@ function doWithSearch( doX, forceX, forceSTS, isURLSearch ) {
     }
     // Add crosshair to map if coordinates were provided
     if (latlng.length > 0) {
-      var crossMarker = L.marker(latlng, {
+      SearchTool.crossMarker = L.marker(latlng, {
         icon: smallIcon
       }).addTo(Map_.map);
-      crossMarker._icon.className = "leaflet-marker-icon leaflet-zoom-animated";
+      SearchTool.crossMarker._icon.className = "leaflet-marker-icon leaflet-zoom-animated";
     }
   }
 }
