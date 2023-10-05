@@ -3,6 +3,7 @@ import * as d3 from 'd3'
 import jqueryUI from '../../../external/JQuery/jquery-ui'
 import Dropy from '../../../external/Dropy/dropy'
 import '../../../external/JQuery/jquery.autocomplete'
+import * as turf from '@turf/turf'
 
 import F_ from '../../../../src/essence/Basics/Formulae_/Formulae_'
 import L_ from '../../../../src/essence/Basics/Layers_/Layers_'
@@ -288,12 +289,66 @@ function searchPolygon() {
 }
 
 function searchWithin( coords ) {
-  // TODO: make this search within polygon
-  var coord = coords[0].lat + ',' + coords[0].lon
-  $('#searchToolType').val('Distance')
-  $('#auto_search').val(coord)
-  console.log(coord)
-  doWithSearch("both", "false", "false", false)
+
+  // Turf expects last coord to match first
+  coords.push(coords[0])
+
+  // Initialize an empty 2D array
+  var multiArray = [];
+
+  // Loop through the data and populate the 2D array
+  for (var i = 0; i < coords.length; i++) {
+      var lat = coords[i].lat;
+      var lon = coords[i].lon;
+      multiArray.push([lat, lon]);
+  }
+
+  var searchWithin = turf.polygon([multiArray]);
+  var sites = L_.layers.nameToUUID[SearchTool.lname];
+  var markers = L_.layers.layer[sites]
+  var latlngs = []
+
+  markers.eachLayer(function(layer) {
+    latlngs.push([layer.feature.properties.y, layer.feature.properties.x])
+  });
+  var points = turf.points(latlngs);
+  var ptsWithin = turf.pointsWithinPolygon(points, searchWithin);
+
+  var foundCoords = [];
+  // Iterate through the features and extract coordinates
+  ptsWithin.features.forEach(function(feature) {
+      if (feature.geometry && feature.geometry.coordinates) {
+        foundCoords.push(feature.geometry.coordinates.toString());
+      }
+  });
+
+  var selectLayers = []
+  markers.eachLayer(function(layer) {
+    var coord = layer.feature.properties.y + ',' + layer.feature.properties.x
+    if (foundCoords.includes(coord)) {
+      selectLayers.push(layer)
+    }
+  });
+
+  if( selectLayers.length > 1 ){
+    var noreset;
+    for( var i = 0; i < selectLayers.length; i++ ){
+      selectLayers[i].setStyle({fillColor: 'magenta'});
+      selectLayers[i].setRadius(9);
+      selectLayers[i].bringToFront();
+      if (ToolController_.activeToolName != 'ChartTool') {
+        var prevActive = $( '#toolcontroller_incdiv .active' );
+        prevActive.removeClass( 'active' ).css( { 'color': ToolController_.defaultColor, 'background': 'none' } );
+        prevActive.parent().css( { 'background': 'none' } );
+        var newActive = $( '#toolcontroller_incdiv #ChartTool' );
+        newActive.addClass( 'active' ).css( { 'color': ToolController_.activeColor } );
+        newActive.parent().css( { 'background': ToolController_.activeBG } );
+        ToolController_.makeTool( 'ChartTool' );
+      }
+      ToolController_.getTool( 'ChartTool' ).use( selectLayers[i].feature, ((i == 0) ? noreset : true) );
+    }
+  }
+
 }
 
 function searchGo() {

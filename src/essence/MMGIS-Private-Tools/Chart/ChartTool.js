@@ -463,7 +463,7 @@ var ChartTool = {
       var json = JSON.stringify(data),
         blob = new Blob([json], { type: "octet/stream" }),
         url = window.URL.createObjectURL(blob);
-      a = document.getElementById('exportData');
+      var a = document.getElementById('exportData');
       a.href = url;
       a.download = $('#textGroup').val() + '.json';
       a.click();
