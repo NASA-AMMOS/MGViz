@@ -1798,13 +1798,15 @@ var ChartTool = {
     return '';
   },
   clickMap: function (e) {
+    if (ChartTool.drawing._errorShown == true) {
+      return
+    }
     CursorInfo.hide()
-    var xy = { lat: e.latlng.lat, lon: e.latlng.lng }
+    var xy = { lat: ChartTool.drawing._currentLatLng.lat, lon: ChartTool.drawing._currentLatLng.lng }
     ChartTool.clickedLatLngs.push(xy)
   },
   drawStop: function (e) {
     if (ChartTool.clickedLatLngs.length > 0) {
-      console.log(ChartTool.clickedLatLngs)
       ToolController_.getTool('SearchTool').searchPoly(ChartTool.clickedLatLngs, 'Distance');
     }
     ChartTool.clickedLatLngs = []
