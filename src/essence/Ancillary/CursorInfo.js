@@ -36,6 +36,7 @@ var CursorInfo = {
             .style('display', 'none')
 
         d3.select('body').on('mousemove', cursorInfoMouseMove)
+        d3.select('body').on('click', cursorClick)
     },
     //Use jquery to fade in out then set display to none and clear inner html
     hide: function (immediate) {
@@ -124,6 +125,19 @@ function cursorInfoMouseMove() {
     CursorInfo.cursorInfoDiv
         .style('left', d3.mouse(this)[0] + 18 + 'px')
         .style('top', d3.mouse(this)[1] + 10 + 'px')
+}
+
+async function cursorClick() {
+    // Copy earthquake info to clipboard
+    var text = CursorInfo.cursorInfoDiv.html().replaceAll('<br>', '\n')
+    if (text[0] == 'M') {
+        try {
+            await navigator.clipboard.writeText(text);
+            alert('Content copied to clipboard:\n' + text);
+        } catch (err) {
+            alert('Failed to copy: ', err);
+        }
+    }
 }
 
 export default CursorInfo
