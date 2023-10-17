@@ -288,8 +288,8 @@ var ChartTool = {
       } else {
         var north = 'x';
       }
-      var siteOptions = new SiteOptions($('#siteSelect').val(), source, fil, type);
-      ToolController_.activeTool.loadChart(siteOptions, [north, east, up], coseismics, offset, stackOn);
+      var siteOptions = new SiteOptions($('#siteSelect').val(), ChartTool.source, ChartTool.fil, ChartTool.type);
+      ToolController_.activeTool.loadChart(siteOptions, [north, ChartTool.east, ChartTool.up], ChartTool.coseismics, ChartTool.offset, ChartTool.stackOn);
     });
     $('input[name=checkeast]').click(function () {
       if (this.checked) {
@@ -297,8 +297,8 @@ var ChartTool = {
       } else {
         var east = 'x';
       }
-      var siteOptions = new SiteOptions($('#siteSelect').val(), source, fil, type);
-      ToolController_.activeTool.loadChart(siteOptions, [north, east, up], coseismics, offset, stackOn);
+      var siteOptions = new SiteOptions($('#siteSelect').val(), ChartTool.source, ChartTool.fil, ChartTool.type);
+      ToolController_.activeTool.loadChart(siteOptions, [ChartTool.north, east, ChartTool.up], ChartTool.coseismics, ChartTool.offset, ChartTool.stackOn);
     });
     $('input[name=checkup]').click(function () {
       if (this.checked) {
@@ -306,14 +306,14 @@ var ChartTool = {
       } else {
         var up = 'x';
       }
-      var siteOptions = new SiteOptions($('#siteSelect').val(), source, fil, type);
-      ToolController_.activeTool.loadChart(siteOptions, [north, east, up], coseismics, offset, stackOn);
+      var siteOptions = new SiteOptions($('#siteSelect').val(), ChartTool.source, ChartTool.fil, ChartTool.type);
+      ToolController_.activeTool.loadChart(siteOptions, [ChartTool.north, ChartTool.east, up], ChartTool.coseismics, ChartTool.offset, ChartTool.stackOn);
     });
     $('input[name=checkOffsets]').click(function () {
       var coseismics = this.checked;
       ToolController_.activeTool.coseismics = this.checked;
-      var siteOptions = new SiteOptions($('#siteSelect').val(), source, fil, type);
-      ToolController_.activeTool.loadChart(siteOptions, [north, east, up], coseismics, offset, stackOn);
+      var siteOptions = new SiteOptions($('#siteSelect').val(), ChartTool.source, ChartTool.fil, ChartTool.type);
+      ToolController_.activeTool.loadChart(siteOptions, [ChartTool.north, ChartTool.east, ChartTool.up], coseismics, ChartTool.offset, ChartTool.stackOn);
     });
     $('input[name=checkStack]').click(function () {
       var stackOn = this.checked;
@@ -322,18 +322,18 @@ var ChartTool = {
         ToolController_.activeTool.siteOptionsList = [];
       }
       if (typeof source !== "undefined") {
-        var siteOptions = new SiteOptions($('#siteSelect').val(), source, fil, type);
-        ToolController_.activeTool.loadChart(siteOptions, [north, east, up], coseismics, offset, stackOn);
+        var siteOptions = new SiteOptions($('#siteSelect').val(), ChartTool.source, ChartTool.fil, ChartTool.type);
+        ToolController_.activeTool.loadChart(siteOptions, [ChartTool.north, ChartTool.east, ChartTool.up], ChartTool.coseismics, ChartTool.offset, stackOn);
       }
     });
     $('input[name=checkSeparation]').click(function () {
       if (this.checked) {
         var offset = $('#textOffset').val();
       } else {
-        var ffset = 0;
+        var offset = 0;
       }
-      var siteOptions = new SiteOptions($('#siteSelect').val(), source, fil, type);
-      ToolController_.activeTool.loadChart(siteOptions, [north, east, up], coseismics, offset, stackOn);
+      var siteOptions = new SiteOptions($('#siteSelect').val(), ChartTool.source, ChartTool.fil, ChartTool.type);
+      ToolController_.activeTool.loadChart(siteOptions, [ChartTool.north, ChartTool.east, ChartTool.up], ChartTool.coseismics, offset, ChartTool.stackOn);
     });
     $('input[name=checkAppend]').click(function () {
       if (this.checked) {
@@ -352,8 +352,8 @@ var ChartTool = {
       } else {
         offset = 0;
       }
-      siteOptions = new SiteOptions($('#siteSelect').val(), source, fil, type);
-      ToolController_.activeTool.loadChart(siteOptions, [north, east, up], coseismics, offset, stackOn);
+      siteOptions = new SiteOptions($('#siteSelect').val(), ChartTool.source, ChartTool.fil, ChartTool.type);
+      ToolController_.activeTool.loadChart(siteOptions, [ChartTool.north, ChartTool.east, ChartTool.up], ChartTool.coseismics, offset, ChartTool.stackOn);
     });
     $('#buttonRemove').click(function () {
       ToolController_.getTool('SearchTool').remove($('#siteSelect').val(), 'Sites');
@@ -361,8 +361,8 @@ var ChartTool = {
       $('#siteSelect option:selected').remove();
       ToolController_.activeTool.siteOptionsList = [];
       $("#siteSelect").val($("#siteSelect option:first").val());
-      siteOptions = new SiteOptions($('#siteSelect').val(), source, fil, type);
-      ToolController_.activeTool.loadChart(siteOptions, [north, east, up], coseismics, offset, stackOn);
+      var siteOptions = new SiteOptions($('#siteSelect').val(), ChartTool.source, ChartTool.fil, ChartTool.type);
+      ToolController_.activeTool.loadChart(siteOptions, [ChartTool.north, ChartTool.east, ChartTool.up], ChartTool.coseismics, ChartTool.offset, ChartTool.stackOn);
     });
     $('#siteSource').click(function () {
       var selectedSites = $('#siteSource').val().toString().split(',')
@@ -487,6 +487,9 @@ var ChartTool = {
     $('#showCharts').click(function () {
       if ($('#contentDiv').is(":hidden")) {
         $('#showCharts').html('&#171; Hide Charts');
+        // $('#toolsWrapper').width('1080px');
+        d3.select('#splitscreens').style('left', '800px')
+        d3.select('#splitscreens').style('width', 'calc(100% - 800px)')
         $('#toolPanel').width('1080px');
         $('#contentDiv').show();
         $('#optionsDiv').show();
@@ -496,6 +499,9 @@ var ChartTool = {
         }
       } else {
         $('#showCharts').html('Show Charts &#187;');
+        // $('#toolsWrapper').width('280px');
+        d3.select('#splitscreens').style('left', '280px')
+        d3.select('#splitscreens').style('width', 'calc(100% - 280px)')
         $('#toolPanel').width('280px');
         $('#contentDiv').hide();
         $('#optionsDiv').hide();
@@ -503,13 +509,14 @@ var ChartTool = {
         ToolController_.activeTool.stackOn = false;
         ToolController_.activeTool.siteOptionsList = [];
       }
+      window.dispatchEvent(new Event('resize'));
     });
     $('#hideInfo').click(function () {
       $('#infoDiv').hide();
       $('#showInfo').show();
       if ($('#contentDiv').is(":hidden")) {
-        $('#toolPanel').width('800px');
-        ChartTool.destroy();
+        $('#toolPanel').width('0px');
+        ToolController_.closeActiveTool();
       } else {
         $('#hideInfo').html('&#171; Hide Site Info');
         $('#toolPanel').width('800px');
@@ -765,7 +772,7 @@ var ChartTool = {
       }
     }
 
-    if (sites == null) {
+    if (sites == null || sites.length == 0) {
       $('#chart0').empty();
       $('#chart1').empty();
       $('#chart2').empty();
@@ -1792,7 +1799,6 @@ var ChartTool = {
     ToolController_.activeTool.siteOptionsList = [];
     L_.resetLayerFills();
     this.MMGISInterface.separateFromMMGIS();
-    // window.removeEventListener('resize', resizeChartTool);
   },
   getUrlString: function () {
     return '';

@@ -463,9 +463,8 @@ function doWithSearch( doX, forceX, forceSTS, isURLSearch ) {
           gotoLayers.push(layer);
         }
         if( doX == 'remove') {
-          var lb = L_.layersNamed['Sites'];
-          layer.setStyle({ fillColor: L_.layersNamed['Sites'].style.fillColor});
-          layer.setRadius(L_.layersNamed['Sites'].radius);
+          layer.setStyle({ fillColor: '#00FFFF'});
+          layer.setRadius(layer.defaultOptions.radius);
         }
       }
     });
