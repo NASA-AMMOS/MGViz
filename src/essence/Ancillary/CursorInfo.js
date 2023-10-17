@@ -135,7 +135,7 @@ async function cursorClick() {
             await navigator.clipboard.writeText(text);
             alert('Content copied to clipboard:\n' + text);
         } catch (err) {
-            alert('Failed to copy: ', err);
+            alert(text);
         }
     }
 }
