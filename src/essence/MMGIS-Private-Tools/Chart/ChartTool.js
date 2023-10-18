@@ -1058,6 +1058,7 @@ var ChartTool = {
         optionsu.series.push($.extend(true, {}, options.series[3]));
       }
       if (load && site != null) {
+        const Chart1 = Highcharts.charts.find(chart => chart && chart.renderTo.id === 'chart1');
         if (typeof Chart1 !== 'undefined') {
           Chart1.showLoading();
         } else {
@@ -1137,6 +1138,7 @@ var ChartTool = {
             }
           });
         }
+        const Chart2 = Highcharts.charts.find(chart => chart && chart.renderTo.id === 'chart2');
         if (typeof Chart2 !== 'undefined') {
           Chart2.showLoading();
         } else {
@@ -1237,6 +1239,7 @@ var ChartTool = {
           });
         }
         if (neu.includes('u')) {
+          const Chart3 = Highcharts.charts.find(chart => chart && chart.renderTo.id === 'chart3');
           if (typeof Chart3 !== 'undefined') {
             Chart3.showLoading();
           } else {
