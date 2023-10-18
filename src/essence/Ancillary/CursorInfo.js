@@ -132,10 +132,10 @@ async function cursorClick() {
     var text = CursorInfo.cursorInfoDiv.html().replaceAll('<br>', '\n')
     if (text[0] == 'M') {
         try {
-            await navigator.clipboard.writeText(text);
-            alert('Content copied to clipboard:\n' + text);
+            await navigator.clipboard.writeText(text)
+            alert('Content copied to clipboard:\n' + text)
         } catch (err) {
-            alert(text);
+            alert(text)
         }
     }
 }

@@ -1295,7 +1295,8 @@ async function makeLayer(layerObj, evenIfOff, forceGeoJSON) {
                         CursorInfo.update(
                             e.layer.properties['title'] + '<br>' +
                             'Depth: ' + e.layer.properties['depth'] + ' km' + '<br>' +
-                            new Date(e.layer.properties.time).toUTCString(),
+                            new Date(e.layer.properties.time).toUTCString() + '<br>' +
+                            $('#mouseLngLat').text(),
                             null,
                             false,
                             null,
