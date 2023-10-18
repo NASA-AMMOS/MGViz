@@ -749,7 +749,7 @@ var ChartTool = {
       else {
         if (this.siteOptionsList.length > 1) {
           // Don't repeat same site options
-          existingOptions = false;
+          var existingOptions = false;
           for (var i = 0; i < this.siteOptionsList.length; i++) {
             if (siteOptions.toString() == this.siteOptionsList[i].toString()) {
               existingOptions = true;
@@ -824,8 +824,8 @@ var ChartTool = {
       var chartHeight = ((this.height - 190) / 3);
     }
     // don't exceed minimum height
-    if (chartHeight < 320) {
-      chartHeight = 320;
+    if (chartHeight < 340) {
+      chartHeight = 340;
     }
     if (neu.includes('n')) {
       $('#chart1').height(chartHeight);
@@ -928,7 +928,7 @@ var ChartTool = {
           fontSize: '10px'
         },
         verticalAlign: 'bottom',
-        y: -12
+        y: 15
       },
       credits: {
         enabled: false
@@ -976,14 +976,14 @@ var ChartTool = {
           enabled: false
         },
         legendIndex: -1
-      }, {
-        name: 'TACLS',
-        color: 'blue',
-        animation: false,
-        marker: {
-          enabled: false
-        },
-        legendIndex: 0
+      // }, {
+      //   name: 'TACLS',
+      //   color: 'blue',
+      //   animation: false,
+      //   marker: {
+      //     enabled: false
+      //   },
+      //   legendIndex: 20
       }, {
         type: 'line',
         zIndex: 99,
@@ -1099,12 +1099,12 @@ var ChartTool = {
               if (this.idx == 0) {
                 optionsn.title.text = datan['site'] + '<br>North';
                 optionsn.subtitle.text = 'slope ' + datan['slope'];
-                optionsn.series[3].name = datan['name'] + ' model trace';
-                optionsn.series[4].name = datan['name'] + ' points';
-                optionsn.series[3].data = datan['trace'];
-                optionsn.series[4].data = datan['data'];
-                optionsn.series[3].legendIndex = 4;
-                optionsn.series[4].legendIndex = 3;
+                optionsn.series[2].name = datan['name'] + ' model trace';
+                optionsn.series[3].name = datan['name'] + ' points';
+                optionsn.series[2].data = datan['trace'];
+                optionsn.series[3].data = datan['data'];
+                optionsn.series[2].legendIndex = 3;
+                optionsn.series[3].legendIndex = 2;
               } else {
                 optionsn.subtitle.text = optionsn.subtitle.text + '<br>slope ' + datan['slope'];
                 let offsetTracen = datan['trace'].map(n => [n[0], n[1] == null ? n[1] : (n[1] + offset * (this.idx - errorsn))]);
@@ -1178,12 +1178,12 @@ var ChartTool = {
               if (this.idx == 0) {
                 optionse.title.text = datae['site'] + '<br>East';
                 optionse.subtitle.text = 'slope ' + datae['slope'];
-                optionse.series[3].name = datae['name'] + ' model trace';
-                optionse.series[4].name = datae['name'] + ' points';
-                optionse.series[3].data = datae['trace'];
-                optionse.series[4].data = datae['data'];
-                optionse.series[3].legendIndex = 4;
-                optionse.series[4].legendIndex = 3;
+                optionse.series[2].name = datae['name'] + ' model trace';
+                optionse.series[3].name = datae['name'] + ' points';
+                optionse.series[2].data = datae['trace'];
+                optionse.series[3].data = datae['data'];
+                optionse.series[2].legendIndex = 3;
+                optionse.series[3].legendIndex = 2;
               } else {
                 optionse.subtitle.text = optionse.subtitle.text + '<br>slope ' + datae['slope'];
                 let offsetTracee = datae['trace'].map(n => [n[0], n[1] == null ? n[1] : (n[1] + offset * (this.idx - errorse))]);
@@ -1277,12 +1277,12 @@ var ChartTool = {
               if (this.idx == 0) {
                 optionsu.title.text = datau['site'] + '<br>Up';
                 optionsu.subtitle.text = 'slope ' + datau['slope'];
-                optionsu.series[3].name = datau['name'] + ' model trace';
-                optionsu.series[4].name = datau['name'] + ' points';
-                optionsu.series[3].data = datau['trace'];
-                optionsu.series[4].data = datau['data'];
-                optionsu.series[3].legendIndex = 4;
-                optionsu.series[4].legendIndex = 3;
+                optionsu.series[2].name = datau['name'] + ' model trace';
+                optionsu.series[3].name = datau['name'] + ' points';
+                optionsu.series[2].data = datau['trace'];
+                optionsu.series[3].data = datau['data'];
+                optionsu.series[2].legendIndex = 3;
+                optionsu.series[3].legendIndex = 2;
               } else {
                 optionsu.subtitle.text = optionsu.subtitle.text + '<br>slope ' + datau['slope'];
                 let offsetTraceu = datau['trace'].map(n => [n[0], n[1] == null ? n[1] : (n[1] + offset * (this.idx - errorsu))]);
@@ -1370,10 +1370,10 @@ var ChartTool = {
                   }
                 }
                 sites = []
-                var Chart0 = Highcharts.chart('chart0', options);
-                // const Chart0 = Highcharts.charts.find(chart => chart && chart.renderTo.id === 'chart0');
+                // var Chart0 = Highcharts.chart('chart0', options);
+                const Chart0 = Highcharts.charts.find(chart => chart && chart.renderTo.id === 'chart0');
                 // This catches multiple sites that are not stackOn
-                if ($('#chart0').highcharts().series.length > 4 && ToolController_.activeTool.siteOptionsList.length == 0) {
+                if (Chart0.series.length > 4 && ToolController_.activeTool.siteOptionsList.length == 0) {
                   for (var j = ToolController_.activeTool.sites.length - 1; j > -1; j--) {
                     if (!sname.includes(ToolController_.activeTool.sites[j])) {
                       sites.push(ToolController_.activeTool.sites[j])
@@ -1386,7 +1386,7 @@ var ChartTool = {
                   $('#chart1').hide();
                   $('#chart2').hide();
                   $('#chart3').hide();
-                  var Chart0 = $('#chart0').highcharts();
+                  // var Chart0 = $('#chart0').highcharts();
                   for (var i = Chart0.series.length - 1; i > -1; i--) {
                     if (Chart0.series[i].name.includes(sname) || Chart0.series[i].name.includes('Series')) {
                       Chart0.series[i].remove();
@@ -1415,7 +1415,7 @@ var ChartTool = {
                   ToolController_.activeTool.stackOn
                 );
                 // Remove from actual legend last
-                var Chart0 = $('#chart0').highcharts();
+                // var Chart0 = $('#chart0').highcharts();
                 for (var i = Chart0.series.length - 1; i > -1; i--) {
                   if (Chart0.series[i].name.includes(sname) || Chart0.series[i].name.includes('Series')) {
                     Chart0.series[i].remove();
@@ -1432,9 +1432,10 @@ var ChartTool = {
         series[j].data = [];
       }
       options.series = series;
+      Highcharts.chart('chart0', options);
       // Remove unneeded chart elements; leave only legend elements
       $('.highcharts-legend').parent().children('g').each(function () {
-        if ($(this).attr('class') != 'highcharts-legend') {
+        if ($(this).attr('class').includes('highcharts-legend') == false) {
           $(this).remove();
         }
       });
@@ -1444,8 +1445,6 @@ var ChartTool = {
       $('.highcharts-legend-navigation').remove();
       $('.highcharts-legend-nav-active').remove();
       $('.highcharts-legend-nav-inactive').remove();
-      
-      Highcharts.chart('chart0', options);
     };
 
     if (load) {
