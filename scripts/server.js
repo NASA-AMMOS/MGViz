@@ -705,7 +705,7 @@ setups.getBackendSetups(function (setups) {
       const axes = encodeURIComponent(req.body.axes);
 
       execFile(
-        "python",
+        "python3",
         [
           "private/api/2ptsToProfile.py",
           path,
@@ -737,7 +737,7 @@ setups.getBackendSetups(function (setups) {
       const bands = encodeURIComponent(req.body.bands);
 
       execFile(
-        "python",
+        "python3",
         ["private/api/BandsToProfile.py", path, x, y, xyorll, bands],
         function (error, stdout, stderr) {
           res.send(stdout);
