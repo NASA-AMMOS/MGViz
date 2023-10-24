@@ -1,0 +1,78 @@
+<!DOCTYPE html><head><title>ESESES - MGViz Help</title><meta charset="utf-8"><meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"><link rel="shortcut icon" href="../resources/LandingPage/TheSnagwazzleM1_WSmall_Icon.png"><style>@font-face {
+font-family: venus;
+src: url("../public/fonts/venus-rising/Venus-Rising-Regular.ttf");
+}
+@font-face {
+font-family: roboto;
+src: url("../public/fonts/roboto/Roboto-Regular.ttf");
+}
+@keyframes fadein {
+from { opacity: 0; }
+to   { opacity: 1; }
+}
+body, html {
+width: 100%;
+height: 100%;
+margin: 0;
+padding: 0;
+overflow: auto;
+background: #222222;
+user-select: none;
+}
+#main-container {
+width: 100%;
+height: 100%;
+animation: fadein 3.5s;
+}
+.background {
+width: 100%;
+height: 100%;
+background-position: center top;
+background-size: 100% auto;
+}
+#top {
+width: 100%;
+height: 90px;
+}
+#middle {
+width: 100%;
+height: 100px;
+}
+#bottom {
+width: 100%;
+height: 50%;
+}
+#title {
+font-family: monospace;
+text-align: center;
+font-size: 40px;
+padding-left: 4px;
+color: #c9d5de;
+}
+#message {
+text-align: center;
+font-family: monospace;
+font-size: 20px;
+color: #eee;
+padding-top: 20px;
+}
+#button {
+text-align: center;
+width: 100%;
+}
+#link {
+text-decoration: none;
+font-family: monospace;
+color: #444;
+border-bottom: 1px solid rgba(68,68,68,0);
+transition: border-bottom 0.2s cubic-bezier(0.445, 0.05, 0.55, 0.95);
+}
+#link:hover {
+border-bottom: 1px solid rgba(68,68,68,1);
+}
+.center {
+display: block;
+margin-left: auto;
+margin-right: auto;
+width: 60%;
+}</style></head><div class="background" id="main-container"><div id="top"><div id="title">ESESES - MGViz</div></div><div id="middle"><div id="message">The landing page displays a map view with the location of seismology measurement sites, major/recent earthquakes, and a reference map.</div><img id="landing" src="Landing.png" alt="Map View" class="center"><div id="message">You can zoom in and out of the map by scrolling or using the + and - buttons in the top-right corner.</div><div id="message">You can pan around the map by clicking and dragging.</div><div id="message">You can hover over markers on the map to see more information.</div><div id="message">Clicking on a seismology site marker will open up a tool for viewing more information about that site.</div><div id="message"></div><div id="message">The buttons on the left will open various tools and links.</div><img id="help" src="Help.png" alt="Help Buttons" class="center"><div id="message">The four buttons in the lower-left do the following (from top to bottom):</div><div id="message">1. Copy a link of the website to share. The currently shown data layers will persist.</div><div id="message">2. View the application in full screen.</div><div id="message">3. Open a link to the project web site.</div><div id="message">4. Open a link to this Help page.</div><div id="message"></div><div id="message">The buttons on the top-left will open unique tools.</div><img id="layers" src="Layers.png" alt="Layers Tool" class="center"><div id="message">The Layers tool presents a list of several data layers to display on the map.</div><div id="message">Several layers, including Sites, are activated by default.</div><div id="message">Velocities may be activated to show arrows denoting the direction and magnitude of motion.</div><div id="message">Earthquakes contains options to view different categories of historical earthquakes.</div><div id="message">Reference layers contains labels and features that may be overlaid on base maps without that information.</div><div id="message">Geological Features can be activated to show U.S. or global geological features.</div><div id="message">Base Maps contains several reference maps that appear on the bottom of all the layers. Activate one at a time for best results.</div><div id="message"></div><img id="search" src="Search.png" alt="Search Tool" class="center"><div id="message">The Search tool allows you to zoom-to and select sites by ID or location.</div><div id="message">You can switch between Site and Distance options.</div><div id="message">The Distance option allows you to enter either a Site ID or latitude, longitude (e.g. 33, -117) or D° M' S" N/S D° M' S" E/W (e.g. 34° 7' 50.4012" N 117° 0' 0" W) along with a search radius in km.</div><div id="message">Found sites can be zoomed into (Go), selected (i.e. bring up the Chart tool for selected sites), or both.</div><div id="message"></div><img id="chart" src="Chart.png" alt="Chart Tool" class="center"><div id="message">The Chart tool allows you visualize and explore the time series data capture at each site.</div><div id="message">The button in the top-right corner of each chart will allow you to export the data to various formats, print, or view in full screen mode. </div><div id="message">You can change the type of time series data via the Source, Filter, and Type options.</div><div id="message">Checking the North, East, and Up boxes will activate a chart for each direction.</div><div id="message">The vertical line denoting offsets (cosesimic and non-coseismic) can be deactivated. Offsets aren't shown when multiple sites are selected.</div><div id="message">Stack On Charts allows for multiple sites to be plotted on the same chart continuously.</div><div id="message">Holding control or command on the keyboard while picking multiple sites in the Selected column will also plot multiples sites on the chart.</div><img id="multisite" src="Multisite.png" alt="Chart Tool - Multiple Sites" class="center"><div id="message">Use Stack Separation to increase the displacement between multiple sites so that the points don't overlap. Hit Apply to update the charts.</div><div id="message">Additional sites can be loaded by adding a Site Code or double clicking from the list of All Sites.</div><div id="message">The Append Site Selection determines whether or not to aggregate sites on the map and in the list. This is helpful to turn off if viewing sites one at a time.</div><img id="exportsites" src="ExportSites.png" alt="Chart Tool - Export Sites" class="center"><div id="message">To export the list of sites, replace "Default Group" with a name for the selection and then click Export Selected to save to a file.</div><div id="message">Use Load Saved Sites to reload a saved list of sites.</div><div id="message">Use Clear Selected to start from a fresh list.</div><img id="siteinfo" src="SiteInfo.png" alt="Chart Tool - Site Info" class="center"><div id="message">Click on Show Site Info in the top-left corner of the tool to view additional metadata for each site.</div><div id="message">You can expand some fields by clicking on the blue headers.</div><div id="message">The charts may be hidden by clicking on Hide Charts at the top of the tool.</div><div id="message">The site info may be hidden by clicking on Hide Site at the top-left corner of the tool.</div><img id="velocities" src="Velocities.png" alt="Velocities Tool" class="center"><div id="message">The Velocities Tool will allow you to customize the parameters of the the Velocities layer.</div><div id="message">You can change the source, direction, display criteria, and add visual exaggeration.</div><img id="velocitiesup" src="VelocitiesUp.png" alt="Velocities Tool - Vertical" class="center"><div id="message">Vertical velocities may also be visualized by the tool.</div></div></div><div id="bottom"></div><footer><script></script></footer>
