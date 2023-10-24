@@ -250,10 +250,12 @@ let ToolController_ = {
                     this.activeTool = tool
                     this.setToolHeight(this.activeTool.height)
                     this.setToolWidth(this.activeTool.width)
-                    if (this.activeTool.height == 0) {
-                        this.UserInterface.openToolPanel(this.activeTool.width)
-                    } else {
-                        this.UserInterface.closeToolPanel()
+                    if (this.UserInterface != null) {
+                        if (this.activeTool.height == 0) {
+                            this.UserInterface.openToolPanel(this.activeTool.width)
+                        } else {
+                            this.UserInterface.closeToolPanel()
+                        }
                     }
                     /*
               if( this.prevHeight != this.activeTool.height && this.UserInterface != null ) {
@@ -286,7 +288,9 @@ let ToolController_ = {
     },
     setToolWidth: function (newWidth) {
         newWidth = newWidth || 'full'
-        this.UserInterface.setToolWidth(newWidth)
+        if (this.UserInterface != null) {
+            this.UserInterface.setToolWidth(newWidth)
+        }
     },
     notifyActiveTool: function (type, payload) {
         if (this.activeTool != null) {
