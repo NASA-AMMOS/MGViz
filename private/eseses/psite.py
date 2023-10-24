@@ -17,7 +17,7 @@ if os.path.exists(json):
 
 url = 'http://geoapp01.ucsd.edu:8080/gpseDB/psite?op=getNeuConversionSiteList'
 try:
-    reader = csv.reader(urllib.request.urlopen(url), delimiter=' ', encoding='utf8')
+    reader = csv.reader(urllib.request.urlopen(url).read().decode('utf-8').splitlines(), delimiter=' ')
 except Exception as e:   # On error, print the saved version and exit
     if os.path.exists(json):
         with open(json, 'r') as out:
@@ -40,7 +40,7 @@ if len(csvLines) < 2:   # an empty response from web service
         sys.exit() 
 
 # Got some csv from the url, now in cvsLines
-with open('out.csv', 'wb') as csvfile:
+with open('out.csv', 'w') as csvfile:
     wtr = csv.writer( csvfile )
     wtr.writerow( ('site', 'x', 'y' ))
     try:
