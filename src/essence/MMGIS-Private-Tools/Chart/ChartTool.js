@@ -321,7 +321,7 @@ var ChartTool = {
       if (stackOn != true) {
         ToolController_.activeTool.siteOptionsList = [];
       }
-      if (typeof source !== "undefined") {
+      if (typeof ChartTool.source !== "undefined") {
         var siteOptions = new SiteOptions($('#siteSelect').val(), ChartTool.source, ChartTool.fil, ChartTool.type);
         ToolController_.activeTool.loadChart(siteOptions, [ChartTool.north, ChartTool.east, ChartTool.up], ChartTool.coseismics, ChartTool.offset, stackOn);
       }
