@@ -347,12 +347,11 @@ var ChartTool = {
       }
     });
     $('#buttonApply').click(function () {
+      var offset = 0
       if ($('input[name=checkSeparation]').prop('checked')) {
         offset = $('#textOffset').val();
-      } else {
-        offset = 0;
       }
-      siteOptions = new SiteOptions($('#siteSelect').val(), ChartTool.source, ChartTool.fil, ChartTool.type);
+      var siteOptions = new SiteOptions($('#siteSelect').val(), ChartTool.source, ChartTool.fil, ChartTool.type);
       ToolController_.activeTool.loadChart(siteOptions, [ChartTool.north, ChartTool.east, ChartTool.up], ChartTool.coseismics, offset, ChartTool.stackOn);
     });
     $('#buttonRemove').click(function () {
@@ -558,7 +557,7 @@ var ChartTool = {
     }
     if (this.sites.indexOf(site) === -1) {
       if (this.sites.length > 0 && $('input[name=checkAppend]').prop('checked') == false) {
-        lastSite = this.sites.pop();
+        var lastSite = this.sites.pop();
         for (var i = 0; i < this.siteOptionsList.length; i++) {
           if (this.siteOptionsList[i].sites.indexOf(lastSite) > -1) {
             this.siteOptionsList.splice(i, 1);
