@@ -712,29 +712,32 @@ const labels = (geojson, layerObj, leafletLayerObject, layer, sublayers) => {
                     const name = `labels_${layer._layerName}_${
                         subname || 'main'
                     }`.replace(/ /g, '_')
-                    L_.Globe_.litho.removeLayer(name)
-                    L_.Globe_.litho.addLayer('vector', {
-                        name: name,
-                        on: true,
-                        // GeoJSON or path to geojson
-                        // [lng, lat, elev?]
-                        geojson: {
-                            type: 'FeatureCollection',
-                            features: globeLabels,
-                        },
-                        style: {
-                            letPropertiesStyleOverride: true,
-                            default: {
-                                color: 'rgb(0, 0, 0)',
-                                fillColor: 'rgb(255, 255, 255)',
-                                fillOpacity: 1,
-                                weight: 2,
-                                fontSize: size === 'large' ? '18px' : '16px',
-                                elevOffset: 4,
+                    if (L_.Globe_) {
+                        L_.Globe_.litho.removeLayer(name)
+                        L_.Globe_.litho.addLayer('vector', {
+                            name: name,
+                            on: true,
+                            // GeoJSON or path to geojson
+                            // [lng, lat, elev?]
+                            geojson: {
+                                type: 'FeatureCollection',
+                                features: globeLabels,
                             },
-                        },
-                        opacity: 1,
-                    })
+                            style: {
+                                letPropertiesStyleOverride: true,
+                                default: {
+                                    color: 'rgb(0, 0, 0)',
+                                    fillColor: 'rgb(255, 255, 255)',
+                                    fillOpacity: 1,
+                                    weight: 2,
+                                    fontSize:
+                                        size === 'large' ? '18px' : '16px',
+                                    elevOffset: 4,
+                                },
+                            },
+                            opacity: 1,
+                        })
+                    }
                 }
 
                 // Short timeout since initial tooltip placement computation can take a bit
@@ -1238,16 +1241,28 @@ const imageOverlays = (geojson, layerObj, leafletLayerObject) => {
                         L.imageTransform(imageSettings.image, anchors, {
                             opacity: 1,
                             clip: anchors,
+                            id: `${layerObj.name}${
+                                imageSettings.image
+                            }${angle}${JSON.stringify(center)}`,
                         }),
                     ])
                 },
             }
+        let existingOn = null
+        if (L_.layers.attachments[L_.asLayerUUID(layerObj.name)])
+            existingOn =
+                L_.layers.attachments[L_.asLayerUUID(layerObj.name)]
+                    .image_overlays.on
+
+        const isOn =
+            existingOn != null
+                ? existingOn
+                : imageVar.initialVisibility != null
+                ? imageVar.initialVisibility
+                : true
         return imageShow === 'always'
             ? {
-                  on:
-                      imageVar.initialVisibility != null
-                          ? imageVar.initialVisibility
-                          : true,
+                  on: isOn,
                   layer: L.geoJson(geojson, leafletLayerObjectImageOverlay),
                   title: 'Map rendered image overlays.',
               }

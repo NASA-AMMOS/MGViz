@@ -65,6 +65,7 @@ const TimeUI = {
     init: function (timeChange, enabled) {
         TimeUI.timeChange = timeChange
         TimeUI.enabled = enabled
+
         // prettier-ignore
         const markup = [
             `<div id="mmgisTimeUI">`,
@@ -133,6 +134,11 @@ const TimeUI = {
     },
     getElement: function () {},
     attachEvents: function (timeChange) {
+        let startingModeIndex = TimeUI.modeIndex
+        // Set modeIndex to 1/Point if a deeplink had an endtime but no starttime
+        if (L_.FUTURES.startTime == null && L_.FUTURES.endTime != null)
+            startingModeIndex = 1
+
         // Timeline pan and zoom
         // zoom
         $('#mmgisTimeUITimelineInner').on('mousewheel', function (e) {
@@ -328,39 +334,12 @@ const TimeUI = {
 
         // Mode dropdown
         $('#mmgisTimeUIModeDropdown').html(
-            Dropy.construct(TimeUI.modes, 'Mode', TimeUI.modeIndex, {
+            Dropy.construct(TimeUI.modes, 'Mode', startingModeIndex, {
                 openUp: true,
                 dark: true,
             })
         )
-        Dropy.init($('#mmgisTimeUIModeDropdown'), function (idx) {
-            TimeUI.modeIndex = idx
-            if (TimeUI.modes[TimeUI.modeIndex] === 'Point') {
-                $('#mmgisTimeUIStartWrapper').css({ display: 'none' })
-                // Remove end date enforcement
-                TimeUI.endTempus.updateOptions({
-                    restrictions: {
-                        minDate: new Date(0).toISOString(),
-                    },
-                })
-            } else {
-                $('#mmgisTimeUIStartWrapper').css({ display: 'inherit' })
-                // Reinforce min date
-                TimeUI.endTempus.updateOptions({
-                    restrictions: {
-                        minDate: TimeUI.startTempusSavedLastDate,
-                    },
-                })
-                if (TimeUI._startTimestamp >= TimeUI._endTimestamp) {
-                    const offsetStartDate = new Date(TimeUI._endTimestamp)
-                    const parsedStart = TimeUI.startTempus.dates.parseInput(
-                        new Date(offsetStartDate)
-                    )
-                    TimeUI.startTempus.dates.setValue(parsedStart)
-                }
-            }
-            TimeUI._remakeTimeSlider(true)
-        })
+        Dropy.init($('#mmgisTimeUIModeDropdown'), TimeUI.changeMode)
         // Step dropdown
         $('#mmgisTimeUIStepDropdown').html(
             Dropy.construct(
@@ -411,6 +390,19 @@ const TimeUI = {
             } else TimeUI._initialEnd = dateStaged
         } else TimeUI._initialEnd = new Date()
 
+        // Initial Timeline window end
+        if (
+            L_.configData.time.initialwindowend != null &&
+            L_.configData.time.initialwindowend != 'now'
+        ) {
+            const dateStaged = new Date(L_.configData.time.initialwindowend)
+            if (dateStaged == 'Invalid Date') {
+                console.warn(
+                    "Invalid 'Initial Window End Time' provided. Defaulting to 'now'."
+                )
+            } else TimeUI._timelineEndTimestamp = dateStaged.getTime()
+        }
+
         // Initial start
         // Start 1 month ago
         TimeUI._initialStart = new Date(TimeUI._initialEnd)
@@ -440,6 +432,21 @@ const TimeUI = {
             } else TimeUI._initialStart = dateStaged
         }
 
+        // Initial Timeline window start
+        if (L_.configData.time.initialwindowstart != null) {
+            const dateStaged = new Date(L_.configData.time.initialwindowstart)
+            if (dateStaged == 'Invalid Date') {
+                console.warn("Invalid 'Initial Window Start Time' provided.")
+            } else if (
+                TimeUI._timelineEndTimestamp == null ||
+                dateStaged.getTime() > TimeUI._timelineEndTimestamp
+            ) {
+                console.warn(
+                    "'Initial Window Start Time' cannot be later than the Initial Window End Time."
+                )
+            } else TimeUI._timelineStartTimestamp = dateStaged.getTime()
+        }
+
         // Initialize the time control times, but don't trigger events
         TimeUI.timeChange(
             TimeUI._initialStart.toISOString(),
@@ -447,6 +454,10 @@ const TimeUI = {
             null,
             true
         )
+
+        // Set modeIndex to 1/Point if a deeplink had an endtime but no starttime
+        if (TimeUI.modeIndex != startingModeIndex)
+            TimeUI.changeMode(startingModeIndex)
     },
     fina() {
         let date
@@ -499,6 +510,35 @@ const TimeUI = {
         if (TimeUI.enabled) {
             TimeUI._makeHistogram()
         }
+    },
+    changeMode(idx) {
+        TimeUI.modeIndex = idx
+        if (TimeUI.modes[TimeUI.modeIndex] === 'Point') {
+            $('#mmgisTimeUIStartWrapper').css({ display: 'none' })
+
+            // Remove end date enforcement
+            TimeUI.endTempus.updateOptions({
+                restrictions: {
+                    minDate: new Date(0),
+                },
+            })
+        } else {
+            $('#mmgisTimeUIStartWrapper').css({ display: 'inherit' })
+            // Reinforce min date
+            TimeUI.endTempus.updateOptions({
+                restrictions: {
+                    minDate: TimeUI.startTempusSavedLastDate,
+                },
+            })
+            if (TimeUI._startTimestamp >= TimeUI._endTimestamp) {
+                const offsetStartDate = new Date(TimeUI._endTimestamp)
+                const parsedStart = TimeUI.startTempus.dates.parseInput(
+                    new Date(offsetStartDate)
+                )
+                TimeUI.startTempus.dates.setValue(parsedStart)
+            }
+        }
+        TimeUI._remakeTimeSlider(true)
     },
     togglePlay(force) {
         const mode = TimeUI.modes[TimeUI.modeIndex]

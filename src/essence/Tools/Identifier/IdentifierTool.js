@@ -30,7 +30,12 @@ var IdentifierTool = {
         this.MMWebGISInterface = new interfaceWithMMWebGIS()
 
         //Get tool variables
-        this.vars = L_.getToolVars('identifier')
+        this.varsRaw = L_.getToolVars('identifier')
+        this.vars = {}
+        Object.keys(this.varsRaw).forEach((layerName) => {
+            this.vars[L_.asLayerUUID(layerName)] = this.varsRaw[layerName]
+        })
+
         //Probably always 256
         this.tileImageWidth = 256
         //x y and zoom of mousedover tile
@@ -434,6 +439,13 @@ function bestMatchInLegend(rgba, legendData) {
 
 function queryDataValue(url, lng, lat, numBands, callback) {
     numBands = numBands || 1
+    var dataPath
+    if (url.startsWith("/vsicurl/")) {
+        dataPath = url
+    }
+    else {
+        dataPath = 'Missions/' + L_.mission + '/' + url
+    }
     calls.api(
         'getbands',
         {
@@ -442,7 +454,7 @@ function queryDataValue(url, lng, lat, numBands, callback) {
             y: lng,
             xyorll: 'll',
             bands: '[[1,' + numBands + ']]',
-            path: 'Missions/' + L_.mission + '/' + url,
+            path: dataPath,
         },
         function (data) {
             //Convert python's Nones to nulls

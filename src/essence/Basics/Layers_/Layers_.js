@@ -188,6 +188,23 @@ const L_ = {
             }
         } else console.log('Failure updating to new site')
     },
+    _timeChangeSubscriptions: {},
+    subscribeTimeChange: function (fid, func) {
+        if (typeof func === 'function') L_._timeChangeSubscriptions[fid] = func
+    },
+    unsubscribeTimeChange: function (fid) {
+        if (L_._timeChangeSubscriptions[fid] != null)
+            delete L_._timeChangeSubscriptions[fid]
+    },
+    _onTimeUIToggleSubscriptions: {},
+    subscribeOnTimeUIToggle: function (fid, func) {
+        if (typeof func === 'function')
+            L_._onTimeUIToggleSubscriptions[fid] = func
+    },
+    unsubscribeOnTimeUIToggle: function (fid) {
+        if (L_._onTimeUIToggleSubscriptions[fid] != null)
+            delete L_._onTimeUIToggleSubscriptions[fid]
+    },
     _onLayerToggleSubscriptions: {},
     subscribeOnLayerToggle: function (fid, func) {
         if (typeof func === 'function')
@@ -211,6 +228,14 @@ const L_ = {
         Object.keys(L_._onLayerToggleSubscriptions).forEach((k) => {
             L_._onLayerToggleSubscriptions[k](s.name, !on)
         })
+
+        // Always reupdate layer infos at the end to keep them in sync
+        Description.updateInfo()
+
+        // Deselect active feature if its layer is being turned off
+        if (L_.activeFeature && L_.activeFeature.layerName === s.name && on) {
+            L_.setActiveFeature(null)
+        }
     },
     toggleLayerHelper: async function (
         s,
@@ -1334,6 +1359,8 @@ const L_ = {
             closeOnClick: false,
             autoPan: false,
             offset: new L.point(0, 3),
+            interactive: true,
+            bubblingMouseEvents: true
         })
             .setLatLng(
                 new L.LatLng(
@@ -1354,6 +1381,11 @@ const L_ = {
                 '</div>'
             )
 
+        if (popup?._contentNode?._leaflet_events)
+            Object.keys(popup._contentNode._leaflet_events).forEach((ev) => {
+                delete popup._contentNode._leaflet_events[ev]
+            })
+
         popup._isAnnotation = true
         popup._annotationParams = {
             feature,
@@ -1369,12 +1401,47 @@ const L_ = {
         popup.toGeoJSON = function () {
             return feature
         }
+
         if (andAddToMap) {
             popup.addTo(L_.Map_.map)
+            L_.removePopupStopPropogationFunctions(popup)
             L_.layers.layer[layerId].push(popup)
+        } else {
+            setTimeout(() => {
+                L_.removePopupStopPropogationFunctions(popup)
+            }, 2000)
         }
 
         return popup
+    },
+    removePopupStopPropogationFunctions(popup) {
+        if (popup?._contentNode?._leaflet_events)
+            Object.keys(popup._contentNode._leaflet_events).forEach((ev) => {
+                document
+                    .querySelectorAll('.leaflet-popup-content')
+                    .forEach(function (elm) {
+                        // Now do something with my button
+                        elm.removeEventListener(
+                            'wheel',
+                            popup._contentNode._leaflet_events[ev]
+                        )
+                    })
+            })
+
+        if (popup?._container?.children?.[0]?._leaflet_events)
+            Object.keys(popup._container.children[0]._leaflet_events).forEach(
+                (ev) => {
+                    document
+                        .querySelectorAll('.leaflet-popup-content-wrapper')
+                        .forEach(function (elm) {
+                            // Now do something with my button
+                            elm.removeEventListener(
+                                ev.replace(/\d+$/, ''),
+                                popup._container.children[0]._leaflet_events[ev]
+                            )
+                        })
+                }
+            )
     },
     setLayerOpacity: function (name, newOpacity) {
         newOpacity = parseFloat(newOpacity)
@@ -2523,6 +2590,8 @@ const L_ = {
                 )
                 return
             }
+            L_.syncSublayerData(layerName)
+            L_.globeLithoLayerHelper(L_.layers.layer[layerName])
         } else {
             console.warn(
                 'Warning: Unable to update vector layer as it does not exist: ' +

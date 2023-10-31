@@ -55,7 +55,7 @@ function get(reqtype, req, res, next) {
             .query(
               "SELECT properties, ST_AsGeoJSON(geom)" + " " + "FROM " + table
             )
-            .spread((results) => {
+            .then(([results]) => {
               let geojson = { type: "FeatureCollection", features: [] };
               for (let i = 0; i < results.length; i++) {
                 let properties = results[i].properties;
@@ -155,7 +155,7 @@ function get(reqtype, req, res, next) {
                 },
               }
             )
-            .spread((results) => {
+            .then(([results]) => {
               res.setHeader("Content-Type", "application/x-protobuf");
               res.setHeader("Access-Control-Allow-Origin", "*");
 
@@ -254,7 +254,7 @@ router.post("/search", function (req, res, next) {
               },
             }
           )
-          .spread((results) => {
+          .then(([results]) => {
             let r = [];
             for (let i = 0; i < results.length; i++) {
               let feature = JSON.parse(results[i].st_asgeojson);
@@ -311,6 +311,10 @@ router.post("/recreate", function (req, res, next) {
       body: {},
     });
   }
+  if (!features) {
+    //Must be a single feature from an append.  Make an array
+    features = [JSON.parse(req.body.geojson)];
+  }
 
   makeNewGeodatasetTable(
     req.body.name,
@@ -325,8 +329,13 @@ router.post("/recreate", function (req, res, next) {
         return;
       }
 
+      let drop_qry = "TRUNCATE TABLE " + result.table + " RESTART IDENTITY";
+      if (req.body.hasOwnProperty("action") && req.body.action=="append") {
+        drop_qry = "";
+      }
+
       sequelize
-        .query("TRUNCATE TABLE " + result.table + " RESTART IDENTITY")
+        .query(drop_qry)
         .then(() => {
           populateGeodatasetTable(
             result.tableObj,
@@ -343,7 +352,7 @@ router.post("/recreate", function (req, res, next) {
           return null;
         })
         .catch((err) => {
-          logger("error", "Recreation error.", req.originalUrl, req, err);
+          logger("error", "Recreation error.", req.originalUrl, req, err.stack);
           res.send(result);
         });
     },
