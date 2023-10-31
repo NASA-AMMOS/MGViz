@@ -34,9 +34,10 @@ types = {'detrend': 'Detrend',
 
 name = site + ': ' + str(sources[source]) + '/' + filters[fil] + '/' + types[ttype] + ' -'
 # test_file = 'private/eseses/tacls/' + site + '.json'
-file_list = glob.glob('private/eseses/tacls/' + 
-                      site + '-WNAM_' + filters[fil].replace(' ', '_') + '_' + types[ttype] +
-                      'NeuTimeSeries_' + source + '_*.json')
+# file_list = glob.glob('private/eseses/tacls/' + 
+#                       site + '-WNAM_' + filters[fil].replace(' ', '_') + '_' + types[ttype] +
+#                       'NeuTimeSeries_' + source + '_*.json')
+file_list = glob.glob('private/eseses/tacls/' + site + '*.json')
 for f in sorted(file_list):
     test_file = f
 if os.path.exists(test_file):

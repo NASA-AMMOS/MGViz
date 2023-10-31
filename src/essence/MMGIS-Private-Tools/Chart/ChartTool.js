@@ -1021,14 +1021,14 @@ var ChartTool = {
           enabled: false
         },
         legendIndex: -1
-      // }, {
-      //   name: 'TACLS',
-      //   color: 'blue',
-      //   animation: false,
-      //   marker: {
-      //     enabled: false
-      //   },
-      //   legendIndex: 20
+      }, {
+        name: 'TACLS',
+        color: 'blue',
+        animation: false,
+        marker: {
+          enabled: false
+        },
+        legendIndex: 20
       }, {
         type: 'line',
         zIndex: 99,
@@ -1145,12 +1145,12 @@ var ChartTool = {
               if (this.idx == 0) {
                 optionsn.title.text = datan['site'] + '<br>North';
                 optionsn.subtitle.text = 'slope ' + datan['slope'];
-                optionsn.series[2].name = datan['name'] + ' model trace';
-                optionsn.series[3].name = datan['name'] + ' points';
-                optionsn.series[2].data = datan['trace'];
-                optionsn.series[3].data = datan['data'];
-                optionsn.series[2].legendIndex = 3;
-                optionsn.series[3].legendIndex = 2;
+                optionsn.series[3].name = datan['name'] + ' model trace';
+                optionsn.series[4].name = datan['name'] + ' points';
+                optionsn.series[3].data = datan['trace'];
+                optionsn.series[4].data = datan['data'];
+                optionsn.series[3].legendIndex = 4;
+                optionsn.series[4].legendIndex = 3;
               } else {
                 optionsn.subtitle.text = optionsn.subtitle.text + '<br>slope ' + datan['slope'];
                 let offsetTracen = datan['trace'].map(n => [n[0], n[1] == null ? n[1] : (n[1] + offset * (this.idx - errorsn))]);
@@ -1172,6 +1172,24 @@ var ChartTool = {
               } else {
                 optionsn.xAxis.plotLines = datan['plotlines'];
               }
+              // experimental tacls data
+              console.log('Getting tacls data n')
+              let sync_tacls = $.ajax({
+                url: 'api/eseses/tacls/' + site + '/' + source + '/' + fil + '/' + type + '/e',
+                dataType: 'json',
+                async: false,
+                success: function (data) {
+                  for (i in optionsn.xAxis.plotLines) {
+                    data.push(optionsn.xAxis.plotLines[i])
+                  }
+                  optionsn.xAxis.plotLines = data;
+                  console.log(optionsn.xAxis.plotLines);
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                  console.log(errorThrown);
+                }
+              })
+
             },
             error: function (jqXHR, textStatus, errorThrown) {
               optionsn = null;
@@ -1225,12 +1243,12 @@ var ChartTool = {
               if (this.idx == 0) {
                 optionse.title.text = datae['site'] + '<br>East';
                 optionse.subtitle.text = 'slope ' + datae['slope'];
-                optionse.series[2].name = datae['name'] + ' model trace';
-                optionse.series[3].name = datae['name'] + ' points';
-                optionse.series[2].data = datae['trace'];
-                optionse.series[3].data = datae['data'];
-                optionse.series[2].legendIndex = 3;
-                optionse.series[3].legendIndex = 2;
+                optionse.series[3].name = datae['name'] + ' model trace';
+                optionse.series[4].name = datae['name'] + ' points';
+                optionse.series[3].data = datae['trace'];
+                optionse.series[4].data = datae['data'];
+                optionse.series[3].legendIndex = 4;
+                optionse.series[4].legendIndex = 3;
               } else {
                 optionse.subtitle.text = optionse.subtitle.text + '<br>slope ' + datae['slope'];
                 let offsetTracee = datae['trace'].map(n => [n[0], n[1] == null ? n[1] : (n[1] + offset * (this.idx - errorse))]);
@@ -1253,24 +1271,22 @@ var ChartTool = {
                 optionse.xAxis.plotLines = datae['plotlines'];
               }
               // experimental tacls data
-              if (['p058', 'p158'].includes(site)) {
-                console.log('Getting tacls data')
-                let sync_tacls = $.ajax({
-                  url: 'api/eseses/tacls/' + site + '/' + source + '/' + fil + '/' + type + '/e',
-                  dataType: 'json',
-                  async: false,
-                  success: function (data) {
-                    for (i in optionse.xAxis.plotLines) {
-                      data.push(optionse.xAxis.plotLines[i])
-                    }
-                    optionse.xAxis.plotLines = data;
-                    console.log(optionse.xAxis.plotLines);
-                  },
-                  error: function (jqXHR, textStatus, errorThrown) {
-                    console.log(errorThrown);
+              console.log('Getting tacls data e')
+              let sync_tacls = $.ajax({
+                url: 'api/eseses/tacls/' + site + '/' + source + '/' + fil + '/' + type + '/e',
+                dataType: 'json',
+                async: false,
+                success: function (data) {
+                  for (i in optionse.xAxis.plotLines) {
+                    data.push(optionse.xAxis.plotLines[i])
                   }
-                })
-              }
+                  optionse.xAxis.plotLines = data;
+                  console.log(optionse.xAxis.plotLines);
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                  console.log(errorThrown);
+                }
+              })
 
             },
             error: function (jqXHR, textStatus, errorThrown) {
@@ -1325,12 +1341,12 @@ var ChartTool = {
               if (this.idx == 0) {
                 optionsu.title.text = datau['site'] + '<br>Up';
                 optionsu.subtitle.text = 'slope ' + datau['slope'];
-                optionsu.series[2].name = datau['name'] + ' model trace';
-                optionsu.series[3].name = datau['name'] + ' points';
-                optionsu.series[2].data = datau['trace'];
-                optionsu.series[3].data = datau['data'];
-                optionsu.series[2].legendIndex = 3;
-                optionsu.series[3].legendIndex = 2;
+                optionsu.series[3].name = datau['name'] + ' model trace';
+                optionsu.series[4].name = datau['name'] + ' points';
+                optionsu.series[3].data = datau['trace'];
+                optionsu.series[4].data = datau['data'];
+                optionsu.series[3].legendIndex = 4;
+                optionsu.series[4].legendIndex = 3;
               } else {
                 optionsu.subtitle.text = optionsu.subtitle.text + '<br>slope ' + datau['slope'];
                 let offsetTraceu = datau['trace'].map(n => [n[0], n[1] == null ? n[1] : (n[1] + offset * (this.idx - errorsu))]);
@@ -1352,6 +1368,23 @@ var ChartTool = {
               } else {
                 optionsu.xAxis.plotLines = datau['plotlines'];
               }
+              // experimental tacls data
+              console.log('Getting tacls data u')
+              let sync_tacls = $.ajax({
+                url: 'api/eseses/tacls/' + site + '/' + source + '/' + fil + '/' + type + '/e',
+                dataType: 'json',
+                async: false,
+                success: function (data) {
+                  for (i in optionsu.xAxis.plotLines) {
+                    data.push(optionsu.xAxis.plotLines[i])
+                  }
+                  optionsu.xAxis.plotLines = data;
+                  console.log(optionsu.xAxis.plotLines);
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                  console.log(errorThrown);
+                }
+              })
             },
             error: function (jqXHR, textStatus, errorThrown) {
               optionsu = null;
