@@ -487,8 +487,8 @@ function doWithSearch( doX, forceX, forceSTS, isURLSearch ) {
         newActive.addClass( 'active' ).css( { 'color': ToolController_.activeColor } );
         newActive.parent().css( { 'background': ToolController_.activeBG } );
         ToolController_.makeTool( 'ChartTool' );
-        ToolController_.getTool( 'ChartTool' ).use( selectLayers[0].feature );
       }
+      ToolController_.getTool( 'ChartTool' ).use( selectLayers[0].feature );
       // if( !isURLSearch ) {
       //   QueryURL.writeSearchURL( x, SearchTool.lname );
       // }
