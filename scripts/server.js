@@ -620,6 +620,7 @@ setups.getBackendSetups(function (setups) {
   );
 
   // API
+  // TODO: move to API/Backend
   //TEST
   app.post(`${ROOT_PATH}/api/test`, function (req, res) {
     res.send("Hello World!");
@@ -719,10 +720,9 @@ setups.getBackendSetups(function (setups) {
         ],
         function (error, stdout, stderr) {
           if (error) {
-            logger("warn", error)
+            logger("warn", error);
             res.status(400).send();
-          }
-          else {
+          } else {
             res.send(stdout);
           }
         }
@@ -747,12 +747,101 @@ setups.getBackendSetups(function (setups) {
         ["private/api/BandsToProfile.py", path, x, y, xyorll, bands],
         function (error, stdout, stderr) {
           if (error) {
-            logger("warn", error)
+            logger("warn", error);
             res.status(400).send();
-          }
-          else {
+          } else {
             res.send(stdout);
           }
+        }
+      );
+    }
+  );
+
+  //utils ll2aerll
+  app.post(
+    `${ROOT_PATH}/api/utils/ll2aerll`,
+    ensureUser(),
+    ensureGroup(permissions.users),
+    function (req, res) {
+      const lng = encodeURIComponent(req.body.lng);
+      const lat = encodeURIComponent(req.body.lat);
+      const height = encodeURIComponent(req.body.height);
+      const target = encodeURIComponent(req.body.target);
+      const time = encodeURIComponent(req.body.time)
+        .replace(/%20/g, " ")
+        .replace(/%3A/g, ":");
+      const includeSunEarth =
+        encodeURIComponent(req.body.includeSunEarth) || "False";
+
+      execFile(
+        "python",
+        [
+          "private/api/spice/ll2aerll.py",
+          lng,
+          lat,
+          height,
+          target,
+          time,
+          includeSunEarth,
+        ],
+        function (error, stdout, stderr) {
+          if (error)
+            logger("error", "ll2aerll failure:", "server", null, error);
+          res.send(stdout);
+        }
+      );
+    }
+  );
+
+  //utils chronos (spice time converter)
+  app.post(
+    `${ROOT_PATH}/api/utils/chronos`,
+    ensureUser(),
+    ensureGroup(permissions.users),
+    function (req, res) {
+      const target = encodeURIComponent(req.body.target);
+      const fromFormat = encodeURIComponent(req.body.from);
+      const fromtype = encodeURIComponent(req.body.fromtype);
+      const to = encodeURIComponent(req.body.to);
+      const totype = encodeURIComponent(req.body.totype);
+      const time = encodeURIComponent(req.body.time)
+        .replace(/%20/g, " ")
+        .replace(/%3A/g, ":");
+
+      execFile(
+        "python",
+        [
+          "private/api/spice/chronos.py",
+          target,
+          fromFormat,
+          fromtype,
+          to,
+          totype,
+          time,
+        ],
+        function (error, stdout, stderr) {
+          if (error) logger("error", "chronos failure:", "server", null, error);
+          res.send(stdout);
+        }
+      );
+    }
+  );
+
+  //utils chronos (spice time converter)
+  app.get(
+    `${ROOT_PATH}/api/utils/proj42wkt`,
+    ensureUser(),
+    ensureGroup(permissions.users),
+    function (req, res) {
+      const proj4 = encodeURIComponent(req.query.proj4);
+
+      execFile(
+        "python",
+        ["private/api/proj42wkt.py", proj4],
+        function (error, stdout, stderr) {
+          if (error)
+            logger("error", "proj42wkt failure:", "server", null, error);
+          res.send(stdout);
         }
       );
     }

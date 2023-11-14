@@ -414,6 +414,7 @@ var Formulae_ = {
         var incline = Math.atan(y / x) * (180 / Math.PI)
         return incline
     },
+    azElRangeToLngLatEl: function (az, el, range) {},
     //closest point on line from point
     //all of form {x: X, y: Y}
     //p point, v and w line endpoints
@@ -1450,6 +1451,72 @@ var Formulae_ = {
         string += ']}'
         return string
     },
+    // https://github.com/mapbox/simplestyle-spec
+    geoJSONForceSimpleStyleSpec(
+        geojson,
+        stringifyPropertyObjects,
+        defaultStyle,
+        useKeyAsName
+    ) {
+        const defStyle = defaultStyle
+            ? JSON.parse(JSON.stringify(defaultStyle))
+            : {}
+
+        const g = JSON.parse(JSON.stringify(geojson))
+        g.features.forEach((f) => {
+            let pstyle = f.properties.style || {}
+
+            if (useKeyAsName && f.properties[useKeyAsName] != null) {
+                if (typeof f.properties[useKeyAsName] === 'number')
+                    f.properties[useKeyAsName] = `${f.properties[useKeyAsName]}`
+            }
+
+            if (f.geometry.type.toLowerCase() === 'point') {
+                if (pstyle.fillColor != null)
+                    f.properties['marker-color'] = pstyle.fillColor
+                else if (defStyle.fillColor != null)
+                    f.properties['marker-color'] = defStyle.fillColor
+            }
+            // style.color -> stroke
+            if (pstyle.color != null) f.properties['stroke'] = pstyle.color
+            else if (defStyle.color != null)
+                f.properties['stroke'] = defStyle.color
+            // style.opacity -> stroke-opacity
+            if (pstyle.opacity != null)
+                f.properties['stroke-opacity'] = pstyle.opacity
+            if (defStyle.opacity != null)
+                f.properties['stroke-opacity'] = defStyle.opacity
+            // style.weight -> stroke-width
+            if (pstyle.weight != null)
+                f.properties['stroke-width'] = pstyle.weight
+            if (defStyle.weight != null)
+                f.properties['stroke-width'] = defStyle.weight
+            // style.fillColor -> fill
+            if (pstyle.fillColor != null)
+                f.properties['fill'] = pstyle.fillColor
+            if (defStyle.fillColor != null)
+                f.properties['fill'] = defStyle.fillColor
+            // style.fillOpacity -> fill-opacity
+            if (pstyle.fillOpacity != null)
+                f.properties['fill-opacity'] = pstyle.fillOpacity
+            if (defStyle.fillOpacity != null)
+                f.properties['fill-opacity'] = defStyle.fillOpacity
+
+            if (stringifyPropertyObjects)
+                Object.keys(f.properties).forEach((p) => {
+                    const val = f.properties[p]
+                    if (
+                        typeof val === 'object' &&
+                        !Array.isArray(val) &&
+                        val !== null
+                    ) {
+                        let str = JSON.stringify(val).replaceAll(`"`, '')
+                        f.properties[p] = str.substring(1, str.length - 1)
+                    }
+                })
+        })
+        return g
+    },
     // Gets all tiles with tile xyz at zoom z
     tilesWithin(xyz, z) {
         let tiles = []
@@ -1627,7 +1694,7 @@ var Formulae_ = {
         var cvd = document.body.appendChild(cv)
         return cv.toDataURL()
     },
-    downloadObject(exportObj, exportName, exportExt) {
+    downloadObject(exportObj, exportName, exportExt, downloadType) {
         var strung
         if (typeof exportObj === 'string') {
             strung = exportObj
@@ -1651,7 +1718,7 @@ var Formulae_ = {
         try {
             // Create a blob of the data
             var fileToSave = new Blob([strung], {
-                type: 'application/json',
+                type: `application/${downloadType || 'json'}`,
                 name: fileName,
             })
             // Save the file //from FileSaver
@@ -1659,7 +1726,8 @@ var Formulae_ = {
         } catch (err) {
             //https://stackoverflow.com/questions/19721439/download-json-object-as-a-file-from-browser#answer-30800715
             var dataStr =
-                'data:text/json;charset=utf-8,' + encodeURIComponent(strung)
+                `data:text/${downloadType || 'json'};charset=utf-8,` +
+                encodeURIComponent(strung)
             var downloadAnchorNode = document.createElement('a')
             downloadAnchorNode.setAttribute('href', dataStr)
             downloadAnchorNode.setAttribute('download', fileName)
@@ -1810,6 +1878,50 @@ var Formulae_ = {
         image.style.color = 'rgb(255, 255, 255)'
         image.style.color = stringToTest
         return image.style.color !== 'rgb(255, 255, 255)'
+    },
+    //From https://codepen.io/chanthy/pen/WxQoVG
+    canvasDrawArrow(ctx, fromx, fromy, tox, toy, arrowWidth, color) {
+        //variables to be used when creating the arrow
+        let headlen = 10
+        let angle = Math.atan2(toy - fromy, tox - fromx)
+
+        ctx.save()
+        ctx.strokeStyle = color
+
+        //starting path of the arrow from the start square to the end square
+        //and drawing the stroke
+        ctx.beginPath()
+        ctx.moveTo(fromx, fromy)
+        ctx.lineTo(tox, toy)
+        ctx.lineWidth = arrowWidth
+        ctx.stroke()
+
+        //starting a new path from the head of the arrow to one of the sides of
+        //the point
+        ctx.beginPath()
+        ctx.moveTo(tox, toy)
+        ctx.lineTo(
+            tox - headlen * Math.cos(angle - Math.PI / 7),
+            toy - headlen * Math.sin(angle - Math.PI / 7)
+        )
+
+        //path from the side point of the arrow, to the other side point
+        ctx.lineTo(
+            tox - headlen * Math.cos(angle + Math.PI / 7),
+            toy - headlen * Math.sin(angle + Math.PI / 7)
+        )
+
+        //path from the side point back to the tip of the arrow, and then
+        //again to the opposite side point
+        ctx.lineTo(tox, toy)
+        ctx.lineTo(
+            tox - headlen * Math.cos(angle - Math.PI / 7),
+            toy - headlen * Math.sin(angle - Math.PI / 7)
+        )
+
+        //draws the paths created above
+        ctx.stroke()
+        ctx.restore()
     },
     timestampToDate(timestamp, small) {
         var a = new Date(timestamp * 1000)
