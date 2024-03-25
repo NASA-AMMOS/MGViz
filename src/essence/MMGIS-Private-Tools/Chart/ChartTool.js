@@ -373,7 +373,7 @@ var ChartTool = {
         ToolController_.activeTool.site = selectedSite;
         var features = { properties: { site: selectedSite } };
         ToolController_.activeTool.use(features);
-        // ToolController_.getTool('SearchTool').search([String(selectedSite)], 'Sites');
+        ToolController_.getTool('SearchTool').search([String(selectedSite)], 'Sites');
       }
     });
     $('#siteSelect').on('change', function () {
