@@ -666,7 +666,6 @@ async function makeLayer(layerObj, evenIfOff, forceGeoJSON) {
 
         function keepGoing() {
             L_.setLastActivePoint(layer)
-            L_.resetLayerFills()
             layer.setStyle({ fillColor: 'red' })
             Map_.activeLayer = layer
             Description.updatePoint(Map_.activeLayer)
@@ -1553,6 +1552,11 @@ function buildToolBar() {
 }
 
 function clearOnMapClick(event) {
+    // Skip if ChartTool is being used
+    if (ToolController_.activeToolName == 'ChartTool') {
+        return
+    }
+
     if (Map_._justSetActiveLayer) {
         Map_._justSetActiveLayer = false
         return
