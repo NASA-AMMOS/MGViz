@@ -245,6 +245,11 @@ var ChartTool = {
           .text(value));
       });
     }
+
+    // Reload sites on map and chart the last selected
+    ToolController_.activeToolName = 'ChartTool'
+    ToolController_.getTool('SearchTool').search(this.previousSites, 'Sites')
+
     this.previousSites = [];
     $('#selectSource').val(this.source);
     $('#selectFilter').val(this.fil);

@@ -507,7 +507,9 @@ function doWithSearch( doX, forceX, forceSTS, isURLSearch ) {
           newActive.parent().css( { 'background': ToolController_.activeBG } );
           ToolController_.makeTool( 'ChartTool' );
         }
-        ToolController_.getTool( 'ChartTool' ).use( selectLayers[i].feature, ((i == 0) ? noreset : true) );
+        if (i < 5) { // Only cycle through the first 5
+          ToolController_.getTool( 'ChartTool' ).use( selectLayers[i].feature, ((i == 0) ? noreset : true) );
+        }
       }
       // if( !isURLSearch ) {
       //   QueryURL.writeSearchURL( x, SearchTool.lname );
