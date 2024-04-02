@@ -48,13 +48,30 @@ else:
     print(f'{test_file} does not exist')
     exit()
 
+palette = []
 plotline_dict = {"color": "blue", "dashStyle": "solid", "width": 2}
 plotlines = []
 
+plotband_dict = {'color': '#FCFFC5'}
+plotbands = []
+
+
 for detection in tacls['detections']:
+    # startdate
     plotline = plotline_dict.copy()
     plotline['value'] = detection['startdate']
     plotlines.append(plotline)
+    # enddate
+    plotline = plotline_dict.copy()
+    plotline['value'] = detection['enddate']
+    plotlines.append(plotline)
+    # shade
+    plotband = plotband_dict.copy()
+    plotband['from'] = detection['startdate']
+    plotband['to'] = detection['enddate']
+    plotbands.append(plotband)
 
-print((json.dumps(plotlines)))
+dicts = {'plotlines': plotlines, 'plotbands': plotbands}
+# print((json.dumps(plotlines)))
+print((json.dumps(dicts)))
 sys.exit()

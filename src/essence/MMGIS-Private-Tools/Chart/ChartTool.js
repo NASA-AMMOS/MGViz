@@ -1179,11 +1179,15 @@ var ChartTool = {
                 dataType: 'json',
                 async: false,
                 success: function (data) {
+                  let plotlines = data.plotlines
+                  let plotbands = data.plotbands
                   for (i in optionsn.xAxis.plotLines) {
-                    data.push(optionsn.xAxis.plotLines[i])
+                    plotlines.push(optionsn.xAxis.plotLines[i])
                   }
-                  optionsn.xAxis.plotLines = data;
+                  optionsn.xAxis.plotLines = plotlines;
+                  optionsn.xAxis.plotBands = plotbands;
                   console.log(optionsn.xAxis.plotLines);
+                  console.log(optionsn.xAxis.plotBands);
                 },
                 error: function (jqXHR, textStatus, errorThrown) {
                   console.log(errorThrown);
@@ -1277,11 +1281,15 @@ var ChartTool = {
                 dataType: 'json',
                 async: false,
                 success: function (data) {
+                  let plotlines = data.plotlines
+                  let plotbands = data.plotbands
                   for (i in optionse.xAxis.plotLines) {
-                    data.push(optionse.xAxis.plotLines[i])
+                    plotlines.push(optionse.xAxis.plotLines[i])
                   }
-                  optionse.xAxis.plotLines = data;
+                  optionse.xAxis.plotLines = plotlines;
+                  optionse.xAxis.plotBands = plotbands;
                   console.log(optionse.xAxis.plotLines);
+                  console.log(optionse.xAxis.plotBands);
                 },
                 error: function (jqXHR, textStatus, errorThrown) {
                   console.log(errorThrown);
@@ -1375,11 +1383,15 @@ var ChartTool = {
                 dataType: 'json',
                 async: false,
                 success: function (data) {
+                  let plotlines = data.plotlines
+                  let plotbands = data.plotbands
                   for (i in optionsu.xAxis.plotLines) {
-                    data.push(optionsu.xAxis.plotLines[i])
+                    plotlines.push(optionsu.xAxis.plotLines[i])
                   }
-                  optionsu.xAxis.plotLines = data;
+                  optionsu.xAxis.plotLines = plotlines;
+                  optionsu.xAxis.plotBands = plotbands;
                   console.log(optionsu.xAxis.plotLines);
+                  console.log(optionsu.xAxis.plotBands);
                 },
                 error: function (jqXHR, textStatus, errorThrown) {
                   console.log(errorThrown);
