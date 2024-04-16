@@ -32,46 +32,46 @@ types = {'detrend': 'Detrend',
          'strain': 'Strain',
          'raw': 'Raw'}
 
-name = site + ': ' + str(sources[source]) + '/' + filters[fil] + '/' + types[ttype] + ' -'
-# test_file = 'private/eseses/tacls/' + site + '.json'
-# file_list = glob.glob('private/eseses/tacls/' + 
-#                       site + '-WNAM_' + filters[fil].replace(' ', '_') + '_' + types[ttype] +
-#                       'NeuTimeSeries_' + source + '_*.json')
-file_list = glob.glob('private/eseses/tacls/' + site + '*.json')
-for f in sorted(file_list):
-    test_file = f
-if os.path.exists(test_file):
-    with open(test_file, 'r') as f:
-        tacls = json.load(f)
-    # print('\n' + json.dumps(tacls, indent=4) + '\n')
-else:
-    print(f'{test_file} does not exist')
-    exit()
-
-palette = []
-plotline_dict = {"color": "blue", "dashStyle": "solid", "width": 2}
+metadata = []
 plotlines = []
-
-plotband_dict = {'color': '#FCFFC5'}
 plotbands = []
+name = site + ': ' + str(sources[source]) + '/' + filters[fil] + '/' + types[ttype] + ' -'
+file_list = glob.glob('private/eseses/tacls/' + site + '*.json')
+for idx, f in enumerate(sorted(file_list)):
+    test_file = f
+    if os.path.exists(test_file):
+        with open(test_file, 'r') as f:
+            tacls = json.load(f)
+            # print('\n' + json.dumps(tacls, indent=4) + '\n')
+    else:
+        print(f'{test_file} does not exist')
+
+    palette_line = ["#ffd92f", "#8da0cb", "#e78ac3", "#a6d854", "#377eb8"]
+    plotline_dict = {"color": palette_line[idx], "dashStyle": "solid", "width": 2}
 
 
-for detection in tacls['detections']:
-    # startdate
-    plotline = plotline_dict.copy()
-    plotline['value'] = detection['startdate']
-    plotlines.append(plotline)
-    # enddate
-    plotline = plotline_dict.copy()
-    plotline['value'] = detection['enddate']
-    plotlines.append(plotline)
-    # shade
-    plotband = plotband_dict.copy()
-    plotband['from'] = detection['startdate']
-    plotband['to'] = detection['enddate']
-    plotbands.append(plotband)
+    palette_dict = ["rgb(255, 242, 174, 0.5)", "rgb(203, 213, 232, 0.5)", "rgb(244, 202, 228, 0.5)", "#rgb(230, 245, 201, 0.5)", "rgb(179, 205, 227, 0.5)"]
+    plotband_dict = {"color": palette_dict[idx]}
 
-dicts = {'plotlines': plotlines, 'plotbands': plotbands}
-# print((json.dumps(plotlines)))
-print((json.dumps(dicts)))
+    for detection in tacls['detections']:
+        # startdate
+        plotline = plotline_dict.copy()
+        plotline['value'] = detection['startdate']
+        plotlines.append(plotline)
+        # enddate
+        plotline = plotline_dict.copy()
+        plotline['value'] = detection['enddate']
+        plotlines.append(plotline)
+        # shade
+        plotband = plotband_dict.copy()
+        plotband['from'] = detection['startdate']
+        plotband['to'] = detection['enddate']
+        plotbands.append(plotband)
+
+    tacls['metadata']['color'] = palette_line[idx]
+    metadata.append(tacls['metadata'])
+
+results = {'metadata': metadata, 'plotlines': plotlines, 'plotbands': plotbands}
+
+print(json.dumps(results))
 sys.exit()
