@@ -85,6 +85,7 @@ var ChartTool = {
   east: 'e',
   up: 'u',
   coseismics: true,
+  sse: true,
   stackOn: false,
   offset: 10,
   previousSites: [],
@@ -119,7 +120,7 @@ var ChartTool = {
       '<input type="checkbox" name="checkeast" value="e" checked="checked"><span style="font-size:13px;"> East</span><br>',
       '<input type="checkbox" name="checkup" value="u" checked="checked"><span style="font-size:13px;"> Up</span><br>',
       '<input type="checkbox" name="checkOffsets" value="true" checked="checked"><span style="font-size:13px;"> Show Offsets</span><br>',
-      '<input type="checkbox" name="checkModels" value="true" checked="checked"><span style="font-size:13px;"> Slow-Slip Events</span><br>',
+      '<input type="checkbox" name="checkSse" value="true" checked="checked"><span style="font-size:13px;"> Slow-Slip Events</span><br>',
       '<input type="checkbox" name="checkStack" value="true"><span style="font-size:13px;"> Stack On Charts</span><br>',
       '<input type="checkbox" name="checkSeparation" value="true" checked="checked" style="margin-bottom:8px;"><span style="font-size:13px;"> Stack Separation</span><br>',
       '<input id="textOffset" type="text" value="' + this.offset + '" name="offset" maxLength="4" style="color:#000000;width:40px;margin-bottom:10px;"/>',
@@ -288,6 +289,7 @@ var ChartTool = {
       $('input[name=checkup]').prop("checked", false);
     }
     $('input[name=checkOffsets]').prop("checked", this.coseismics);
+    $('input[name=checkSse]').prop("checked", this.sse);
     $('input[name=checkStack]').prop("checked", this.stackOn);
     if (this.offset == 0) {
       $('input[name=checkSeparation]').prop("checked", false);
@@ -343,6 +345,12 @@ var ChartTool = {
       ToolController_.activeTool.coseismics = this.checked;
       var siteOptions = new SiteOptions($('#siteSelect').val(), ChartTool.source, ChartTool.fil, ChartTool.type);
       ToolController_.activeTool.loadChart(siteOptions, [ChartTool.north, ChartTool.east, ChartTool.up], coseismics, ChartTool.offset, ChartTool.stackOn);
+    });
+    $('input[name=checkSse]').click(function () {
+      var sse = this.sse;
+      ToolController_.activeTool.sse = this.checked;
+      var siteOptions = new SiteOptions($('#siteSelect').val(), ChartTool.source, ChartTool.fil, ChartTool.type);
+      ToolController_.activeTool.loadChart(siteOptions, [ChartTool.north, ChartTool.east, ChartTool.up], ChartTool.coseismics, ChartTool.offset, ChartTool.stackOn);
     });
     $('input[name=checkStack]').click(function () {
       var stackOn = this.checked;
@@ -1083,7 +1091,7 @@ var ChartTool = {
     var asyncn = [];
     var asynce = [];
     var asyncu = [];
-    var legendDefaultText = 'All selected sites shown. Click series below to remove from chart.';
+    var legendDefaultText = 'All selected sites shown. Click series below to view metadata or remove from chart.';
     var legendText = legendDefaultText;
 
     for (var i = 0; i < sites.length; i++) {
@@ -1174,43 +1182,44 @@ var ChartTool = {
                 optionsn.xAxis.plotLines = datan['plotlines'];
               }
               // experimental tacls data
-              let sync_tacls = $.ajax({
-                url: 'api/eseses/tacls/' + site + '/' + source + '/' + fil + '/' + type + '/n',
-                dataType: 'json',
-                async: false,
-                success: function (results) {
-                  let label = 'TACLS'
-                  for (var a = 0; a < results.metadata.length; a++) {  
-                    label = results.metadata[a].label
-                    var series = {
-                      name: label,
-                      color: results.metadata[a].color,
-                      opacity: 0.8,
-                      animation: false,
-                      marker: {
-                        enabled: false
-                      },
-                      legendIndex: 20+a
+              if (ChartTool.sse) {
+                let sync_tacls = $.ajax({
+                  url: 'api/eseses/tacls/' + site + '/' + source + '/' + fil + '/' + type + '/n',
+                  dataType: 'json',
+                  async: false,
+                  success: function (results) {
+                    let label = 'TACLS'
+                    for (var a = 0; a < results.metadata.length; a++) {  
+                      label = results.metadata[a].label
+                      var series = {
+                        name: label,
+                        color: results.metadata[a].color,
+                        opacity: 0.8,
+                        animation: false,
+                        marker: {
+                          enabled: false
+                        },
+                        legendIndex: 20+a
+                      }
+                      optionsn.series.push(series)
+                      options.series.push(series)
+                    }             
+                    let plotlines = results.plotlines
+                    let plotbands = results.plotbands
+                    for (var i in optionsn.xAxis.plotLines) {
+                      plotlines.push(optionsn.xAxis.plotLines[i])
                     }
-                    optionsn.series.push(series)
-                    options.series.push(series)
-                  }             
-                  let plotlines = results.plotlines
-                  let plotbands = results.plotbands
-                  for (var i in optionsn.xAxis.plotLines) {
-                    plotlines.push(optionsn.xAxis.plotLines[i])
+                    optionsn.xAxis.plotLines = plotlines;
+                    optionsn.xAxis.plotBands = plotbands;
+
+                    // const Chart0 = Highcharts.charts.find(chart => chart && chart.renderTo.id === 'chart0');
+                    // Chart0.series.append(series)
+                  },
+                  error: function (jqXHR, textStatus, errorThrown) {
+                    console.log(errorThrown);
                   }
-                  optionsn.xAxis.plotLines = plotlines;
-                  optionsn.xAxis.plotBands = plotbands;
-
-                  // const Chart0 = Highcharts.charts.find(chart => chart && chart.renderTo.id === 'chart0');
-                  // Chart0.series.append(series)
-                },
-                error: function (jqXHR, textStatus, errorThrown) {
-                  console.log(errorThrown);
-                }
-              })
-
+                })
+              }
             },
             error: function (jqXHR, textStatus, errorThrown) {
               optionsn = null;
@@ -1292,43 +1301,44 @@ var ChartTool = {
                 optionse.xAxis.plotLines = datae['plotlines'];
               }
               // experimental tacls data
-              let sync_tacls = $.ajax({
-                url: 'api/eseses/tacls/' + site + '/' + source + '/' + fil + '/' + type + '/e',
-                dataType: 'json',
-                async: false,
-                success: function (results) {
-                  let label = 'TACLS'
-                  for (var a = 0; a < results.metadata.length; a++) {  
-                    label = results.metadata[a].label
-                    var series = {
-                      name: label,
-                      color: results.metadata[a].color,
-                      opacity: 0.8,
-                      animation: false,
-                      marker: {
-                        enabled: false
-                      },
-                      legendIndex: 20+a
+              if (ChartTool.sse) {
+                let sync_tacls = $.ajax({
+                  url: 'api/eseses/tacls/' + site + '/' + source + '/' + fil + '/' + type + '/e',
+                  dataType: 'json',
+                  async: false,
+                  success: function (results) {
+                    let label = 'TACLS'
+                    for (var a = 0; a < results.metadata.length; a++) {  
+                      label = results.metadata[a].label
+                      var series = {
+                        name: label,
+                        color: results.metadata[a].color,
+                        opacity: 0.8,
+                        animation: false,
+                        marker: {
+                          enabled: false
+                        },
+                        legendIndex: 20+a
+                      }
+                      optionse.series.push(series)
+                      options.series.push(series)
+                    }             
+                    let plotlines = results.plotlines
+                    let plotbands = results.plotbands
+                    for (var i in optionse.xAxis.plotLines) {
+                      plotlines.push(optionse.xAxis.plotLines[i])
                     }
-                    optionse.series.push(series)
-                    options.series.push(series)
-                  }             
-                  let plotlines = results.plotlines
-                  let plotbands = results.plotbands
-                  for (var i in optionse.xAxis.plotLines) {
-                    plotlines.push(optionse.xAxis.plotLines[i])
+                    optionse.xAxis.plotLines = plotlines;
+                    optionse.xAxis.plotBands = plotbands;
+
+                    // const Chart0 = Highcharts.charts.find(chart => chart && chart.renderTo.id === 'chart0');
+                    // Chart0.series.append(series)
+                  },
+                  error: function (jqXHR, textStatus, errorThrown) {
+                    console.log(errorThrown);
                   }
-                  optionse.xAxis.plotLines = plotlines;
-                  optionse.xAxis.plotBands = plotbands;
-
-                  // const Chart0 = Highcharts.charts.find(chart => chart && chart.renderTo.id === 'chart0');
-                  // Chart0.series.append(series)
-                },
-                error: function (jqXHR, textStatus, errorThrown) {
-                  console.log(errorThrown);
-                }
-              })
-
+                })
+              }
             },
             error: function (jqXHR, textStatus, errorThrown) {
               optionse = null;
@@ -1410,41 +1420,43 @@ var ChartTool = {
                 optionsu.xAxis.plotLines = datau['plotlines'];
               }
               // experimental tacls data
-              let sync_tacls = $.ajax({
-                url: 'api/eseses/tacls/' + site + '/' + source + '/' + fil + '/' + type + '/u',
-                dataType: 'json',
-                async: false,
-                success: function (results) {
-                  let label = 'TACLS'
-                  for (var a = 0; a < results.metadata.length; a++) {  
-                    label = results.metadata[a].label
-                    var series = {
-                      name: label,
-                      color: results.metadata[a].color,
-                      opacity: 0.8,
-                      animation: false,
-                      marker: {
-                        enabled: false
-                      },
-                      legendIndex: 20+a
+              if (ChartTool.sse) {
+                let sync_tacls = $.ajax({
+                  url: 'api/eseses/tacls/' + site + '/' + source + '/' + fil + '/' + type + '/u',
+                  dataType: 'json',
+                  async: false,
+                  success: function (results) {
+                    let label = 'TACLS'
+                    for (var a = 0; a < results.metadata.length; a++) {  
+                      label = results.metadata[a].label
+                      var series = {
+                        name: label,
+                        color: results.metadata[a].color,
+                        opacity: 0.8,
+                        animation: false,
+                        marker: {
+                          enabled: false
+                        },
+                        legendIndex: 20+a
+                      }
+                      optionsu.series.push(series)
+                      options.series.push(series)
+                    }             
+                    let plotlines = results.plotlines
+                    let plotbands = results.plotbands
+                    for (var i in optionsu.xAxis.plotLines) {
+                      plotlines.push(optionsu.xAxis.plotLines[i])
                     }
-                    optionsu.series.push(series)
-                    options.series.push(series)
-                  }             
-                  let plotlines = results.plotlines
-                  let plotbands = results.plotbands
-                  for (var i in optionsu.xAxis.plotLines) {
-                    plotlines.push(optionsu.xAxis.plotLines[i])
+                    optionsu.xAxis.plotLines = plotlines;
+                    optionsu.xAxis.plotBands = plotbands;
+                    // const Chart0 = Highcharts.charts.find(chart => chart && chart.renderTo.id === 'chart0');
+                    // Chart0.series.append(series)
+                  },
+                  error: function (jqXHR, textStatus, errorThrown) {
+                    console.log(errorThrown);
                   }
-                  optionsu.xAxis.plotLines = plotlines;
-                  optionsu.xAxis.plotBands = plotbands;
-                  // const Chart0 = Highcharts.charts.find(chart => chart && chart.renderTo.id === 'chart0');
-                  // Chart0.series.append(series)
-                },
-                error: function (jqXHR, textStatus, errorThrown) {
-                  console.log(errorThrown);
-                }
-              })
+                })
+              }
             },
             error: function (jqXHR, textStatus, errorThrown) {
               optionsu = null;
@@ -1498,6 +1510,28 @@ var ChartTool = {
               var sname = this.name.split(' - ')[0];
               // Ignore offsets
               if (this.name.includes('seismic')) {
+                return false;
+              }
+              // View results metadata
+              if (!this.name.includes(':')) {
+                let sync_tacls_metadata = $.ajax({
+                  url: 'api/eseses/tacls/' + site + '/' + source + '/' + fil + '/' + type + '/n',
+                  dataType: 'json',
+                  async: false,
+                  success: function (results) {
+                    for (var a = 0; a < results.metadata.length; a++) {
+                      if (results.metadata[a].label == sname) {
+                        let metadata = 'Station ID: ' + results.metadata[a].stationid + '\n' +
+                          'Event Type: ' + results.metadata[a].eventtype + '\n' +
+                          'Model ID: ' + results.metadata[a].modelid
+                        alert(metadata)
+                      }
+                    }
+                  },
+                  error: function (jqXHR, textStatus, errorThrown) {
+                    console.log(errorThrown);
+                  }
+                })
                 return false;
               }
               if (!confirm('Do you want to remove ' + sname + '?')) {
