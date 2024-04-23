@@ -1031,14 +1031,6 @@ var ChartTool = {
         },
         legendIndex: -1
       }, {
-        name: '',
-        color: 'white',
-        animation: false,
-        marker: {
-          enabled: false
-        },
-        legendIndex: 20
-      }, {
         type: 'line',
         zIndex: 99,
         color: 'red',
@@ -1154,12 +1146,12 @@ var ChartTool = {
               if (this.idx == 0) {
                 optionsn.title.text = datan['site'] + '<br>North';
                 optionsn.subtitle.text = 'slope ' + datan['slope'];
-                optionsn.series[3].name = datan['name'] + ' model trace';
-                optionsn.series[4].name = datan['name'] + ' points';
-                optionsn.series[3].data = datan['trace'];
-                optionsn.series[4].data = datan['data'];
-                optionsn.series[3].legendIndex = 4;
-                optionsn.series[4].legendIndex = 3;
+                optionsn.series[2].name = datan['name'] + ' model trace';
+                optionsn.series[3].name = datan['name'] + ' points';
+                optionsn.series[2].data = datan['trace'];
+                optionsn.series[3].data = datan['data'];
+                optionsn.series[2].legendIndex = 3;
+                optionsn.series[3].legendIndex = 2;
               } else {
                 optionsn.subtitle.text = optionsn.subtitle.text + '<br>slope ' + datan['slope'];
                 let offsetTracen = datan['trace'].map(n => [n[0], n[1] == null ? n[1] : (n[1] + offset * (this.idx - errorsn))]);
@@ -1273,12 +1265,12 @@ var ChartTool = {
               if (this.idx == 0) {
                 optionse.title.text = datae['site'] + '<br>East';
                 optionse.subtitle.text = 'slope ' + datae['slope'];
-                optionse.series[3].name = datae['name'] + ' model trace';
-                optionse.series[4].name = datae['name'] + ' points';
-                optionse.series[3].data = datae['trace'];
-                optionse.series[4].data = datae['data'];
-                optionse.series[3].legendIndex = 4;
-                optionse.series[4].legendIndex = 3;
+                optionse.series[2].name = datae['name'] + ' model trace';
+                optionse.series[3].name = datae['name'] + ' points';
+                optionse.series[2].data = datae['trace'];
+                optionse.series[3].data = datae['data'];
+                optionse.series[2].legendIndex = 3;
+                optionse.series[3].legendIndex = 2;
               } else {
                 optionse.subtitle.text = optionse.subtitle.text + '<br>slope ' + datae['slope'];
                 let offsetTracee = datae['trace'].map(n => [n[0], n[1] == null ? n[1] : (n[1] + offset * (this.idx - errorse))]);
@@ -1392,12 +1384,12 @@ var ChartTool = {
               if (this.idx == 0) {
                 optionsu.title.text = datau['site'] + '<br>Up';
                 optionsu.subtitle.text = 'slope ' + datau['slope'];
-                optionsu.series[3].name = datau['name'] + ' model trace';
-                optionsu.series[4].name = datau['name'] + ' points';
-                optionsu.series[3].data = datau['trace'];
-                optionsu.series[4].data = datau['data'];
-                optionsu.series[3].legendIndex = 4;
-                optionsu.series[4].legendIndex = 3;
+                optionsu.series[2].name = datau['name'] + ' model trace';
+                optionsu.series[3].name = datau['name'] + ' points';
+                optionsu.series[2].data = datau['trace'];
+                optionsu.series[3].data = datau['data'];
+                optionsu.series[2].legendIndex = 3;
+                optionsu.series[3].legendIndex = 2;
               } else {
                 optionsu.subtitle.text = optionsu.subtitle.text + '<br>slope ' + datau['slope'];
                 let offsetTraceu = datau['trace'].map(n => [n[0], n[1] == null ? n[1] : (n[1] + offset * (this.idx - errorsu))]);
