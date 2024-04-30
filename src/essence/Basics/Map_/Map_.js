@@ -420,6 +420,10 @@ let Map_ = {
         // use old method for Velocities
         if (layerObj.display_name == 'Velocities') {
             this.map.eachLayer( function (layer) {
+                if (layer.vtId == 'id') {
+                    // Make sure vector tiles don't get lost in the back
+                    layer.bringToFront()
+                }
                 if (layer.vtId == 'site') {
                     // Need to overcome some weirdness with points not being removed
                     Map_.map.removeLayer( layer );
