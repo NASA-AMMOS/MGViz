@@ -778,6 +778,9 @@ var ChartTool = {
     var type = siteOptions.type;
 
     if (stackOn && siteOptions.sites != null) {
+      if (siteOptions.sites.length == 0) {
+        return;
+      }
       // Don't stack previous sites if multiple sites are selected
       if (siteOptions.sites.length > 1) {
         this.siteOptionsList = [];
