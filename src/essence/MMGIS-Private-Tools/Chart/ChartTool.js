@@ -146,6 +146,22 @@ var ChartTool = {
       '<div style="height:95%;width:260px;overflow:auto;"><table id="siteInfo" colspan="2" class="site-table" style="width:240px;"><tbody><tr>',
       '</tr></tbody></table></div>'].join('\n');
 
+    var introHtml = ['<div style="text-align:center;font-size:24px;"><strong>Welcome to MGViz - the MMGIS GNSS Visualizer</strong></div><br></br>',
+      '<div style="font-size:16px;">The map to the right displays GNSS sites and earthquakes. Select a site (blue circle) to display a time series plot of the site\'s data or use the ',
+      '<strong>Load Saved Sites</strong> button near the bottom of the left panel to load a list of sites from an existing file.<br></br>',
+      'Use the Chart Options on the left to change the Source, Type, and Trend/Detrend.<br></br>',
+      'Check/uncheck plot display options as needed. <strong>Stack On Charts</strong> will add data for additionally selected sites (up to 5).',
+      '<strong>Stack Separation</strong> will add a vertical buffer between selected sites to mitigate overlapping points.<br></br>',
+      'More sites may be added by manually inputting the <strong>Site Code</strong> or selecting from the <strong>All Sites</strong> list. ',
+      'Selected sites will show up under the <strong>Saved</strong> list. Deselecting the <strong>Append Site Selection</strong> ',
+      'option will result in only a single site being loaded at a time.<br></br>',
+      'A polygon can also be drawn on the map to select sites. Click on the <strong>Polygon Select</strong> button to begin drawing on the map.',
+      'Click on the first drawn point to complete the polygon selection.<br></br>',
+      'To export the list of saved sites to a file, provide a group name in the <strong>Default Group</strong> ',
+      'text box and then click the <strong>Export Selected</strong> button.<br></br>',
+      'Hitting the <strong>Clear Selected</strong> button will reset the Chart tool.<br></br>',
+      'Additional tools beyond charting may be found on the strip of icons on the far left of the screen.</div>'].join('\n')
+
     var tools = d3.select('#toolPanel');
     tools.selectAll('*').remove();
     tools.style('width', '800px')
@@ -188,6 +204,8 @@ var ChartTool = {
       .style('width', '58%')
       .style('overflow', 'auto')
       .style('display', 'none');
+    this.introDiv = this.contentDiv.append('div')
+      .attr('id', 'introDiv')
     this.chart0Div = this.contentDiv.append('div')
       .attr('id', 'chart0')
       .style('height', '110px')
@@ -244,6 +262,9 @@ var ChartTool = {
           .attr('value', value)
           .text(value));
       });
+    } else {
+      // display initial instructions
+      this.introDiv.html(introHtml)
     }
 
     // Reload sites on map and chart the last selected
@@ -479,6 +500,7 @@ var ChartTool = {
       $('#chart1').hide();
       $('#chart2').hide();
       $('#chart3').hide();
+      $('#introDiv').show();
       $('#textGroup').val('Default Group');
       $('#inputImport').val('');
       ToolController_.activeTool.site = '';
@@ -582,6 +604,13 @@ var ChartTool = {
     $('#siteSelect').val(site);
     var selectedSites = $('#siteSelect').val();
 
+    // display intro HTML if nothing to chart, otherwise remove
+    if (selectedSites.length == 0) {
+      $('#introDiv').show()
+    } else {
+      $('#introDiv').hide()
+    }
+
     site = this.site;
     var sites = this.sites;
     var source = this.source;
@@ -633,6 +662,7 @@ var ChartTool = {
         $('#chart1').hide();
         $('#chart2').hide();
         $('#chart3').hide();
+        $('#introDiv').show()
         ToolController_.activeTool.sites = [];
         L_.resetLayerFills();
       }
@@ -781,6 +811,7 @@ var ChartTool = {
       $('#chart1').empty();
       $('#chart2').empty();
       $('#chart3').empty();
+      $('#introDiv').show()
       return;
     }
     if (sites.length > 1 && coseismics) { // don't show coseismics when selecting multiple sites

@@ -225,6 +225,9 @@ let Map_ = {
 
         //Set the time for any time enabled layers
         TimeControl.updateLayersTime()
+
+        //Open Chart tool
+        ToolController_.makeTool( 'ChartTool' )
     },
     toggleGraticule: function (on) {
         if (on)
