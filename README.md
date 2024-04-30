@@ -3,7 +3,7 @@
 **This is a fork of [MMGIS](https://github.com/NASA-AMMOS/MMGIS) (Multi-Mission Geographic Information System)
 developed for the NASA MEaSUREs project “Extended Solid Earth Science ESDR System” (ESESES)**
 
-**Project specific documentation and setup can be found here: [Missions/MGViz/README.md](Missions/ESESES/README.md)**
+**Project specific documentation and setup can be found here: [Missions/MGViz/README.md](Missions/MGViz/README.md)**
 
 <hr>
 <div align="center">
