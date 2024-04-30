@@ -88,6 +88,7 @@ var ChartTool = {
   stackOn: false,
   offset: 10,
   previousSites: [],
+  append: true,
   make: function () {
     this.MMGISInterface = new interfaceWithMMGIS();
     // window.addEventListener('resize', resizeChartTool);
@@ -363,6 +364,7 @@ var ChartTool = {
     });
     $('input[name=checkAppend]').click(function () {
       if (this.checked) {
+        ToolController_.activeTool.append = true
         var siteList = [];
         if ($('#siteSelect').val() != null) {
           $("#siteSelect option").each(function () {
@@ -370,6 +372,8 @@ var ChartTool = {
           });
         }
         ToolController_.getTool('SearchTool').search(siteList, 'Sites');
+      } else {
+        ToolController_.activeTool.append = false
       }
     });
     $('#buttonApply').click(function () {

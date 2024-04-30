@@ -683,6 +683,9 @@ async function makeLayer(layerObj, evenIfOff, forceGeoJSON) {
                 newActive.parent().css( { 'background': ToolController_.activeBG } );
                 ToolController_.makeTool( 'ChartTool' );
             }
+            if (ToolController_.getTool( 'ChartTool' ).append == false) {
+                L_.resetLayerFills();
+            }
             // get a list of already selected sites
             var sites = [];
             if($('#siteSelect').val() != null) {
