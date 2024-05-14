@@ -332,6 +332,7 @@ function searchWithin( coords ) {
 
   if( selectLayers.length > 1 ){
     var noreset;
+    var nochart = false;
     for( var i = 0; i < selectLayers.length; i++ ){
       selectLayers[i].setStyle({fillColor: 'magenta'});
       selectLayers[i].setRadius(9);
@@ -345,7 +346,10 @@ function searchWithin( coords ) {
         newActive.parent().css( { 'background': ToolController_.activeBG } );
         ToolController_.makeTool( 'ChartTool' );
       }
-      ToolController_.getTool( 'ChartTool' ).use( selectLayers[i].feature, ((i == 0) ? noreset : true) );
+      if (i >= 5) { // Only cycle through the first 5
+        nochart = true;
+      }
+      ToolController_.getTool( 'ChartTool' ).use( selectLayers[i].feature, ((i == 0) ? noreset : true), nochart );
     }
   }
 
@@ -494,6 +498,7 @@ function doWithSearch( doX, forceX, forceSTS, isURLSearch ) {
       // }
     } else if( selectLayers.length > 1 ){
       var noreset;
+      var nochart = false;
       for( var i = 0; i < selectLayers.length; i++ ){
         selectLayers[i].setStyle({fillColor: 'magenta'});
         selectLayers[i].setRadius(9);
@@ -507,13 +512,11 @@ function doWithSearch( doX, forceX, forceSTS, isURLSearch ) {
           newActive.parent().css( { 'background': ToolController_.activeBG } );
           ToolController_.makeTool( 'ChartTool' );
         }
-        if (i < 5) { // Only cycle through the first 5
-          ToolController_.getTool( 'ChartTool' ).use( selectLayers[i].feature, ((i == 0) ? noreset : true) );
+        if (i >= 5) { // Only cycle through the first 5
+          nochart = true;
         }
+        ToolController_.getTool( 'ChartTool' ).use( selectLayers[i].feature, ((i == 0) ? noreset : true), nochart);
       }
-      // if( !isURLSearch ) {
-      //   QueryURL.writeSearchURL( x, SearchTool.lname );
-      // }
     }
 
     if( gotoLayers.length > 0){

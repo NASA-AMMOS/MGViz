@@ -564,7 +564,7 @@ var ChartTool = {
       $('#contentDiv').css('width', '58%');
     });
   },
-  use: function (features, noreset) {
+  use: function (features, noreset, nochart = false) {
     this.features = features;
     try {
       if (ToolController_.activeTool.site == null) {
@@ -629,7 +629,9 @@ var ChartTool = {
     var offset = this.offset;
 
     var siteOptions = new SiteOptions(selectedSites, source, fil, type);
-    this.loadChart(siteOptions, neu, coseismics, offset, stackOn);
+    if (nochart == false) {
+      this.loadChart(siteOptions, neu, coseismics, offset, stackOn);
+    }
 
   },
 
