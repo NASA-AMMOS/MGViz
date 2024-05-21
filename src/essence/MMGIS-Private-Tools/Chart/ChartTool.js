@@ -100,6 +100,7 @@ var ChartTool = {
       '<option selected="selected" value="comb">Combination</option>',
       '<option value="jpl">JPL</option>',
       '<option value="sopac">SOPAC</option>',
+      //'<option value="sopacR20">SOPACR20</option>',
       '</select>',
       '<br>Type:<br>',
       '<select id="selectFilter" style="color:black">',
@@ -293,20 +294,20 @@ var ChartTool = {
     $('#textOffset').val(this.offset);
 
     $('#selectSource').on('change', function (e) {
-      let source = this.value;
-      let siteOptions = new SiteOptions($('#siteSelect').val(), source, ChartTool.fil, ChartTool.type);
+      ChartTool.source = this.value;
+      let siteOptions = new SiteOptions($('#siteSelect').val(), ChartTool.source, ChartTool.fil, ChartTool.type);
       ToolController_.activeTool.loadChart(siteOptions, [ChartTool.north, ChartTool.east,ChartTool.up], ChartTool.coseismics, ChartTool.offset, ChartTool.stackOn);
     });
     $('#selectFilter').on('change', function (e) {
-      let fil = this.value;
+      ChartTool.fil = this.value;
       if (typeof ChartTool.source !== "undefined") {
-        let siteOptions = new SiteOptions($('#siteSelect').val(), ChartTool.source, fil, ChartTool.type);
+        let siteOptions = new SiteOptions($('#siteSelect').val(), ChartTool.source, ChartTool.fil, ChartTool.type);
         ToolController_.activeTool.loadChart(siteOptions, [ChartTool.north, ChartTool.east, ChartTool.up], ChartTool.coseismics, ChartTool.offset, ChartTool.stackOn);
       }
     });
     $('#selectType').on('change', function (e) {
-      let type = this.value;
-      let siteOptions = new SiteOptions($('#siteSelect').val(), ChartTool.source, ChartTool.fil, type);
+      ChartTool.type = this.value;
+      let siteOptions = new SiteOptions($('#siteSelect').val(), ChartTool.source, ChartTool.fil, ChartTool.type);
       ToolController_.activeTool.loadChart(siteOptions, [ChartTool.north, ChartTool.east, ChartTool.up], ChartTool.coseismics, ChartTool.offset, ChartTool.stackOn);
     });
     $('input[name=checknorth]').click(function () {
