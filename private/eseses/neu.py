@@ -23,7 +23,8 @@ if str(sys.argv[5]).isalnum():   # n e u
 sources = {'comb' : 'Comb',
         'combg' : 'Combg',
         'jpl' : 'JPL',
-        'sopac' : 'SOPAC'}
+        'sopac' : 'SOPAC',
+        'sopacR20' : 'SOPACR20'}
 
 filters = {'flt' : 'Filter',
         'clean' : 'Clean',

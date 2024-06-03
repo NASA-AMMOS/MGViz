@@ -101,7 +101,7 @@ var ChartTool = {
       '<option selected="selected" value="comb">Combination</option>',
       '<option value="jpl">JPL</option>',
       '<option value="sopac">SOPAC</option>',
-      //'<option value="sopacR20">SOPACR20</option>',
+      '<option value="sopacR20">SOPACR20</option>',
       '</select>',
       '<br>Type:<br>',
       '<select id="selectFilter" style="color:black">',
