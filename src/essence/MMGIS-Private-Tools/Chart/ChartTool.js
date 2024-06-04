@@ -90,6 +90,7 @@ var ChartTool = {
   offset: 10,
   previousSites: [],
   append: true,
+  version: 'default',
   make: function () {
     this.MMGISInterface = new interfaceWithMMGIS();
     // window.addEventListener('resize', resizeChartTool);
@@ -111,10 +112,14 @@ var ChartTool = {
       '<option value="rawm">Raw M</option>',
       '</select>',
       '<br>Trend/Detrend:<br>',
-      '<select id="selectType" style="color:black;margin-bottom:10px;">',
+      '<select id="selectType" style="color:black;">',
       '<option selected="selected" value="detrend">Detrend</option>',
       '<option value="trend">Trend</option>',
       '<option value="resid">Resid</option>',
+      '</select>',
+      '<br>Model Version:<br>',
+      '<select id="selectVersion" style="color:black;margin-bottom:10px;">',
+      '<option selected="selected" value="default">default</option>',
       '</select><br>',
       '<input type="checkbox" name="checknorth" value="n" checked="checked"><span style="font-size:13px;"> North</span><br>',
       '<input type="checkbox" name="checkeast" value="e" checked="checked"><span style="font-size:13px;"> East</span><br>',
@@ -242,6 +247,24 @@ var ChartTool = {
     $('#contentDiv').css('left', '188px');
     $('#contentDiv').css('width', '620px');
 
+    // Query TACLS metadata
+    $.ajax({
+      type: 'GET',
+      url: 'api/eseses/tacls',
+      dataType: 'json',
+      success: function (data) {
+        $('#selectVersion').empty()
+          $.each(data['versions'], function (key, value) {
+            $('#selectVersion').append($('<option></option>')
+              .attr('value', value)
+              .text(value));
+          });
+      },
+      error: function (jqXHR, textStatus, errorThrown) {
+        console.error('Unable to retrieve TACLS metadata');
+      }
+    });
+
     // load list of sites
     $.ajax({
       url: 'api/eseses/psite',
@@ -299,19 +322,24 @@ var ChartTool = {
     $('#selectSource').on('change', function (e) {
       ChartTool.source = this.value;
       let siteOptions = new SiteOptions($('#siteSelect').val(), ChartTool.source, ChartTool.fil, ChartTool.type);
-      ToolController_.activeTool.loadChart(siteOptions, [ChartTool.north, ChartTool.east,ChartTool.up], ChartTool.coseismics, ChartTool.offset, ChartTool.stackOn);
+      ToolController_.activeTool.loadChart(siteOptions, [ChartTool.north, ChartTool.east,ChartTool.up], ChartTool.coseismics, ChartTool.offset, ChartTool.stackOn, ChartTool.version);
     });
     $('#selectFilter').on('change', function (e) {
       ChartTool.fil = this.value;
       if (typeof ChartTool.source !== "undefined") {
         let siteOptions = new SiteOptions($('#siteSelect').val(), ChartTool.source, ChartTool.fil, ChartTool.type);
-        ToolController_.activeTool.loadChart(siteOptions, [ChartTool.north, ChartTool.east, ChartTool.up], ChartTool.coseismics, ChartTool.offset, ChartTool.stackOn);
+        ToolController_.activeTool.loadChart(siteOptions, [ChartTool.north, ChartTool.east, ChartTool.up], ChartTool.coseismics, ChartTool.offset, ChartTool.stackOn, ChartTool.version);
       }
     });
     $('#selectType').on('change', function (e) {
       ChartTool.type = this.value;
       let siteOptions = new SiteOptions($('#siteSelect').val(), ChartTool.source, ChartTool.fil, ChartTool.type);
-      ToolController_.activeTool.loadChart(siteOptions, [ChartTool.north, ChartTool.east, ChartTool.up], ChartTool.coseismics, ChartTool.offset, ChartTool.stackOn);
+      ToolController_.activeTool.loadChart(siteOptions, [ChartTool.north, ChartTool.east, ChartTool.up], ChartTool.coseismics, ChartTool.offset, ChartTool.stackOn, ChartTool.version);
+    });
+    $('#selectVersion').on('change', function (e) {
+      ChartTool.version = this.value;
+      let siteOptions = new SiteOptions($('#siteSelect').val(), ChartTool.source, ChartTool.fil, ChartTool.type);
+      ToolController_.activeTool.loadChart(siteOptions, [ChartTool.north, ChartTool.east, ChartTool.up], ChartTool.coseismics, ChartTool.offset, ChartTool.stackOn, ChartTool.version);
     });
     $('input[name=checknorth]').click(function () {
       if (this.checked) {
@@ -320,7 +348,7 @@ var ChartTool = {
         var north = 'x';
       }
       var siteOptions = new SiteOptions($('#siteSelect').val(), ChartTool.source, ChartTool.fil, ChartTool.type);
-      ToolController_.activeTool.loadChart(siteOptions, [north, ChartTool.east, ChartTool.up], ChartTool.coseismics, ChartTool.offset, ChartTool.stackOn);
+      ToolController_.activeTool.loadChart(siteOptions, [north, ChartTool.east, ChartTool.up], ChartTool.coseismics, ChartTool.offset, ChartTool.stackOn, ChartTool.version);
     });
     $('input[name=checkeast]').click(function () {
       if (this.checked) {
@@ -329,7 +357,7 @@ var ChartTool = {
         var east = 'x';
       }
       var siteOptions = new SiteOptions($('#siteSelect').val(), ChartTool.source, ChartTool.fil, ChartTool.type);
-      ToolController_.activeTool.loadChart(siteOptions, [ChartTool.north, east, ChartTool.up], ChartTool.coseismics, ChartTool.offset, ChartTool.stackOn);
+      ToolController_.activeTool.loadChart(siteOptions, [ChartTool.north, east, ChartTool.up], ChartTool.coseismics, ChartTool.offset, ChartTool.stackOn, ChartTool.version);
     });
     $('input[name=checkup]').click(function () {
       if (this.checked) {
@@ -338,19 +366,19 @@ var ChartTool = {
         var up = 'x';
       }
       var siteOptions = new SiteOptions($('#siteSelect').val(), ChartTool.source, ChartTool.fil, ChartTool.type);
-      ToolController_.activeTool.loadChart(siteOptions, [ChartTool.north, ChartTool.east, up], ChartTool.coseismics, ChartTool.offset, ChartTool.stackOn);
+      ToolController_.activeTool.loadChart(siteOptions, [ChartTool.north, ChartTool.east, up], ChartTool.coseismics, ChartTool.offset, ChartTool.stackOn, ChartTool.version);
     });
     $('input[name=checkOffsets]').click(function () {
       var coseismics = this.checked;
       ToolController_.activeTool.coseismics = this.checked;
       var siteOptions = new SiteOptions($('#siteSelect').val(), ChartTool.source, ChartTool.fil, ChartTool.type);
-      ToolController_.activeTool.loadChart(siteOptions, [ChartTool.north, ChartTool.east, ChartTool.up], coseismics, ChartTool.offset, ChartTool.stackOn);
+      ToolController_.activeTool.loadChart(siteOptions, [ChartTool.north, ChartTool.east, ChartTool.up], coseismics, ChartTool.offset, ChartTool.stackOn, ChartTool.version);
     });
     $('input[name=checkSse]').click(function () {
       var sse = this.sse;
       ToolController_.activeTool.sse = this.checked;
       var siteOptions = new SiteOptions($('#siteSelect').val(), ChartTool.source, ChartTool.fil, ChartTool.type);
-      ToolController_.activeTool.loadChart(siteOptions, [ChartTool.north, ChartTool.east, ChartTool.up], ChartTool.coseismics, ChartTool.offset, ChartTool.stackOn);
+      ToolController_.activeTool.loadChart(siteOptions, [ChartTool.north, ChartTool.east, ChartTool.up], ChartTool.coseismics, ChartTool.offset, ChartTool.stackOn, ChartTool.version);
     });
     $('input[name=checkStack]').click(function () {
       var stackOn = this.checked;
@@ -360,7 +388,7 @@ var ChartTool = {
       }
       if (typeof ChartTool.source !== "undefined") {
         var siteOptions = new SiteOptions($('#siteSelect').val(), ChartTool.source, ChartTool.fil, ChartTool.type);
-        ToolController_.activeTool.loadChart(siteOptions, [ChartTool.north, ChartTool.east, ChartTool.up], ChartTool.coseismics, ChartTool.offset, stackOn);
+        ToolController_.activeTool.loadChart(siteOptions, [ChartTool.north, ChartTool.east, ChartTool.up], ChartTool.coseismics, ChartTool.offset, stackOn, ChartTool.version);
       }
     });
     $('input[name=checkSeparation]').click(function () {
@@ -370,7 +398,7 @@ var ChartTool = {
         var offset = 0;
       }
       var siteOptions = new SiteOptions($('#siteSelect').val(), ChartTool.source, ChartTool.fil, ChartTool.type);
-      ToolController_.activeTool.loadChart(siteOptions, [ChartTool.north, ChartTool.east, ChartTool.up], ChartTool.coseismics, offset, ChartTool.stackOn);
+      ToolController_.activeTool.loadChart(siteOptions, [ChartTool.north, ChartTool.east, ChartTool.up], ChartTool.coseismics, offset, ChartTool.stackOn, ChartTool.version);
     });
     $('input[name=checkAppend]').click(function () {
       if (this.checked) {
@@ -392,7 +420,7 @@ var ChartTool = {
         offset = $('#textOffset').val();
       }
       var siteOptions = new SiteOptions($('#siteSelect').val(), ChartTool.source, ChartTool.fil, ChartTool.type);
-      ToolController_.activeTool.loadChart(siteOptions, [ChartTool.north, ChartTool.east, ChartTool.up], ChartTool.coseismics, offset, ChartTool.stackOn);
+      ToolController_.activeTool.loadChart(siteOptions, [ChartTool.north, ChartTool.east, ChartTool.up], ChartTool.coseismics, offset, ChartTool.stackOn, ChartTool.version);
     });
     $('#buttonRemove').click(function () {
       ToolController_.getTool('SearchTool').remove($('#siteSelect').val(), 'Sites');
@@ -401,7 +429,7 @@ var ChartTool = {
       ToolController_.activeTool.siteOptionsList = [];
       $("#siteSelect").val($("#siteSelect option:first").val());
       var siteOptions = new SiteOptions($('#siteSelect').val(), ChartTool.source, ChartTool.fil, ChartTool.type);
-      ToolController_.activeTool.loadChart(siteOptions, [ChartTool.north, ChartTool.east, ChartTool.up], ChartTool.coseismics, ChartTool.offset, ChartTool.stackOn);
+      ToolController_.activeTool.loadChart(siteOptions, [ChartTool.north, ChartTool.east, ChartTool.up], ChartTool.coseismics, ChartTool.offset, ChartTool.stackOn, ChartTool.version);
     });
     $('#siteSource').click(function () {
       var selectedSites = $('#siteSource').val().toString().split(',')
@@ -419,7 +447,7 @@ var ChartTool = {
     $('#siteSelect').on('change', function () {
       var selectedSites = $('#siteSelect').val();
       var siteOptions = new SiteOptions(selectedSites, ChartTool.source, ChartTool.fil, ChartTool.type);
-      ToolController_.activeTool.loadChart(siteOptions, [ChartTool.north, ChartTool.east, ChartTool.up], ChartTool.coseismics, ChartTool.offset, ChartTool.stackOn);
+      ToolController_.activeTool.loadChart(siteOptions, [ChartTool.north, ChartTool.east, ChartTool.up], ChartTool.coseismics, ChartTool.offset, ChartTool.stackOn, ChartTool.version);
       ToolController_.getTool('SearchTool').search([selectedSites[selectedSites.length - 1]], 'Sites');
     });
     $('#buttonAdd').click(function () {
@@ -637,10 +665,11 @@ var ChartTool = {
     var coseismics = this.coseismics;
     var stackOn = this.stackOn;
     var offset = this.offset;
+    var version = this.version
 
     var siteOptions = new SiteOptions(selectedSites, source, fil, type);
     if (nochart == false) {
-      this.loadChart(siteOptions, neu, coseismics, offset, stackOn);
+      this.loadChart(siteOptions, neu, coseismics, offset, stackOn, version);
     }
 
   },
@@ -783,7 +812,7 @@ var ChartTool = {
     };
 
   },
-  loadChart: function (siteOptions, neu, coseismics, offset, stackOn) { // sites, source, fil, type, neu, coseismics, offset
+  loadChart: function (siteOptions, neu, coseismics, offset, stackOn, version) { // sites, source, fil, type, neu, coseismics, offset, stackOn, version
     var sites = siteOptions.sites;
     var source = siteOptions.source;
     var fil = siteOptions.fil;
@@ -1176,7 +1205,7 @@ var ChartTool = {
               // experimental tacls data
               if (ChartTool.sse) {
                 let sync_tacls = $.ajax({
-                  url: 'api/eseses/tacls/' + site + '/' + source + '/' + fil + '/' + type + '/n',
+                  url: 'api/eseses/tacls/' + site + '/' + source + '/' + fil + '/' + type + '/' + version + '/n',
                   dataType: 'json',
                   async: false,
                   success: function (results) {
@@ -1295,7 +1324,7 @@ var ChartTool = {
               // experimental tacls data
               if (ChartTool.sse) {
                 let sync_tacls = $.ajax({
-                  url: 'api/eseses/tacls/' + site + '/' + source + '/' + fil + '/' + type + '/e',
+                  url: 'api/eseses/tacls/' + site + '/' + source + '/' + fil + '/' + type + '/' + version + '/e' ,
                   dataType: 'json',
                   async: false,
                   success: function (results) {
@@ -1414,7 +1443,7 @@ var ChartTool = {
               // experimental tacls data
               if (ChartTool.sse) {
                 let sync_tacls = $.ajax({
-                  url: 'api/eseses/tacls/' + site + '/' + source + '/' + fil + '/' + type + '/u',
+                  url: 'api/eseses/tacls/' + site + '/' + source + '/' + fil + '/' + type + '/' + version + '/u',
                   dataType: 'json',
                   async: false,
                   success: function (results) {
@@ -1579,7 +1608,8 @@ var ChartTool = {
                   ],
                   ToolController_.activeTool.coseismics,
                   ToolController_.activeTool.offset,
-                  ToolController_.activeTool.stackOn
+                  ToolController_.activeTool.stackOn,
+                  ToolController_.activeTool.version
                 );
                 // Remove from actual legend last
                 // var Chart0 = $('#chart0').highcharts();

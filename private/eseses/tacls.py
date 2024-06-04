@@ -4,6 +4,15 @@ import os.path
 import json
 import glob
 
+path = 'private/eseses/tacls'
+
+# get versions request
+if (len(sys.argv) == 1):
+    versions = [item for item in os.listdir(path) if os.path.isdir(os.path.join(path, item))]
+    results = {'versions': sorted(versions)}
+    print(json.dumps(results))
+    sys.exit()
+
 # Get args
 if str(sys.argv[1]).isalnum():   # site
     site = sys.argv[1]
@@ -15,6 +24,8 @@ if str(sys.argv[4]).isalnum():   # Trend/Detrend
     ttype = sys.argv[4]
 if str(sys.argv[5]).isalnum():   # n e u
     neu = sys.argv[5]
+if str(sys.argv[6]).isalnum():   # version / source directory
+    version = sys.argv[6]
 
 sources = {'comb': 'Comb',
            'combg': 'Combg',
@@ -36,7 +47,7 @@ metadata = []
 plotlines = []
 plotbands = []
 name = site + ': ' + str(sources[source]) + '/' + filters[fil] + '/' + types[ttype] + ' -'
-file_list = glob.glob('private/eseses/tacls/' + site + '*.json')
+file_list = glob.glob(path + '/' + version + '/' + site + '*.json')
 for idx, f in enumerate(sorted(file_list)):
     test_file = f
     if os.path.exists(test_file):
