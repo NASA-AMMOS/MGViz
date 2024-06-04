@@ -97,6 +97,11 @@ var ChartTool = {
 
     var chartOptions = ['<a href="#" style="float:left;display:none;" id="showInfo">&#187; Show Site Info</a>',
       '<br><br><b>Chart Options</b><br>',
+      '<br>Mode:<br>',
+      '<select id="selectMode" style="color:black">',
+      '<option selected="selected" value="geodetic">Geodetic</option>',
+      '<option value="tropospheric">Tropospheric</option>',
+      '</select>',
       '<br>Source:<br>',
       '<select id="selectSource" style="color:black">',
       '<option selected="selected" value="comb">Combination</option>',
