@@ -23,7 +23,8 @@ if str(sys.argv[5]).isalnum():   # n e u
 sources = {'comb' : 'Comb',
         'combg' : 'Combg',
         'jpl' : 'JPL',
-        'sopac' : 'SOPAC'}
+        'sopac' : 'SOPAC',
+        'sopacR20' : 'SOPACR20'}
 
 filters = {'flt' : 'Filter',
         'clean' : 'Clean',
@@ -57,7 +58,7 @@ if raw_file is not None:
         sys.exit()
 if neu_file is not None:
     if os.path.exists(neu_file):
-        f = open(neu_file, 'r')
+        neuf = open(neu_file, 'r')
     else:
         print(('{"err": "Data not found for ' + site + '/' + source + '/' + fil + '/' + ttype + '/' + neu + '. ' + neu_file + '."}'))
         if raw_file is not None:
@@ -336,7 +337,7 @@ def calculate_points(modelTerms, f, neu_component, ttype):
           return (deTrend,[])
 
 
-lines = f.readlines()
+lines = neuf.readlines()
 for idx, line in enumerate(lines):
     line = line.rstrip('\n')
     if str(line).startswith('#') == False and len(line) > 0:
@@ -354,39 +355,39 @@ for idx, line in enumerate(lines):
             scaling_factor_idx = idx
 
 try:
-  modelTerms = getModelTerms(site,f,str(sources[source]),fil if fil=='flt' else 'unf')
+  modelTerms = getModelTerms(site,neuf,str(sources[source]),fil if fil=='flt' else 'unf')
   n_component = parse_component (n_component_idx, e_component_idx-1, lines)
   e_component = parse_component (e_component_idx, u_component_idx-1, lines)
   u_component = parse_component (u_component_idx, scaling_factor_idx, lines)
-  time_min = min(times)
-  time_max = max(times)
-  n_component['time_min'] = time_min
-  e_component['time_min'] = time_min
-  u_component['time_min'] = time_min
-  n_component['time_max'] = time_max
-  e_component['time_max'] = time_max
-  u_component['time_max'] = time_max
+  if len(times) > 0:
+    time_min = min(times)
+    time_max = max(times)
+    n_component['time_min'] = time_min
+    e_component['time_min'] = time_min
+    u_component['time_min'] = time_min
+    n_component['time_max'] = time_max
+    e_component['time_max'] = time_max
+    u_component['time_max'] = time_max
 
 except:
   modelTerms = {}
   n_component = {'site':site, 'name':name, 'plotlines':[]}
   e_component = {'site':site, 'name':name, 'plotlines':[]}
   u_component = {'site':site, 'name':name, 'plotlines':[]}
-  if ttype == 'detrend':
+  if 'detrend' in ttype:
     print(('{"err": "Cannot detrend ' + site + '/' + source + '/' + fil + '/' + ttype + '/' + neu + '." }'))
     sys.exit()
 
 if raw_file is not None: 
-
     n_component['data'],n_component['trace'] = calculate_points(modelTerms, rawf, 'N', ttype)
     e_component['data'],e_component['trace'] = calculate_points(modelTerms, rawf, 'E', ttype)
     u_component['data'],u_component['trace'] = calculate_points(modelTerms, rawf, 'U', ttype)
     rawf.close()
 else:
-    n_component['data'],n_component['trace'] = calculate_points(modelTerms, f, 'N', ttype)
-    e_component['data'],e_component['trace'] = calculate_points(modelTerms, f, 'E', ttype)
-    u_component['data'],u_component['trace'] = calculate_points(modelTerms, f, 'U', ttype)    
-    f.close()
+    n_component['data'],n_component['trace'] = calculate_points(modelTerms, neuf, 'N', ttype)
+    e_component['data'],e_component['trace'] = calculate_points(modelTerms, neuf, 'E', ttype)
+    u_component['data'],u_component['trace'] = calculate_points(modelTerms, neuf, 'U', ttype)    
+    neuf.close()
 
 data = {}
 if 'n' in neu:
