@@ -30,7 +30,8 @@ if str(sys.argv[6]).isalnum():   # version / source directory
 sources = {'comb': 'Comb',
            'combg': 'Combg',
            'jpl': 'JPL',
-           'sopac': 'SOPAC'}
+            'sopac' : 'SOPAC',
+            'sopacR20' : 'SOPACR20'}
 
 filters = {'flt': 'Filter',
            'clean': 'Clean',
