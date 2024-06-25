@@ -679,6 +679,15 @@ setups.getBackendSetups(function (setups) {
     function(error, stdout, stderr) { res.send(stdout); console.log(stderr);});
   });
 
+    //trop
+    app.get('/api/eseses/trop/:site/:param/:date', function(req, res) {
+        const site = encodeURIComponent(req.params.site);
+        const param = encodeURIComponent(req.params.param);
+        const date = encodeURIComponent(req.params.date);
+        execFile('python3', ['private/eseses/trop.py', site, param, date], {maxBuffer: 1024 * 1024},
+        function(error, stdout, stderr) { res.send(stdout); console.log(stderr);});
+      });
+
   //tacls
   app.get('/api/eseses/tacls/:site/:source/:fil/:type/:version/:neu', function(req, res) {
     const site = encodeURIComponent(req.params.site);

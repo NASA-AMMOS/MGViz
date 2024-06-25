@@ -10,6 +10,9 @@ require('highcharts/modules/export-data')(Highcharts);
 require('highcharts/modules/offline-exporting')(Highcharts);
 require('highcharts/modules/annotations')(Highcharts);
 
+import flatpickr from 'flatpickr'
+require("flatpickr/dist/themes/dark.css");
+
 import F_ from '../../../../src/essence/Basics/Formulae_/Formulae_'
 import L_ from '../../../../src/essence/Basics/Layers_/Layers_'
 import ToolController_ from '../../../../src/essence/Basics/ToolController_/ToolController_'
@@ -25,14 +28,23 @@ import './ChartTool.css'
 window.jspdf = require("jspdf/dist/jspdf.es.min.js")
 window.svg2pdf = require("./external/svg2pdf.js")
 
-function SiteOptions(sites, source, fil, type) {
+function SiteOptions(sites, source, fil, type, mode, param, date) {
   this.sites = sites;
   this.source = source;
   this.fil = fil;
   this.type = type;
+  this.mode = mode;
+  this.param = param;
+  this.date = date;
 }
 SiteOptions.prototype.toString = function () {
-  return this.sites + ', ' + this.source + ', ' + this.fil + ', ' + this.type;
+  return this.sites + ', ' + 
+         this.source + ', ' + 
+         this.fil + ', ' + 
+         this.type + ', ' +
+         this.mode + ', ' + 
+         this.param + ', ' +
+         this.date;
 };
 
 //Add the tool markup if you want to do it this way
@@ -59,6 +71,15 @@ const LOS = {
 }
 let profileData = []
 
+// Borrowed from https://stackoverflow.com/a/45408480
+function incrementDate(dateInput, increment) {
+    var dateFormatTotime = new Date(dateInput);
+    var increasedDate = new Date(dateFormatTotime.getTime() +(increment *86400000));
+    return increasedDate;
+}
+
+var d = new Date();
+d.setDate(d.getDate() - 1);
 
 var ChartTool = {
   drawing: null,
@@ -78,12 +99,15 @@ var ChartTool = {
   site: '',
   sites: [],
   siteOptionsList: [],
+  mode: 'geodetic',
   source: 'comb',
   fil: 'clean',
   type: 'detrend',
   north: 'n',
   east: 'e',
   up: 'u',
+  param: 'TROTOT',
+  date: d.toISOString().split('T')[0],
   coseismics: true,
   sse: true,
   stackOn: false,
@@ -91,6 +115,9 @@ var ChartTool = {
   previousSites: [],
   append: true,
   version: 'default',
+  calendar: null,
+  calendarDisableDates: null,
+  calendarEnabledDates: null,
   make: function () {
     this.MMGISInterface = new interfaceWithMMGIS();
     // window.addEventListener('resize', resizeChartTool);
@@ -102,6 +129,27 @@ var ChartTool = {
       '<option selected="selected" value="geodetic">Geodetic</option>',
       '<option value="tropospheric">Tropospheric</option>',
       '</select>',
+      '<div id="troposphericDiv" style="display:none">',
+      '<br>Parameter:<br>',
+      '<select id="selectParameter" style="color:black; margin-bottom:4px;">',
+      '<option selected="selected" value="TROTOT">TROTOT</option>',
+      '<option value="TROTOTSTDEV">TROTOTSTDEV</option>',
+      '<option value="TRODRY">TRODRY</option>',
+      '<option value="TROWET">TROWET</option>',
+      '<option value="TGNWET">TGNWET</option>',
+      '<option value="TGNWETSTDEV">TGNWETSTDEV</option>',
+      '<option value="TGEWET">TGEWET</option>',
+      '<option value="TGEWETSTDEV">TGEWETSTDEV</option>',
+      '<option value="IWV">IWV</option>',
+      '<option value="PRESS">PRESS</option>',
+      '<option value="TEMDRY">TEMDRY</option>',
+      '</select>',
+      '<br>Date:<br>',
+      '<input id="calendarInput" style="margin-top:4px; width: 100%;" value="' + ChartTool.date + '">',
+      '</input>',
+      '<br></br>',
+      '</div>',     
+      '<div id="geodeticDiv">',
       '<br>Source:<br>',
       '<select id="selectSource" style="color:black">',
       '<option selected="selected" value="comb">Combination</option>',
@@ -135,11 +183,12 @@ var ChartTool = {
       '<input type="checkbox" name="checkSeparation" value="true" checked="checked" style="margin-bottom:8px;"><span style="font-size:13px;"> Stack Separation</span><br>',
       '<input id="textOffset" type="text" value="' + this.offset + '" name="offset" maxLength="4" style="color:#000000;width:40px;margin-bottom:10px;"/>',
       '<span style="font-size:10px;"> mm</span><button id="buttonApply" style="color:#000000;padding:2px;float:right;width:60px;font-size:11px;">Apply</button>',
+      '</div>',
+      '<div id="sitesDiv" style="margin-top:4px;">',
       '<br>Site Code:<br>',
       '<input id="textSite" type="text" name="sitecode" style="color:#000000;width:60px;"/>',
       '<button id="buttonAdd" style="color:#000000;padding:2px;float:right;width:60px;font-size:11px;">Add</button><br>',
       '<span style="font-size:11px;text-align:left;float:left;" align="left">Hold control/command to plot or remove multiple sites.</span>',
-      '<div id="sitesDiv" style="margin-top:4px;">',
       '<span style="float:left">All Sites:</span><span style="float:right">Saved:&nbsp;&nbsp;&nbsp;&nbsp;</span><br>',
       '<select multiple="multiple" id="siteSource" name="site-source[]" style="height:226px;width:60px;color:#000000;float:left;"></select>',
       '<span>&nbsp;&nbsp;</span>',
@@ -252,6 +301,30 @@ var ChartTool = {
     $('#contentDiv').css('left', '188px');
     $('#contentDiv').css('width', '620px');
 
+    // Create the calendar
+    ChartTool.calendar = flatpickr('#calendarInput', {
+      defaultDate: ChartTool.date || new Date,
+      position: 'auto center',
+      closeOnSelect: false,
+      dateFormat: "Y-m-d",
+      minDate: "2000-01-01",
+      maxDate: "today",
+      onChange: function(selectedDates, dateStr, instance) {
+          ChartTool.date = dateStr; 
+          const start_date = dateStr;
+          let end_date = incrementDate(start_date, 1);
+          end_date = end_date.toISOString().substr(0, 10);
+          ChartTool.calendar.setDate(ChartTool.date, false);
+
+          let siteOptions = new SiteOptions($('#siteSelect').val(), ChartTool.source, ChartTool.fil, ChartTool.type, ChartTool.mode, ChartTool.param, ChartTool.date);
+          ToolController_.activeTool.loadChart(siteOptions, [ChartTool.north, ChartTool.east,ChartTool.up], ChartTool.coseismics, ChartTool.offset, ChartTool.stackOn, ChartTool.version);
+      },
+    }); 
+
+    if (!ChartTool.param) {
+        $('#calendarInput').prop('disabled', true);
+    }
+
     // Query TACLS metadata
     $.ajax({
       type: 'GET',
@@ -324,27 +397,51 @@ var ChartTool = {
     }
     $('#textOffset').val(this.offset);
 
+    $('#selectMode').on('change', function (e) {
+      if (this.value === "tropospheric") {
+        $('#geodeticDiv').hide()
+        $('#troposphericDiv').show();
+      } else {
+        $('#geodeticDiv').show();
+        $('#troposphericDiv').hide()
+      }
+    });
+    $('#selectMode').on('change', function (e) {
+      ChartTool.mode = this.value;
+      let siteOptions = new SiteOptions($('#siteSelect').val(), ChartTool.source, ChartTool.fil, ChartTool.type, ChartTool.mode, ChartTool.param, ChartTool.date);
+      ToolController_.activeTool.loadChart(siteOptions, [ChartTool.north, ChartTool.east,ChartTool.up], ChartTool.coseismics, ChartTool.offset, ChartTool.stackOn, ChartTool.version);
+    });
     $('#selectSource').on('change', function (e) {
       ChartTool.source = this.value;
-      let siteOptions = new SiteOptions($('#siteSelect').val(), ChartTool.source, ChartTool.fil, ChartTool.type);
+      let siteOptions = new SiteOptions($('#siteSelect').val(), ChartTool.source, ChartTool.fil, ChartTool.type, ChartTool.mode, ChartTool.param, ChartTool.date);
       ToolController_.activeTool.loadChart(siteOptions, [ChartTool.north, ChartTool.east,ChartTool.up], ChartTool.coseismics, ChartTool.offset, ChartTool.stackOn, ChartTool.version);
     });
     $('#selectFilter').on('change', function (e) {
       ChartTool.fil = this.value;
       if (typeof ChartTool.source !== "undefined") {
-        let siteOptions = new SiteOptions($('#siteSelect').val(), ChartTool.source, ChartTool.fil, ChartTool.type);
+        let siteOptions = new SiteOptions($('#siteSelect').val(), ChartTool.source, ChartTool.fil, ChartTool.type, ChartTool.mode, ChartTool.param, ChartTool.date);
         ToolController_.activeTool.loadChart(siteOptions, [ChartTool.north, ChartTool.east, ChartTool.up], ChartTool.coseismics, ChartTool.offset, ChartTool.stackOn, ChartTool.version);
       }
     });
     $('#selectType').on('change', function (e) {
       ChartTool.type = this.value;
-      let siteOptions = new SiteOptions($('#siteSelect').val(), ChartTool.source, ChartTool.fil, ChartTool.type);
+      let siteOptions = new SiteOptions($('#siteSelect').val(), ChartTool.source, ChartTool.fil, ChartTool.type, ChartTool.mode, ChartTool.param, ChartTool.date);
       ToolController_.activeTool.loadChart(siteOptions, [ChartTool.north, ChartTool.east, ChartTool.up], ChartTool.coseismics, ChartTool.offset, ChartTool.stackOn, ChartTool.version);
     });
     $('#selectVersion').on('change', function (e) {
       ChartTool.version = this.value;
-      let siteOptions = new SiteOptions($('#siteSelect').val(), ChartTool.source, ChartTool.fil, ChartTool.type);
+      let siteOptions = new SiteOptions($('#siteSelect').val(), ChartTool.source, ChartTool.fil, ChartTool.type, ChartTool.mode, ChartTool.param, ChartTool.date);
       ToolController_.activeTool.loadChart(siteOptions, [ChartTool.north, ChartTool.east, ChartTool.up], ChartTool.coseismics, ChartTool.offset, ChartTool.stackOn, ChartTool.version);
+    });
+    $('#selectParameter').on('change', function (e) {
+      ChartTool.param = this.value;
+      let siteOptions = new SiteOptions($('#siteSelect').val(), ChartTool.source, ChartTool.fil, ChartTool.type, ChartTool.mode, ChartTool.param, ChartTool.date);
+      ToolController_.activeTool.loadChart(siteOptions, [ChartTool.north, ChartTool.east,ChartTool.up], ChartTool.coseismics, ChartTool.offset, ChartTool.stackOn, ChartTool.version);
+    });
+    $('#selectDate').on('change', function (e) {
+      ChartTool.date = this.value;
+      let siteOptions = new SiteOptions($('#siteSelect').val(), ChartTool.source, ChartTool.fil, ChartTool.type, ChartTool.mode, ChartTool.param, ChartTool.date);
+      ToolController_.activeTool.loadChart(siteOptions, [ChartTool.north, ChartTool.east,ChartTool.up], ChartTool.coseismics, ChartTool.offset, ChartTool.stackOn, ChartTool.version);
     });
     $('input[name=checknorth]').click(function () {
       if (this.checked) {
@@ -352,7 +449,7 @@ var ChartTool = {
       } else {
         var north = 'x';
       }
-      var siteOptions = new SiteOptions($('#siteSelect').val(), ChartTool.source, ChartTool.fil, ChartTool.type);
+      var siteOptions = new SiteOptions($('#siteSelect').val(), ChartTool.source, ChartTool.fil, ChartTool.type, ChartTool.mode, ChartTool.param, ChartTool.date);
       ToolController_.activeTool.loadChart(siteOptions, [north, ChartTool.east, ChartTool.up], ChartTool.coseismics, ChartTool.offset, ChartTool.stackOn, ChartTool.version);
     });
     $('input[name=checkeast]').click(function () {
@@ -361,7 +458,7 @@ var ChartTool = {
       } else {
         var east = 'x';
       }
-      var siteOptions = new SiteOptions($('#siteSelect').val(), ChartTool.source, ChartTool.fil, ChartTool.type);
+      var siteOptions = new SiteOptions($('#siteSelect').val(), ChartTool.source, ChartTool.fil, ChartTool.type, ChartTool.mode, ChartTool.param, ChartTool.date);
       ToolController_.activeTool.loadChart(siteOptions, [ChartTool.north, east, ChartTool.up], ChartTool.coseismics, ChartTool.offset, ChartTool.stackOn, ChartTool.version);
     });
     $('input[name=checkup]').click(function () {
@@ -370,19 +467,19 @@ var ChartTool = {
       } else {
         var up = 'x';
       }
-      var siteOptions = new SiteOptions($('#siteSelect').val(), ChartTool.source, ChartTool.fil, ChartTool.type);
+      var siteOptions = new SiteOptions($('#siteSelect').val(), ChartTool.source, ChartTool.fil, ChartTool.type, ChartTool.mode, ChartTool.param, ChartTool.date);
       ToolController_.activeTool.loadChart(siteOptions, [ChartTool.north, ChartTool.east, up], ChartTool.coseismics, ChartTool.offset, ChartTool.stackOn, ChartTool.version);
     });
     $('input[name=checkOffsets]').click(function () {
       var coseismics = this.checked;
       ToolController_.activeTool.coseismics = this.checked;
-      var siteOptions = new SiteOptions($('#siteSelect').val(), ChartTool.source, ChartTool.fil, ChartTool.type);
+      var siteOptions = new SiteOptions($('#siteSelect').val(), ChartTool.source, ChartTool.fil, ChartTool.type, ChartTool.mode, ChartTool.param, ChartTool.date);
       ToolController_.activeTool.loadChart(siteOptions, [ChartTool.north, ChartTool.east, ChartTool.up], coseismics, ChartTool.offset, ChartTool.stackOn, ChartTool.version);
     });
     $('input[name=checkSse]').click(function () {
       var sse = this.sse;
       ToolController_.activeTool.sse = this.checked;
-      var siteOptions = new SiteOptions($('#siteSelect').val(), ChartTool.source, ChartTool.fil, ChartTool.type);
+      var siteOptions = new SiteOptions($('#siteSelect').val(), ChartTool.source, ChartTool.fil, ChartTool.type, ChartTool.mode, ChartTool.param, ChartTool.date);
       ToolController_.activeTool.loadChart(siteOptions, [ChartTool.north, ChartTool.east, ChartTool.up], ChartTool.coseismics, ChartTool.offset, ChartTool.stackOn, ChartTool.version);
     });
     $('input[name=checkStack]').click(function () {
@@ -392,7 +489,7 @@ var ChartTool = {
         ToolController_.activeTool.siteOptionsList = [];
       }
       if (typeof ChartTool.source !== "undefined") {
-        var siteOptions = new SiteOptions($('#siteSelect').val(), ChartTool.source, ChartTool.fil, ChartTool.type);
+        var siteOptions = new SiteOptions($('#siteSelect').val(), ChartTool.source, ChartTool.fil, ChartTool.type, ChartTool.mode, ChartTool.param, ChartTool.date);
         ToolController_.activeTool.loadChart(siteOptions, [ChartTool.north, ChartTool.east, ChartTool.up], ChartTool.coseismics, ChartTool.offset, stackOn, ChartTool.version);
       }
     });
@@ -402,7 +499,7 @@ var ChartTool = {
       } else {
         var offset = 0;
       }
-      var siteOptions = new SiteOptions($('#siteSelect').val(), ChartTool.source, ChartTool.fil, ChartTool.type);
+      var siteOptions = new SiteOptions($('#siteSelect').val(), ChartTool.source, ChartTool.fil, ChartTool.type, ChartTool.mode, ChartTool.param, ChartTool.date);
       ToolController_.activeTool.loadChart(siteOptions, [ChartTool.north, ChartTool.east, ChartTool.up], ChartTool.coseismics, offset, ChartTool.stackOn, ChartTool.version);
     });
     $('input[name=checkAppend]').click(function () {
@@ -424,7 +521,7 @@ var ChartTool = {
       if ($('input[name=checkSeparation]').prop('checked')) {
         offset = $('#textOffset').val();
       }
-      var siteOptions = new SiteOptions($('#siteSelect').val(), ChartTool.source, ChartTool.fil, ChartTool.type);
+      var siteOptions = new SiteOptions($('#siteSelect').val(), ChartTool.source, ChartTool.fil, ChartTool.type, ChartTool.mode, ChartTool.param, ChartTool.date);
       ToolController_.activeTool.loadChart(siteOptions, [ChartTool.north, ChartTool.east, ChartTool.up], ChartTool.coseismics, offset, ChartTool.stackOn, ChartTool.version);
     });
     $('#buttonRemove').click(function () {
@@ -433,7 +530,7 @@ var ChartTool = {
       $('#siteSelect option:selected').remove();
       ToolController_.activeTool.siteOptionsList = [];
       $("#siteSelect").val($("#siteSelect option:first").val());
-      var siteOptions = new SiteOptions($('#siteSelect').val(), ChartTool.source, ChartTool.fil, ChartTool.type);
+      var siteOptions = new SiteOptions($('#siteSelect').val(), ChartTool.source, ChartTool.fil, ChartTool.type, ChartTool.mode, ChartTool.param, ChartTool.date);
       ToolController_.activeTool.loadChart(siteOptions, [ChartTool.north, ChartTool.east, ChartTool.up], ChartTool.coseismics, ChartTool.offset, ChartTool.stackOn, ChartTool.version);
     });
     $('#siteSource').click(function () {
@@ -451,7 +548,7 @@ var ChartTool = {
     });
     $('#siteSelect').on('change', function () {
       var selectedSites = $('#siteSelect').val();
-      var siteOptions = new SiteOptions(selectedSites, ChartTool.source, ChartTool.fil, ChartTool.type);
+      var siteOptions = new SiteOptions(selectedSites, ChartTool.source, ChartTool.fil, ChartTool.type, ChartTool.mode, ChartTool.param, ChartTool.date);
       ToolController_.activeTool.loadChart(siteOptions, [ChartTool.north, ChartTool.east, ChartTool.up], ChartTool.coseismics, ChartTool.offset, ChartTool.stackOn, ChartTool.version);
       ToolController_.getTool('SearchTool').search([selectedSites[selectedSites.length - 1]], 'Sites');
     });
@@ -567,7 +664,7 @@ var ChartTool = {
         $('#contentDiv').show();
         $('#optionsDiv').show();
         if ($('#siteSelect').has('option').length > 0) {
-          var siteOptions = new SiteOptions($('#siteSelect').val(), ChartTool.source, ChartTool.fil, ChartTool.type);
+          var siteOptions = new SiteOptions($('#siteSelect').val(), ChartTool.source, ChartTool.fil, ChartTool.type, ChartTool.mode, ChartTool.param, ChartTool.date);
           ToolController_.activeTool.loadChart(siteOptions, [ChartTool.north, ChartTool.east, ChartTool.up], ChartTool.coseismics, ChartTool.offset, ChartTool.stackOn);
         }
       } else {
@@ -672,7 +769,7 @@ var ChartTool = {
     var offset = this.offset;
     var version = this.version
 
-    var siteOptions = new SiteOptions(selectedSites, source, fil, type);
+    var siteOptions = new SiteOptions(selectedSites, source, fil, type, this.mode, this.param, this.date);
     if (nochart == false) {
       this.loadChart(siteOptions, neu, coseismics, offset, stackOn, version);
     }
@@ -822,6 +919,9 @@ var ChartTool = {
     var source = siteOptions.source;
     var fil = siteOptions.fil;
     var type = siteOptions.type;
+    var mode = siteOptions.mode;
+    var param = siteOptions.param;
+    var date = siteOptions.date;
 
     if (stackOn && siteOptions.sites != null) {
       if (siteOptions.sites.length == 0) {
@@ -905,6 +1005,11 @@ var ChartTool = {
     }
     neu = [north, east, up];
 
+    // Tropospheric customizations
+    if (mode == 'tropospheric') {
+      neu = [];
+    }
+
     // set chart heights based on selection
     if (neu.includes('x')) { // increase height if not displaying all charts
       var chartHeight = ((this.height - 190) / 2);
@@ -915,7 +1020,10 @@ var ChartTool = {
     if (chartHeight < 340) {
       chartHeight = 340;
     }
-    if (neu.includes('n')) {
+    if (mode == 'tropospheric') {
+      chartHeight = 530;
+      $('#chart1').height(chartHeight);
+    } else if (neu.includes('n')) {
       $('#chart1').height(chartHeight);
     } else {
       $('#chart1').height('0px');
@@ -1029,8 +1137,13 @@ var ChartTool = {
           return { x: 5, y: 2 };
         },
         formatter: function () {
-          var d = convertDecimalDate(this.x);
-          var dateString = d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2) + ' (' + d.getFullYear() + '-' + doy(d) + ')';
+          if (mode == 'tropospheric') {
+            var d = new Date(this.x);
+            var dateString = d.toISOString().slice(0, 19) + 'Z';
+          } else {
+            var d = convertDecimalDate(this.x);
+            var dateString = d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2) + ' (' + d.getFullYear() + '-' + doy(d) + ')';
+          }
           return '<b>' + this.series.name + '</b><br><b>x: ' + dateString + '</b><br><b>y: ' + (Math.round(this.y * 100) / 100).toFixed(2) + ' mm</b>';
         },
         style: {
@@ -1095,8 +1208,13 @@ var ChartTool = {
         point: {
           events: {
             click: function () {
-              var d = convertDecimalDate(this.x);
-              var dateString = d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2) + ' (' + d.getFullYear() + '-' + doy(d) + ')';
+              if (mode == 'tropospheric') {
+                var d = new Date(this.x);
+                var dateString = d.toISOString().slice(0, 19) + 'Z';
+              } else {
+                var d = convertDecimalDate(this.x);
+                var dateString = d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2) + ' (' + d.getFullYear() + '-' + doy(d) + ')';
+              }
               alert('x: ' + dateString + ',  y: ' + (Math.round(this.y * 100) / 100).toFixed(2) + ' mm');
             }
           }
@@ -1105,6 +1223,7 @@ var ChartTool = {
     };
 
     // create options for each chart type
+    var optionst = $.extend(true, {}, options);
     var optionsn = $.extend(true, {}, options);
     var optionse = $.extend(true, {}, options);
     var optionsu = $.extend(true, {}, options);
@@ -1114,6 +1233,7 @@ var ChartTool = {
     var resultsn = [];
     var resultse = [];
     var resultsu = [];
+    var asynct = [];
     var asyncn = [];
     var asynce = [];
     var asyncu = [];
@@ -1130,6 +1250,8 @@ var ChartTool = {
         site = sites[i];
       }
       if (i > 0) { //create additional series
+        optionst.series.push($.extend(true, {}, options.series[2]));
+        optionst.series.push($.extend(true, {}, options.series[3]));
         optionsn.series.push($.extend(true, {}, options.series[2]));
         optionsn.series.push($.extend(true, {}, options.series[3]));
         optionse.series.push($.extend(true, {}, options.series[2]));
@@ -1144,6 +1266,71 @@ var ChartTool = {
         } else {
           $('#chart1').html(loadMsg);
         }
+
+        if (mode == 'tropospheric') {
+          asynct[i] = $.ajax({
+            idx: i,
+            url: 'api/eseses/trop/' + site + '/' + param + '/' + date,
+            dataType: 'json',
+            traceColors: ['red', 'fuchsia', 'brown', 'blue', 'black'],
+            success: function (data) {
+              $('#optionsDiv').children().prop('disabled', false);
+              $('#sitesDiv').children().prop('disabled', false);
+              if (data['err']) {
+                if (sites.length < 2) {
+                  $('#chart1').html(data['err']);
+                  optionsn = null;
+                }
+                var legendTitle = $('.highcharts-legend-title').children(0).children(0);
+                if (typeof legendTitle.html() !== 'undefined') {
+                  legendText = $(legendTitle).html().replace(legendDefaultText, '').replace(data['err'].slice(0, -3) + '.', '') + data['err'].slice(0, -3) + '. ';
+                  $(legendTitle).html(legendText);
+                }
+                errorsn++;
+                return;
+              }
+              var datat = data;
+              if (optionst.xAxis.min > datat['time_min']) {
+                optionst.xAxis.min = datat['time_min'];
+              }
+              if (optionst.xAxis.max < datat['time_max']) {
+                optionst.xAxis.max = datat['time_max'];
+              }
+              optionst.xAxis.type = 'datatime';
+              optionst.xAxis.labels = {
+                format: '{value:%Y-%m-%dT%H:%M:%SZ}'
+              }
+              optionst.xAxis.title.text = 'time';
+
+
+              optionst.yAxis.minorTicks = true;
+              optionst.yAxis.startOnTick = false;
+              optionst.yAxis.endOnTick = false;
+              optionst.yAxis.minPadding = 0;
+
+              optionst.title.text = site + '<br>' + param;
+
+              optionst.series[2].name = 'trace';
+              optionst.series[3].name = 'points';
+              optionst.series[3].data = datat['data'];
+              
+              var Chart1 = Highcharts.chart('chart1', optionst);
+              $('#chart1').show();
+
+              return;
+
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+              optionsn = null;
+              var errorMsg = '<div>Unable to retrieve data for site: "' + site + '." ' + errorThrown + '</div>';
+              $('#chart1').html(errorMsg);
+              $('#chart1').show();
+              $('#optionsDiv').children().prop('disabled', false);
+              $('#sitesDiv').children().prop('disabled', false);
+            }
+          });
+        }
+
         if (neu.includes('n')) {
           asyncn[i] = $.ajax({
             idx: i,
@@ -1584,7 +1771,7 @@ var ChartTool = {
                 }
                 if (sites.length == 0 && ToolController_.activeTool.siteOptionsList.length == 0) {
                   // Don't display if all sites removed
-                  $('#chart1').hide();
+                  // $('#chart1').hide();
                   $('#chart2').hide();
                   $('#chart3').hide();
                   // var Chart0 = $('#chart0').highcharts();
@@ -1603,7 +1790,10 @@ var ChartTool = {
                   sites,
                   ToolController_.activeTool.source,
                   ToolController_.activeTool.fil,
-                  ToolController_.activeTool.type
+                  ToolController_.activeTool.type,
+                  ToolController_.activeToo.mode,
+                  ToolController_.activeToo.param,
+                  ToolController_.activeToo.date
                 );
                 ToolController_.activeTool.loadChart(
                   siteOptions,
@@ -1758,7 +1948,7 @@ var ChartTool = {
             elements1[i].addEventListener('click', addLegendListeners1, false);
           }
 
-          if (neu.includes('n')) {
+          if ((mode == 'tropospheric') || neu.includes('n')) {
             $('#chart1').show();
           } else {
             $('#chart1').hide();
