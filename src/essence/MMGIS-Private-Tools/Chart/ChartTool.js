@@ -337,6 +337,8 @@ var ChartTool = {
               .attr('value', value)
               .text(value));
           });
+        // make sure first version is selected
+        ChartTool.version = data['versions'][0]
       },
       error: function (jqXHR, textStatus, errorThrown) {
         console.error('Unable to retrieve TACLS metadata');

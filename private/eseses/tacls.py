@@ -3,6 +3,7 @@ import os
 import os.path
 import json
 import glob
+import re
 
 path = 'private/eseses/tacls'
 
@@ -24,8 +25,11 @@ if str(sys.argv[4]).isalnum():   # Trend/Detrend
     ttype = sys.argv[4]
 if str(sys.argv[5]).isalnum():   # n e u
     neu = sys.argv[5]
-if str(sys.argv[6]).isalnum():   # version / source directory
-    version = sys.argv[6]
+if not re.search(r'[^a-zA-Z0-9_\-\.]', str(sys.argv[6])):   # version / source directory
+    version = re.sub(r'[^a-zA-Z0-9_\-\.]', '', str(sys.argv[6]))
+else:
+    print('Invalid characters in version')
+    sys.exit()
 
 sources = {'comb': 'Comb',
            'combg': 'Combg',
