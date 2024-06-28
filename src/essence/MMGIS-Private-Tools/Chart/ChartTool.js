@@ -130,19 +130,22 @@ var ChartTool = {
       '<option value="tropospheric">Tropospheric</option>',
       '</select>',
       '<div id="troposphericDiv" style="display:none">',
-      '<br>Parameter:<br>',
-      '<select id="selectParameter" style="color:black; margin-bottom:4px;">',
-      '<option selected="selected" value="TROTOT">TROTOT</option>',
-      '<option value="TROTOTSTDEV">TROTOTSTDEV</option>',
-      '<option value="TRODRY">TRODRY</option>',
-      '<option value="TROWET">TROWET</option>',
-      '<option value="TGNWET">TGNWET</option>',
-      '<option value="TGNWETSTDEV">TGNWETSTDEV</option>',
-      '<option value="TGEWET">TGEWET</option>',
-      '<option value="TGEWETSTDEV">TGEWETSTDEV</option>',
-      '<option value="IWV">IWV</option>',
-      '<option value="PRESS">PRESS</option>',
-      '<option value="TEMDRY">TEMDRY</option>',
+      '<br>Parameter: ',
+      '<i id="paramInfo" class="mmgisHoverBlue mdi mdi-information-outline mdi-18px" style="width: 18px; height: 18px; cursor: pointer; "></i>',
+      '<br><select id="selectParameter" style="color:black; margin-bottom:4px;">',
+      '<option selected="selected" value="TROTOT">ZTD</option>',
+      '<option value="TROTOTSTDEV">&sigma; ZTD</option>',
+      '<option value="TRODRY">nominal ZHD</option>',
+      '<option value="TRODRYSTDEV">&sigma; nominal ZHD</option>',
+      '<option value="TROWET">approx. ZWD</option>',
+      '<option value="TROWETSTDEV">&sigma; approx. ZWD</option>',
+      // '<option value="TGNWET">TGNWET</option>',
+      // '<option value="TGNWETSTDEV">TGNWETSTDEV</option>',
+      // '<option value="TGEWET">TGEWET</option>',
+      // '<option value="TGEWETSTDEV">TGEWETSTDEV</option>',
+      '<option value="IWV">PWV</option>',
+      '<option value="PRESS">surf. press</option>',
+      '<option value="TEMDRY">surf. temp</option>',
       '</select>',
       '<br>Date:<br>',
       '<input id="calendarInput" style="margin-top:4px; width: 100%;" value="' + ChartTool.date + '">',
@@ -1303,7 +1306,7 @@ var ChartTool = {
               optionst.xAxis.labels = {
                 format: '{value:%Y-%m-%dT%H:%M:%SZ}'
               }
-              optionst.xAxis.title.text = 'time';
+              optionst.xAxis.title.text = 'time (GPS)';
 
 
               optionst.yAxis.minorTicks = true;
@@ -1311,7 +1314,7 @@ var ChartTool = {
               optionst.yAxis.endOnTick = false;
               optionst.yAxis.minPadding = 0;
 
-              optionst.title.text = site + '<br>' + param;
+              optionst.title.text = site + '<br>' + $('#selectParameter option:selected').text();
 
               optionst.series[2].name = 'trace';
               optionst.series[3].name = 'points';
