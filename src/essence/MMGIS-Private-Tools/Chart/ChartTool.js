@@ -309,6 +309,7 @@ var ChartTool = {
       dateFormat: "Y-m-d",
       minDate: "2000-01-01",
       maxDate: "today",
+      allowInput: true,
       onChange: function(selectedDates, dateStr, instance) {
           ChartTool.date = dateStr; 
           const start_date = dateStr;
