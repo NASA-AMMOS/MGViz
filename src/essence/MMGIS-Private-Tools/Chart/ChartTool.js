@@ -9,6 +9,8 @@ require('highcharts/modules/exporting')(Highcharts);
 require('highcharts/modules/export-data')(Highcharts);
 require('highcharts/modules/offline-exporting')(Highcharts);
 require('highcharts/modules/annotations')(Highcharts);
+import * as HighchartsMore from "highcharts/highcharts-more";
+HighchartsMore(Highcharts);
 
 import flatpickr from 'flatpickr'
 require("flatpickr/dist/themes/dark.css");
@@ -79,7 +81,7 @@ function incrementDate(dateInput, increment) {
 }
 
 var d = new Date();
-d.setDate(d.getDate() - 1);
+d.setDate(d.getDate() - 14);
 
 var ChartTool = {
   drawing: null,
@@ -134,11 +136,11 @@ var ChartTool = {
       '<i id="paramInfo" class="mmgisHoverBlue mdi mdi-information-outline mdi-18px" style="width: 18px; height: 18px; cursor: pointer; "></i>',
       '<br><select id="selectParameter" style="color:black; margin-bottom:4px;">',
       '<option selected="selected" value="TROTOT">ZTD</option>',
-      '<option value="TROTOTSTDEV">&sigma; ZTD</option>',
+      // '<option value="TROTOTSTDEV">&sigma; ZTD</option>',
       '<option value="TRODRY">nominal ZHD</option>',
-      '<option value="TRODRYSTDEV">&sigma; nominal ZHD</option>',
+      // '<option value="TRODRYSTDEV">&sigma; nominal ZHD</option>',
       '<option value="TROWET">approx. ZWD</option>',
-      '<option value="TROWETSTDEV">&sigma; approx. ZWD</option>',
+      // '<option value="TROWETSTDEV">&sigma; approx. ZWD</option>',
       // '<option value="TGNWET">TGNWET</option>',
       // '<option value="TGNWETSTDEV">TGNWETSTDEV</option>',
       // '<option value="TGEWET">TGEWET</option>',
@@ -151,6 +153,7 @@ var ChartTool = {
       '<input id="calendarInput" style="margin-top:4px; width: 100%;" value="' + ChartTool.date + '">',
       '</input>',
       '<br></br>',
+      '<input type="checkbox" name="checkMetric" value="true" checked="checked"><span style="font-size:13px;"> Metric Units</span><br>',
       '</div>',     
       '<div id="geodeticDiv">',
       '<br>Source:<br>',
@@ -182,11 +185,11 @@ var ChartTool = {
       '<input type="checkbox" name="checkup" value="u" checked="checked"><span style="font-size:13px;"> Up</span><br>',
       '<input type="checkbox" name="checkOffsets" value="true" checked="checked"><span style="font-size:13px;"> Show Offsets</span><br>',
       '<input type="checkbox" name="checkSse" value="true" checked="checked"><span style="font-size:13px;"> Slow-Slip Events</span><br>',
+      '</div>',
       '<input type="checkbox" name="checkStack" value="true"><span style="font-size:13px;"> Stack On Charts</span><br>',
       '<input type="checkbox" name="checkSeparation" value="true" checked="checked" style="margin-bottom:8px;"><span style="font-size:13px;"> Stack Separation</span><br>',
       '<input id="textOffset" type="text" value="' + this.offset + '" name="offset" maxLength="4" style="color:#000000;width:40px;margin-bottom:10px;"/>',
       '<span style="font-size:10px;"> mm</span><button id="buttonApply" style="color:#000000;padding:2px;float:right;width:60px;font-size:11px;">Apply</button>',
-      '</div>',
       '<div id="sitesDiv" style="margin-top:4px;">',
       '<br>Site Code:<br>',
       '<input id="textSite" type="text" name="sitecode" style="color:#000000;width:60px;"/>',
@@ -1308,17 +1311,29 @@ var ChartTool = {
               }
               optionst.xAxis.title.text = 'time (GPS)';
 
+              // error bars
+              var errort = data['error']
+              if (errort.length > 0) {
+                var errorSeries = [{'data': []}]
+                optionst.series.push(errorSeries);
+                optionst.series[4].data = errort;
+                optionst.series[4].type = 'errorbar';
+                optionst.series[4].color = 'pink';
+                optionst.series[4].zIndex = -99;
+              }
 
               optionst.yAxis.minorTicks = true;
               optionst.yAxis.startOnTick = false;
               optionst.yAxis.endOnTick = false;
               optionst.yAxis.minPadding = 0;
+              optionst.yAxis.title.text = 'mm';
 
               optionst.title.text = site + '<br>' + $('#selectParameter option:selected').text();
 
               optionst.series[2].name = 'trace';
               optionst.series[3].name = 'points';
               optionst.series[3].data = datat['data'];
+              optionst.series[3].type = 'line';
               
               var Chart1 = Highcharts.chart('chart1', optionst);
               $('#chart1').show();

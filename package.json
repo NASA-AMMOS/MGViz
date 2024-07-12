@@ -78,6 +78,7 @@
     "hammerjs": "^2.0.8",
     "helmet": "^4.1.1",
     "highcharts": "^10.3.3",
+    "highcharts-more": "^0.1.7",
     "hotkeys-js": "^3.12.0",
     "html2canvas": "^1.4.1",
     "html2pug": "^4.0.0",

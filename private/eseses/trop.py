@@ -77,7 +77,7 @@ def tro2read(fn):
             [hh, mm, ss] = str(timedelta(seconds=int(sec))).split(':')
             epoch = calendar.timegm(time.strptime(' '.join(
                 [yy, doy, hh, mm, ss]), "%y %j %H %M %S"))-calendar.timegm(
-                  time.strptime("2000 01 01 12 00", "%Y %m %d %H %M"))
+                  time.strptime("2000 01 01 00 00", "%Y %m %d %H %M"))
 
             if cols[0] not in trop:
                 trop[cols[0]] = {}
@@ -103,13 +103,26 @@ if source_file is not None:
 else:
     sys.exit()
 
-data = {'data': []}
+data = {'data': [],
+        'error': []}
 times = source[site]
 dates = []
 for tm, val in times.items():
     date = convert_seconds_to_date(tm)
     dates.append(date)
-    data['data'].append([date, val[str(parameters[param])]])
+    try:
+        data['data'].append([date, val[str(parameters[param])]])
+    except KeyError:
+        data['data'] = []
+    if param in ['TROTOT', 'TRODRY', 'TROWET', 'TGNWET', 'TGEWET']:
+        paramstd = param+'STDEV'
+        try:
+            error = [date,
+                     val[str(parameters[param])] - val[str(parameters[paramstd])],
+                     val[str(parameters[param])] + val[str(parameters[paramstd])]]
+            data['error'].append(error)
+        except KeyError:
+            data['error'] = []
 time_min = min(dates)
 time_max = max(dates)
 data['time_min'] = time_min
