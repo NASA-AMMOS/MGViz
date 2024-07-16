@@ -4,7 +4,7 @@ import sys
 import os
 import os.path
 import json
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import calendar
 import time
 import gzip
@@ -35,7 +35,7 @@ parameters = {'TROTOT': 'TROTOT',
 
 def convert_seconds_to_date(seconds_since_2000):
     # Define the start date: January 1, 2000
-    start_date = datetime(2000, 1, 1)
+    start_date = datetime(2000, 1, 1, tzinfo=timezone.utc)
     # Calculate the new date by adding the seconds
     new_date = start_date + timedelta(seconds=seconds_since_2000)
     # formatted_date = new_date.strftime("%Y-%m-%dT%H:%M:%SZ")
