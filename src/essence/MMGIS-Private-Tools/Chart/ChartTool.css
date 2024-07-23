@@ -17,3 +17,64 @@
 .flatpickr-data-date {
   border: 1px solid red !important;
 }
+
+#paramInfoModal {
+    background: var(--color-k);
+    width: 600px;
+    margin: 40px;
+    border-radius: 3px;
+}
+#paramInfoModalTitle {
+    padding: 0px 0px 0px 10px;
+    height: 40px;
+    line-height: 39px;
+    font-size: 18px;
+    background: var(--color-i);
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+    display: flex;
+    justify-content: space-between;
+}
+#paramInfoModalTitle > div:first-child {
+    display: flex;
+}
+#paramInfoModalTitle > div:first-child > div {
+    margin-left: 6px;
+    line-height: 40px;
+}
+#paramInfoModalClose {
+    width: 40px;
+    height: 40px;
+    text-align: center;
+}
+#paramInfoModalContent {
+    padding: 10px 20px;
+}
+.paramInfoModalSection {
+    padding: 4px 0px 4px 0px;
+}
+.paramInfoModalSectionOptions {
+    list-style-type: none;
+    margin: 8px 0px;
+    padding: 0;
+}
+.paramInfoModalSectionOptions li {
+    display: flex;
+    height: 30px;
+    line-height: 30px;
+    padding-left: 10px;
+}
+.paramInfoModalSectionOptions li > div:last-child {
+    padding-left: 3px;
+}
+.paramInfoModalHR {
+    width: 100%;
+    height: 1px;
+    background: var(--color-b);
+    margin: 4px 0px;
+}
+#paramInfoModal .infoIcon {
+    padding: 0px 4px;
+    color: #999;
+    cursor: help;
+}

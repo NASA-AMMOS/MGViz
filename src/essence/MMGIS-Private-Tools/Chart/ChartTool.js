@@ -24,6 +24,7 @@ import Globe_ from '../../../../src/essence/Basics/Globe_/Globe_'
 import CursorInfo from '../../Ancillary/CursorInfo'
 import Formulae_ from '../../../../src/essence/Basics/Formulae_/Formulae_.js'
 import { mmgisAPI } from '../../../../src/essence/mmgisAPI/mmgisAPI.js'
+import Modal from '../../Ancillary/Modal'
 
 import './ChartTool.css'
 
@@ -296,6 +297,13 @@ var ChartTool = {
     // } else {
     //   this.height = 1200; //recommended min height to avoid scrolling
     // }
+
+    // Info for Tropospheric parameters
+    $('#paramInfo').on('click', function () {
+      const that = $('#paramInfo')
+      const wasOn = that.hasClass('active')
+      toggleParamInfo(!wasOn)
+    })
 
     // Hide info; show charts by default
     $('#showCharts').html('&#171; Hide Charts');
@@ -2287,6 +2295,61 @@ function convertDecimalDate(decimalDate) {
   var miliseconds = reminder * daysPerYear * 24 * 60 * 60 * 1000;
   var yearDate = new Date(year, 0, 1);
   return new Date(yearDate.getTime() + miliseconds);
+}
+
+function toggleParamInfo(on) {
+  if (on) {
+      const modalContent = [
+          `<div id='paramInfoModal'>`,
+              `<div id='paramInfoModalTitle'>`,
+                  `<div><i class='mdi mdi-information-outline mdi-18px'></i><div>Parameters</div></div>`,
+                  `<div id='paramInfoModalClose'><i class='mmgisHoverBlue mdi mdi-close mdi-18px'></i></div>`,
+              `</div>`,
+              `<div id='paramInfoModalContent'>`,
+                  `<div class='paramInfoModalSection' id='paramInfoModalSectionUIVisibility'>`,
+                      `<div class='paramInfoModalSectionTitle'>Description</div>`,
+                      `<ul class='paramInfoModalSectionOptions'>`,
+                          `<li>`,
+                              `<div>ZTD (m): tropospheric zenith total delay (TROTOT)</div>`,
+                          `</li>`,
+                          `<li>`,
+                              `<div>nominal ZHD (m): tropospheric zenith dry/hydrostatic delay (TRODRY)</div>`,
+                          `</li>`,
+                          `<li>`,
+                              `<div>approx. ZWD (m): tropospheric zenith wet delay (TROWET)</div>`,
+                          `</li>`,
+                          `<li>`,
+                              `<div>PWV (mm): integrated water vapour (IWV)</div>`,
+                          `</li>`,
+                          `<li>`,
+                              `<div>surf. press (hPa): surface pressure (PRESS)</div>`,
+                          `</li>`,
+                          `<li>`,
+                              `<div>surf. temp (K): surface temperature (TEMPDRY)</div>`,
+                          `</li>`,
+                      `</ul>`,
+                  `</div>`,
+              `</div>`,
+          `</div>`
+      ].join('\n')
+
+    Modal.set(
+      modalContent,
+      function () {
+          $('#paramInfoModalClose').on('click', function () {
+              Modal.remove()
+          })
+          // UI Visibility
+          $(
+              `#paramInfoModalSectionUIVisibility .mmgis-checkbox > input`
+          ).on('click', function () {
+              const checked = $(this).prop('checked')
+              const value = $(this).attr('value')
+          })
+      },
+      function () {}
+    )
+  }
 }
 
 export default ChartTool;
