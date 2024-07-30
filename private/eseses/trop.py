@@ -18,19 +18,19 @@ if str(sys.argv[2]).isalnum():   # parameter
 if str(sys.argv[3]).replace('-', '').isalnum():   # date
     date = datetime.strptime(sys.argv[3].replace('-', ''), '%Y%m%d')
 
-parameters = {'TROTOT': 'TROTOT',
-              'TROTOTSTDEV': 'TROTOTSTDEV',
-              'TRODRY': 'TRODRY',
-              'TRODRYSTDEV': 'TRODRYSTDEV',
-              'TROWET': 'TROWET',
-              'TROWETSTDEV': 'TROWETSTDEV',
-              'TGNWET': 'TGNWET',
-              'TGNWETSTDEV': 'TGNWETSTDEV',
-              'TGEWET': 'TGEWET',
-              'TGEWETSTDEV': 'TGEWETSTDEV',
-              'IWV': 'IWV',
-              'PRESS': 'PRESS',
-              'TEMDRY': 'TEMDRY'}
+param_uom = {'TROTOT': 'm',
+             'TROTOTSTDEV': 'σ',
+             'TRODRY': 'm',
+             'TRODRYSTDEV': 'σ',
+             'TROWET': 'm',
+             'TROWETSTDEV': 'σ',
+             'TGNWET': 'm',
+             'TGNWETSTDEV': 'σ',
+             'TGEWET': 'm',
+             'TGEWETSTDEV': 'σ',
+             'IWV': 'mm',
+             'PRESS': 'hPa',
+             'TEMDRY': 'K'}
 
 
 def convert_seconds_to_date(seconds_since_2000):
@@ -111,15 +111,15 @@ for tm, val in times.items():
     date = convert_seconds_to_date(tm)
     dates.append(date)
     try:
-        data['data'].append([date, val[str(parameters[param])]])
+        data['data'].append([date, val[param]])
     except KeyError:
         data['data'] = []
     if param in ['TROTOT', 'TRODRY', 'TROWET', 'TGNWET', 'TGEWET']:
         paramstd = param+'STDEV'
         try:
             error = [date,
-                     val[str(parameters[param])] - val[str(parameters[paramstd])],
-                     val[str(parameters[param])] + val[str(parameters[paramstd])]]
+                     val[param] - val[paramstd],
+                     val[param] + val[paramstd]]
             data['error'].append(error)
         except KeyError:
             data['error'] = []
@@ -127,6 +127,7 @@ time_min = min(dates)
 time_max = max(dates)
 data['time_min'] = time_min
 data['time_max'] = time_max
+data['uom'] = str(param_uom[param])
 
 print((json.dumps(data)))
 sys.exit()

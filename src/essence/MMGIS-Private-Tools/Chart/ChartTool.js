@@ -1334,7 +1334,7 @@ var ChartTool = {
               optionst.yAxis.startOnTick = false;
               optionst.yAxis.endOnTick = false;
               optionst.yAxis.minPadding = 0;
-              optionst.yAxis.title.text = 'mm';
+              optionst.yAxis.title.text = data['uom'];
 
               optionst.title.text = site + '<br>' + $('#selectParameter option:selected').text();
 
