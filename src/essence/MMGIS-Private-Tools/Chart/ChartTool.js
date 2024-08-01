@@ -113,6 +113,7 @@ var ChartTool = {
   date: d.toISOString().split('T')[0],
   coseismics: true,
   sse: true,
+  metric: true,
   stackOn: false,
   offset: 10,
   previousSites: [],
@@ -408,6 +409,7 @@ var ChartTool = {
     }
     $('input[name=checkOffsets]').prop("checked", this.coseismics);
     $('input[name=checkSse]').prop("checked", this.sse);
+    $('input[name=checkMetric]').prop("checked", this.metric);
     $('input[name=checkStack]').prop("checked", this.stackOn);
     if (this.offset == 0) {
       $('input[name=checkSeparation]').prop("checked", false);
@@ -496,6 +498,11 @@ var ChartTool = {
     $('input[name=checkSse]').click(function () {
       var sse = this.sse;
       ToolController_.activeTool.sse = this.checked;
+      var siteOptions = new SiteOptions($('#siteSelect').val(), ChartTool.source, ChartTool.fil, ChartTool.type, ChartTool.mode, ChartTool.param, ChartTool.date);
+      ToolController_.activeTool.loadChart(siteOptions, [ChartTool.north, ChartTool.east, ChartTool.up], ChartTool.coseismics, ChartTool.offset, ChartTool.stackOn, ChartTool.version);
+    });
+    $('input[name=checkMetric]').click(function () {
+      ToolController_.activeTool.metric = this.checked;
       var siteOptions = new SiteOptions($('#siteSelect').val(), ChartTool.source, ChartTool.fil, ChartTool.type, ChartTool.mode, ChartTool.param, ChartTool.date);
       ToolController_.activeTool.loadChart(siteOptions, [ChartTool.north, ChartTool.east, ChartTool.up], ChartTool.coseismics, ChartTool.offset, ChartTool.stackOn, ChartTool.version);
     });
@@ -1311,6 +1318,23 @@ var ChartTool = {
               }
               var datat = data;
               uom = data['uom'];
+              if (ToolController_.activeTool.metric == false) {
+                if (uom == 'm') {
+                  uom = 'in';
+                  datat['data'] = datat['data'].map(tuple => [tuple[0], tuple[1] * 39.3701]);
+                  datat['error'] = datat['error'].map(tuple => [tuple[0], tuple[1] * 39.3701, tuple[2] * 39.3701]);
+                } else if (uom == 'mm') {
+                  uom = 'in';
+                  datat['data'] = datat['data'].map(tuple => [tuple[0], tuple[1] * 0.0393701]);
+                  datat['error'] = datat['error'].map(tuple => [tuple[0], tuple[1] * 0.0393701, tuple[2] * 0.0393701]);
+                } else if (uom == 'hPa') {
+                  uom = 'mb';
+                } else if (uom == 'K') {
+                  uom = 'F';
+                  datat['data'] = datat['data'].map(tuple => [tuple[0], ((tuple[1] - 273.15) * 1.8) + 32]);
+                  datat['error'] = datat['error'].map(tuple => [tuple[0], ((tuple[1] - 273.15) * 1.8) + 32, ((tuple[2] - 273.15) * 1.8) + 32]);
+                }
+              }
               if (optionst.xAxis.min > datat['time_min']) {
                 optionst.xAxis.min = datat['time_min'];
               }
@@ -1319,7 +1343,7 @@ var ChartTool = {
               }
               optionst.xAxis.type = 'datatime';
               optionst.xAxis.labels = {
-                format: '{value:%Y-%m-%dT%H:%M:%SZ}'
+                format: '{value:%Y-%m-%d T%H:%M:%SZ}'
               }
               optionst.xAxis.title.text = 'time (GPS)';
 
