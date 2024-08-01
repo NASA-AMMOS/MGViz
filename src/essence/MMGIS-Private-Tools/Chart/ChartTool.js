@@ -1076,6 +1076,9 @@ var ChartTool = {
     this.stackOn = stackOn;
     this.offset = offset;
 
+    // units
+    var uom = 'mm';
+
     var options = {
       chart: {
         zoomType: 'x',
@@ -1161,7 +1164,7 @@ var ChartTool = {
             var d = convertDecimalDate(this.x);
             var dateString = d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2) + ' (' + d.getFullYear() + '-' + doy(d) + ')';
           }
-          return '<b>' + this.series.name + '</b><br><b>x: ' + dateString + '</b><br><b>y: ' + (Math.round(this.y * 100) / 100).toFixed(2) + ' mm</b>';
+          return '<b>' + this.series.name + '</b><br><b>x: ' + dateString + '</b><br><b>y: ' + (Math.round(this.y * 100) / 100).toFixed(2) + ' ' + uom + '</b>';
         },
         style: {
           fontWeight: 'bold',
@@ -1232,7 +1235,7 @@ var ChartTool = {
                 var d = convertDecimalDate(this.x);
                 var dateString = d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2) + ' (' + d.getFullYear() + '-' + doy(d) + ')';
               }
-              alert('x: ' + dateString + ',  y: ' + (Math.round(this.y * 100) / 100).toFixed(2) + ' mm');
+              alert('x: ' + dateString + ',  y: ' + (Math.round(this.y * 100) / 100).toFixed(2) + ' ' + uom);
             }
           }
         }
@@ -1307,6 +1310,7 @@ var ChartTool = {
                 return;
               }
               var datat = data;
+              uom = data['uom'];
               if (optionst.xAxis.min > datat['time_min']) {
                 optionst.xAxis.min = datat['time_min'];
               }
@@ -1334,7 +1338,7 @@ var ChartTool = {
               optionst.yAxis.startOnTick = false;
               optionst.yAxis.endOnTick = false;
               optionst.yAxis.minPadding = 0;
-              optionst.yAxis.title.text = data['uom'];
+              optionst.yAxis.title.text = uom;
 
               optionst.title.text = site + '<br>' + $('#selectParameter option:selected').text();
 
