@@ -32,6 +32,17 @@ param_uom = {'TROTOT': 'm',
              'PRESS': 'hPa',
              'TEMDRY': 'K'}
 
+param_name = {'TROTOT': 'ZTD',
+              'TRODRY': 'nominal ZHD',
+              'TROWET': 'approx. ZWD',
+              'TGNWET': 'TGNWET',
+              'TGEWET': 'TGEWET',
+              'IWV': 'PWV',
+              'PRESS': 'surf. press',
+              'TEMDRY': 'surf. temp'}
+
+name = site.lower() + ': ' + param_name[param] + '/' + date.strftime('%Y-%m-%d') + ' -'
+
 
 def convert_seconds_to_date(seconds_since_2000):
     # Define the start date: January 1, 2000
@@ -128,6 +139,7 @@ time_max = max(dates)
 data['time_min'] = time_min
 data['time_max'] = time_max
 data['uom'] = str(param_uom[param])
+data['name'] = name
 
 print((json.dumps(data)))
 sys.exit()

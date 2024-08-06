@@ -744,26 +744,26 @@ var ChartTool = {
       return;
     }
     var site = features.properties.site;
-    if (this.sites.length > 1) {
+    if (ChartTool.sites.length > 1) {
       noreset = true;
     }
     if ($('#optionsDiv').is(":hidden") && (typeof (noreset) == 'undefined')) {
-      this.sites = []; // reset sites if charts are hidden
+      ChartTool.sites = []; // reset sites if charts are hidden
     }
-    if (this.sites.indexOf(site) === -1) {
-      if (this.sites.length > 0 && $('input[name=checkAppend]').prop('checked') == false) {
-        var lastSite = this.sites.pop();
-        for (var i = 0; i < this.siteOptionsList.length; i++) {
-          if (this.siteOptionsList[i].sites.indexOf(lastSite) > -1) {
-            this.siteOptionsList.splice(i, 1);
+    if (ChartTool.sites.indexOf(site) === -1) {
+      if (ChartTool.sites.length > 0 && $('input[name=checkAppend]').prop('checked') == false) {
+        var lastSite = ChartTool.sites.pop();
+        for (var i = 0; i < ChartTool.siteOptionsList.length; i++) {
+          if (ChartTool.siteOptionsList[i].sites.indexOf(lastSite) > -1) {
+            ChartTool.siteOptionsList.splice(i, 1);
             i--;
           }
         }
       }
-      this.sites.push(site);
+      ChartTool.sites.push(site);
     }
     $('#siteSelect').empty();
-    $.each(this.sites, function (key, value) {
+    $.each(ChartTool.sites, function (key, value) {
       $('#siteSelect').append($('<option></option>')
         .attr('value', value)
         .text(value));
@@ -780,7 +780,7 @@ var ChartTool = {
     }
 
     site = this.site;
-    var sites = this.sites;
+    var sites = ChartTool.sites;
     var source = this.source;
     var fil = this.fil;
     var type = this.type;
@@ -816,9 +816,9 @@ var ChartTool = {
       this.sites.splice(this.sites.indexOf(site), 1);
       $('#siteSelect option[value="' + site + '"]').remove();
     }
-    for (var i = 0; i < this.siteOptionsList.length; i++) {
-      if (this.siteOptionsList[i].sites.indexOf(site) > -1) {
-        this.siteOptionsList.splice(i, 1);
+    for (var i = 0; i < ChartTool.siteOptionsList.length; i++) {
+      if (ChartTool.siteOptionsList[i].sites.indexOf(site) > -1) {
+        ChartTool.siteOptionsList.splice(i, 1);
         i--;
       }
     }
@@ -953,32 +953,32 @@ var ChartTool = {
       }
       // Don't stack previous sites if multiple sites are selected
       if (siteOptions.sites.length > 1) {
-        this.siteOptionsList = [];
+        ChartTool.siteOptionsList = [];
         stackOn = false;
         $('input[name=checkStack]').prop('checked', false);
       }
       else {
-        if (this.siteOptionsList.length > 1) {
+        if (ChartTool.siteOptionsList.length > 1) {
           // Don't repeat same site options
           var existingOptions = false;
-          for (var i = 0; i < this.siteOptionsList.length; i++) {
-            if (siteOptions.toString() == this.siteOptionsList[i].toString()) {
+          for (var i = 0; i < ChartTool.siteOptionsList.length; i++) {
+            if (siteOptions.toString() == ChartTool.siteOptionsList[i].toString()) {
               existingOptions = true;
             }
           }
           if (existingOptions == false) {
             // Don't stack more than 5 sites
-            if (this.siteOptionsList.length > 4) {
-              this.siteOptionsList = this.siteOptionsList.slice(this.siteOptionsList.length - 4, this.siteOptionsList.length);
+            if (ChartTool.siteOptionsList.length > 4) {
+              ChartTool.siteOptionsList = ChartTool.siteOptionsList.slice(ChartTool.siteOptionsList.length - 4, ChartTool.siteOptionsList.length);
             }
-            this.siteOptionsList.push(siteOptions);
+            ChartTool.siteOptionsList.push(siteOptions);
           }
         } else {
-          this.siteOptionsList.push(siteOptions);
+          ChartTool.siteOptionsList.push(siteOptions);
         }
         sites = [];
-        for (var i = 0; i < this.siteOptionsList.length; i++) {
-          sites.push(this.siteOptionsList[i].sites[0]);
+        for (var i = 0; i < ChartTool.siteOptionsList.length; i++) {
+          sites.push(ChartTool.siteOptionsList[i].sites[0]);
         }
       }
     }
@@ -1257,6 +1257,7 @@ var ChartTool = {
     var errorsn = 0;
     var errorse = 0;
     var errorsu = 0;
+    var resultst = [];
     var resultsn = [];
     var resultse = [];
     var resultsu = [];
@@ -1269,22 +1270,25 @@ var ChartTool = {
 
     for (var i = 0; i < sites.length; i++) {
       if (stackOn) {
-        site = this.siteOptionsList[i].sites[0];
-        source = this.siteOptionsList[i].source;
-        fil = this.siteOptionsList[i].fil;
-        type = this.siteOptionsList[i].type;
+        site = ChartTool.siteOptionsList[i].sites[0];
+        source = ChartTool.siteOptionsList[i].source;
+        fil = ChartTool.siteOptionsList[i].fil;
+        type = ChartTool.siteOptionsList[i].type;
       } else {
         site = sites[i];
       }
       if (i > 0) { //create additional series
-        optionst.series.push($.extend(true, {}, options.series[2]));
-        optionst.series.push($.extend(true, {}, options.series[3]));
+        optionst.series.push($.extend(true, {}, optionst.series[0]));
+        optionst.series.push($.extend(true, {}, optionst.series[1]));
         optionsn.series.push($.extend(true, {}, options.series[2]));
         optionsn.series.push($.extend(true, {}, options.series[3]));
         optionse.series.push($.extend(true, {}, options.series[2]));
         optionse.series.push($.extend(true, {}, options.series[3]));
         optionsu.series.push($.extend(true, {}, options.series[2]));
         optionsu.series.push($.extend(true, {}, options.series[3]));
+      } else {
+        // get rid of default seismic and coseismic series
+        optionst.series.splice(0,2)
       }
       if (load && site != null) {
         const Chart1 = Highcharts.charts.find(chart => chart && chart.renderTo.id === 'chart1');
@@ -1299,7 +1303,7 @@ var ChartTool = {
             idx: i,
             url: 'api/eseses/trop/' + site + '/' + param + '/' + date,
             dataType: 'json',
-            traceColors: ['red', 'fuchsia', 'brown', 'blue', 'black'],
+            lineColors: ['blue', 'black', 'brown', 'green', 'purple'],
             success: function (data) {
               $('#optionsDiv').children().prop('disabled', false);
               $('#sitesDiv').children().prop('disabled', false);
@@ -1348,14 +1352,27 @@ var ChartTool = {
               optionst.xAxis.title.text = 'time (GPS)';
 
               // error bars
-              var errort = data['error']
+              var errort = datat['error'].map(n => [n[0], n[1] + (offset/1000) * (this.idx), n[2] + (offset/1000) * (this.idx)]);
+              var errorSeries = [{'data': []}]
               if (errort.length > 0) {
-                var errorSeries = [{'data': []}]
-                optionst.series.push(errorSeries);
-                optionst.series[4].data = errort;
-                optionst.series[4].type = 'errorbar';
-                optionst.series[4].color = 'pink';
-                optionst.series[4].zIndex = -99;
+                if (this.idx == 0) {
+                  optionst.series[0] = errorSeries;
+                  optionst.series[0].data = errort;
+                  optionst.series[0].type = 'errorbar';
+                  optionst.series[0].color = 'pink';
+                  optionst.series[0].zIndex = -99;
+                  optionst.series[0].animation = false;
+                  optionst.series[0].name = data['name'] + ' error';
+                }
+                else {
+                  optionst.series[this.idx * 2] = errorSeries;
+                  optionst.series[this.idx * 2].data = errort;
+                  optionst.series[this.idx * 2].type = 'errorbar';
+                  optionst.series[this.idx * 2].color = 'pink';
+                  optionst.series[this.idx * 2].zIndex = -99;
+                  optionst.series[this.idx * 2].animation = false;
+                  optionst.series[this.idx * 2].name = data['name'] + ' error';
+                }
               }
 
               optionst.yAxis.minorTicks = true;
@@ -1364,21 +1381,28 @@ var ChartTool = {
               optionst.yAxis.minPadding = 0;
               optionst.yAxis.title.text = uom;
 
-              optionst.title.text = site + '<br>' + $('#selectParameter option:selected').text();
+              var title = 'Multiple Sites'
+              if (sites.length <= 1) {
+                title = site
+              }
+              optionst.title.text = title + '<br>' + $('#selectParameter option:selected').text();
+              optionst.subtitle.text = '';
 
-              optionst.series[2].name = 'trace';
-              optionst.series[3].name = 'points';
-              optionst.series[3].data = datat['data'];
-              optionst.series[3].type = 'line';
-              
-              var Chart1 = Highcharts.chart('chart1', optionst);
-              $('#chart1').show();
-
-              return;
+              var datat = datat['data'].map(n => [n[0], n[1] + (offset/1000) * (this.idx)]);
+              if (this.idx == 0) {
+                optionst.series[1].name = data['name'] + ' points';
+                optionst.series[1].data = datat;
+                optionst.series[1].type = 'scatter';
+              } else {
+                optionst.series[2 * this.idx + 1].name = data['name'] + ' points';
+                optionst.series[2 * this.idx + 1].data = datat;
+                optionst.series[2 * this.idx + 1].type = 'scatter';
+                optionst.series[2 * this.idx + 1].color = this.lineColors[this.idx];
+              }
 
             },
             error: function (jqXHR, textStatus, errorThrown) {
-              optionsn = null;
+              optionst = null;
               var errorMsg = '<div>Unable to retrieve data for site: "' + site + '." ' + errorThrown + '</div>';
               $('#chart1').html(errorMsg);
               $('#chart1').show();
@@ -1783,7 +1807,8 @@ var ChartTool = {
                 return false;
               }
               // View results metadata
-              if (!this.name.includes(':')) {
+              let invalid_vals = [':', 'error'] 
+              if (invalid_vals.some(val => this.name.includes(invalid_vals))) {
                 let sync_tacls_metadata = $.ajax({
                   url: 'api/eseses/tacls/' + site + '/' + source + '/' + fil + '/' + type + '/n',
                   dataType: 'json',
@@ -1848,9 +1873,9 @@ var ChartTool = {
                   ToolController_.activeTool.source,
                   ToolController_.activeTool.fil,
                   ToolController_.activeTool.type,
-                  ToolController_.activeToo.mode,
-                  ToolController_.activeToo.param,
-                  ToolController_.activeToo.date
+                  ToolController_.activeTool.mode,
+                  ToolController_.activeTool.param,
+                  ToolController_.activeTool.date
                 );
                 ToolController_.activeTool.loadChart(
                   siteOptions,
@@ -1905,7 +1930,115 @@ var ChartTool = {
         resultsn.push(asyncn[i]);
         resultse.push(asynce[i]);
         resultsu.push(asyncu[i]);
+        if ((mode == 'tropospheric')) {
+          resultst.push(asynct[i]);
+        } else {
+          optionst = null;
+        }
       }
+      $.when.apply(this, resultst).done(function () {
+        if (optionst) {
+          var missingData = 0;
+          var returnedSites = []
+          if (!sites.every((val, i, arr) => val === arr[0])) {
+            optionst.title.text = 'Multiple Sites';
+          }
+          for (var j = 0; j < optionst.series.length; j++) {
+            if (optionst.series[j].type == 'scatter') {
+              if ((typeof optionst.series[j].name == 'undefined')) {
+                missingData = missingData + 1;
+                optionst.series.splice(j - 1, 1);
+                j = 0; // restart count if spliced
+              } else {
+                returnedSites.push(optionst.series[j].name.split(':')[0]);
+              }
+            }
+          }
+          let missingSites = sites.filter(x => !returnedSites.includes(x));
+          if (missingSites.length > 0) {
+            console.log('Missing tropospheric data for ' + missingSites.join(' '));
+            for (var i = 0; i < ToolController_.activeTool.siteOptionsList.length; i++) {
+              if (missingSites.includes(ToolController_.activeTool.siteOptionsList[i].sites[0])) {
+                ToolController_.activeTool.siteOptionsList.splice(ToolController_.activeTool.siteOptionsList.indexOf(ToolController_.activeTool.siteOptionsList[i]), 1);
+              }
+            }
+            // remove empty series
+            for (var j = 0; j < optionst.series.length; j++) {
+              if ((typeof optionst.series[j].name == 'undefined' || optionst.series[j].name.includes('seismic'))) {
+                optionst.series.splice(j, 1);
+                j = 0; // restart count if spliced
+              }
+            }
+          }
+          if (missingData > 0) {
+            var errorMsg = '<div>Unable to retrieve data for site: "' + sites + '."</div>';
+            $('#chart1').html(errorMsg);
+            $('#chart1').show();
+            $('#optionsDiv').children().prop('disabled', false);
+            $('#sitesDiv').children().prop('disabled', false);
+          } else {
+            var Chart1 = Highcharts.chart('chart1', optionst);
+          }
+
+          // Handle legends
+          loadLegends(optionst.series);
+          var legend1Enabled = false;
+          var showLegend1 = function () {
+            Chart1.update({
+              chart: {
+                marginBottom: legend1Enabled ? 90 : 150
+              },
+              subtitle: {
+                y: legend1Enabled ? -12 : -75
+              },
+              legend: {
+                enabled: legend1Enabled ? false : true,
+                itemStyle: {
+                  fontSize: '10px'
+                }
+              }
+            })
+            if ((window.fullScreen) ||
+              (window.innerWidth == screen.width && window.innerHeight == screen.height)) {
+              legend1Enabled = false;
+            } else {
+              legend1Enabled = !legend1Enabled;
+            }
+          };
+
+          document.addEventListener("fullscreenchange", function () {
+            if ((window.fullScreen) ||
+              (window.innerWidth == screen.width && window.innerHeight == screen.height)) {
+              legend1Enabled = false;
+            } else {
+              legend1Enabled = true;
+            }
+            showLegend1();
+          });
+
+          var addLegendListeners1 = function () {
+            var elements = document.getElementsByClassName('highcharts-menu-item');
+            for (var i = 0; i < elements.length; i++) {
+              elements[i].addEventListener('mouseenter', showLegend1, false);
+              elements[i].addEventListener('mouseleave', showLegend1, false);
+            }
+          };
+
+          var elements1 = document.getElementsByClassName('highcharts-contextbutton');
+          for (var i = 0; i < elements1.length; i++) {
+            elements1[i].addEventListener('click', addLegendListeners1, false);
+          }
+
+          if (mode == 'tropospheric') {
+            $('#chart1').show();
+          } else {
+            $('#chart1').hide();           
+          }
+        }
+        if (sites.length == 1) {
+          $('#siteSelect').val(sites[0]); // ensure focus is in sync
+        }
+      });
       $.when.apply(this, resultsn).done(function () {
         if (optionsn) {
           var missingData = 0;
@@ -1925,7 +2058,7 @@ var ChartTool = {
             }
           }
           let missingSites = sites.filter(x => !returnedSites.includes(x));
-          if (missingSites.length > 0) {
+          if (missingSites.length > 0 && mode != 'tropospheric') {
             console.log('Missing North data for ' + missingSites.join(' '));
             for (var i = 0; i < ToolController_.activeTool.siteOptionsList.length; i++) {
               if (missingSites.includes(ToolController_.activeTool.siteOptionsList[i].sites[0])) {
@@ -2005,7 +2138,7 @@ var ChartTool = {
             elements1[i].addEventListener('click', addLegendListeners1, false);
           }
 
-          if ((mode == 'tropospheric') || neu.includes('n')) {
+          if (neu.includes('n')) {
             $('#chart1').show();
           } else {
             $('#chart1').hide();
@@ -2034,7 +2167,7 @@ var ChartTool = {
             }
           }
           let missingSites = sites.filter(x => !returnedSites.includes(x));
-          if (missingSites.length > 0) {
+          if (missingSites.length > 0 && mode != 'tropospheric') {
             console.log('Missing East data for ' + missingSites.join(' '));
             for (var i = 0; i < ToolController_.activeTool.siteOptionsList.length; i++) {
               if (missingSites.includes(ToolController_.activeTool.siteOptionsList[i].sites[0])) {
@@ -2143,7 +2276,7 @@ var ChartTool = {
             }
           }
           let missingSites = sites.filter(x => !returnedSites.includes(x));
-          if (missingSites.length > 0) {
+          if (missingSites.length > 0 && mode != 'tropospheric') {
             console.log('Missing Up data for ' + missingSites.join(' '));
             for (var i = 0; i < ToolController_.activeTool.siteOptionsList.length; i++) {
               if (missingSites.includes(ToolController_.activeTool.siteOptionsList[i].sites[0])) {
