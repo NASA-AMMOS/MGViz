@@ -41,7 +41,7 @@ param_name = {'TROTOT': 'ZTD',
               'PRESS': 'surf. press',
               'TEMDRY': 'surf. temp'}
 
-name = site.lower() + ': ' + param_name[param] + '/' + date.strftime('%Y-%m-%d') + ' -'
+name = site.lower() + ': ' + param_name[param] + '/' + date.strftime('%Y-%m-%d')
 
 
 def convert_seconds_to_date(seconds_since_2000):

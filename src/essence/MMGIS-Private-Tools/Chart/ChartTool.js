@@ -82,7 +82,7 @@ function incrementDate(dateInput, increment) {
 }
 
 var d = new Date();
-d.setDate(d.getDate() - 14);
+d.setDate(d.getDate() - 14); // default two weeks from today
 
 var ChartTool = {
   drawing: null,
@@ -1274,6 +1274,7 @@ var ChartTool = {
         source = ChartTool.siteOptionsList[i].source;
         fil = ChartTool.siteOptionsList[i].fil;
         type = ChartTool.siteOptionsList[i].type;
+        date = ChartTool.siteOptionsList[i].date;
       } else {
         site = sites[i];
       }
@@ -1390,11 +1391,11 @@ var ChartTool = {
 
               var datat = datat['data'].map(n => [n[0], n[1] + (offset/1000) * (this.idx)]);
               if (this.idx == 0) {
-                optionst.series[1].name = data['name'] + ' points';
+                optionst.series[1].name = data['name'];
                 optionst.series[1].data = datat;
                 optionst.series[1].type = 'scatter';
               } else {
-                optionst.series[2 * this.idx + 1].name = data['name'] + ' points';
+                optionst.series[2 * this.idx + 1].name = data['name'];
                 optionst.series[2 * this.idx + 1].data = datat;
                 optionst.series[2 * this.idx + 1].type = 'scatter';
                 optionst.series[2 * this.idx + 1].color = this.lineColors[this.idx];
