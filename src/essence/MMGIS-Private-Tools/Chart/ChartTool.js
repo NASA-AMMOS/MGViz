@@ -1354,7 +1354,7 @@ var ChartTool = {
               }
               optionst.xAxis.type = 'datatime';
               optionst.xAxis.labels = {
-                format: '{value:%Y-%m-%d T%H:%M:%SZ}'
+                format: '{value:%Y-%m-%d %H:%M}'
               }
               optionst.xAxis.title.text = 'time (GPS)';
 
