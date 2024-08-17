@@ -116,6 +116,7 @@ var ChartTool = {
   metric: true,
   stackOn: false,
   offset: 10,
+  uom: 'mm',
   previousSites: [],
   append: true,
   version: 'default',
@@ -191,7 +192,7 @@ var ChartTool = {
       '<input type="checkbox" name="checkStack" value="true"><span style="font-size:13px;"> Stack On Charts</span><br>',
       '<input type="checkbox" name="checkSeparation" value="true" checked="checked" style="margin-bottom:8px;"><span style="font-size:13px;"> Stack Separation</span><br>',
       '<input id="textOffset" type="text" value="' + this.offset + '" name="offset" maxLength="4" style="color:#000000;width:40px;margin-bottom:10px;"/>',
-      '<span style="font-size:10px;"> mm</span><button id="buttonApply" style="color:#000000;padding:2px;float:right;width:60px;font-size:11px;">Apply</button>',
+      '<span id="labelUnits" style="font-size:10px;"> ' + this.uom + '</span><button id="buttonApply" style="color:#000000;padding:2px;float:right;width:60px;font-size:11px;">Apply</button>',
       '<div id="sitesDiv" style="margin-top:4px;">',
       '<br>Site Code:<br>',
       '<input id="textSite" type="text" name="sitecode" style="color:#000000;width:60px;"/>',
@@ -420,9 +421,13 @@ var ChartTool = {
       if (this.value === "tropospheric") {
         $('#geodeticDiv').hide()
         $('#troposphericDiv').show();
+        ChartTool.uom = 'm';
+        $('#labelUnits').text(' ' + ChartTool.uom);
       } else {
         $('#geodeticDiv').show();
         $('#troposphericDiv').hide()
+        ChartTool.uom = 'mm';
+        $('#labelUnits').text(' ' + ChartTool.uom);
       }
     });
     $('#selectMode').on('change', function (e) {
@@ -1084,7 +1089,7 @@ var ChartTool = {
     this.offset = offset;
 
     // units
-    var uom = 'mm';
+    var uom = ChartTool.uom;
 
     var options = {
       chart: {
@@ -1340,6 +1345,7 @@ var ChartTool = {
                   datat['error'] = datat['error'].map(tuple => [tuple[0], ((tuple[1] - 273.15) * 1.8) + 32, ((tuple[2] - 273.15) * 1.8) + 32]);
                 }
               }
+              $('#labelUnits').text(' ' + uom);
               if (optionst.xAxis.min > datat['time_min']) {
                 optionst.xAxis.min = datat['time_min'];
               }
@@ -1353,7 +1359,7 @@ var ChartTool = {
               optionst.xAxis.title.text = 'time (GPS)';
 
               // error bars
-              var errort = datat['error'].map(n => [n[0], n[1] + (offset/1000) * (this.idx), n[2] + (offset/1000) * (this.idx)]);
+              var errort = datat['error'].map(n => [n[0], n[1] + (offset) * (this.idx), n[2] + (offset) * (this.idx)]);
               var errorSeries = [{'data': []}]
               if (errort.length > 0) {
                 if (this.idx == 0) {
@@ -1389,7 +1395,7 @@ var ChartTool = {
               optionst.title.text = title + '<br>' + $('#selectParameter option:selected').text();
               optionst.subtitle.text = '';
 
-              var datat = datat['data'].map(n => [n[0], n[1] + (offset/1000) * (this.idx)]);
+              var datat = datat['data'].map(n => [n[0], n[1] + (offset) * (this.idx)]);
               if (this.idx == 0) {
                 optionst.series[1].name = data['name'];
                 optionst.series[1].data = datat;
