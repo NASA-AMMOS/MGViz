@@ -1380,6 +1380,12 @@ var ChartTool = {
                   optionst.series[this.idx * 2].animation = false;
                   optionst.series[this.idx * 2].name = data['name'] + ' error';
                 }
+              } else {
+                if (this.idx == 0) {
+                  optionst.series[0].showInLegend = false;
+                } else {
+                  optionst.series[this.idx * 2].showInLegend = false;
+                }
               }
 
               optionst.yAxis.minorTicks = true;
