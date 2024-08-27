@@ -218,7 +218,7 @@ let Map_ = {
         })
 
         // Clear the selected feature if clicking on the map where there are no features
-        Map_.map.addEventListener('click', clearOnMapClick)
+        // Map_.map.addEventListener('click', clearOnMapClick)
 
         //Build the toolbar
         buildToolBar()
@@ -1562,11 +1562,6 @@ function buildToolBar() {
 }
 
 function clearOnMapClick(event) {
-    // Skip if ChartTool is being used
-    if (ToolController_.activeToolName == 'ChartTool') {
-        return
-    }
-
     if (Map_._justSetActiveLayer) {
         Map_._justSetActiveLayer = false
         return
