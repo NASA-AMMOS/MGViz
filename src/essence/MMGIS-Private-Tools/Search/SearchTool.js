@@ -346,7 +346,7 @@ function searchWithin( coords ) {
         newActive.parent().css( { 'background': ToolController_.activeBG } );
         ToolController_.makeTool( 'ChartTool' );
       }
-      if (i >= 5) { // Only cycle through the first 5
+      if (i >= 1) { // Only chart the first
         nochart = true;
       }
       ToolController_.getTool( 'ChartTool' ).use( selectLayers[i].feature, ((i == 0) ? noreset : true), nochart );
@@ -512,7 +512,7 @@ function doWithSearch( doX, forceX, forceSTS, isURLSearch ) {
           newActive.parent().css( { 'background': ToolController_.activeBG } );
           ToolController_.makeTool( 'ChartTool' );
         }
-        if (i >= 5) { // Only cycle through the first 5
+        if (i >= 1) { // Only chart the first
           nochart = true;
         }
         ToolController_.getTool( 'ChartTool' ).use( selectLayers[i].feature, ((i == 0) ? noreset : true), nochart);
