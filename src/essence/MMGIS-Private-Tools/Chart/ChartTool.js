@@ -2391,7 +2391,6 @@ var ChartTool = {
     ToolController_.activeTool.site = '';
     ToolController_.activeTool.sites = [];
     ToolController_.activeTool.siteOptionsList = [];
-    L_.resetLayerFills();
     this.MMGISInterface.separateFromMMGIS();
   },
   getUrlString: function () {
