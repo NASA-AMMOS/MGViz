@@ -31,6 +31,8 @@ import './ChartTool.css'
 window.jspdf = require("jspdf/dist/jspdf.es.min.js")
 window.svg2pdf = require("./external/svg2pdf.js")
 
+const tacls = true; // optional turn off tacls
+
 function SiteOptions(sites, source, fil, type, mode, param, date) {
   this.sites = sites;
   this.source = source;
@@ -112,7 +114,7 @@ var ChartTool = {
   param: 'TROTOT',
   date: d.toISOString().split('T')[0],
   coseismics: true,
-  sse: true,
+  sse: tacls,
   metric: true,
   stackOn: false,
   offset: 10,
@@ -178,16 +180,17 @@ var ChartTool = {
       '<option selected="selected" value="detrend">Detrend</option>',
       '<option value="trend">Trend</option>',
       '<option value="resid">Resid</option>',
-      '</select>',
-      '<br>Model Version:<br>',
+      '</select><br>',
+      '<div id ="modelDiv">Model Version:<br>',
       '<select id="selectVersion" style="color:black;margin-bottom:10px;">',
       '<option selected="selected" value="default">default</option>',
-      '</select><br>',
+      '</select></div>',
+      '<br>',
       '<input type="checkbox" name="checknorth" value="n" checked="checked"><span style="font-size:13px;"> North</span><br>',
       '<input type="checkbox" name="checkeast" value="e" checked="checked"><span style="font-size:13px;"> East</span><br>',
       '<input type="checkbox" name="checkup" value="u" checked="checked"><span style="font-size:13px;"> Up</span><br>',
       '<input type="checkbox" name="checkOffsets" value="true" checked="checked"><span style="font-size:13px;"> Show Offsets</span><br>',
-      '<input type="checkbox" name="checkSse" value="true" checked="checked"><span style="font-size:13px;"> Slow-Slip Events</span><br>',
+      '<div id="SseDiv"><input type="checkbox" name="checkSse" value="true" checked="checked"><span style="font-size:13px;"> Slow-Slip Events</span><br></div>',
       '</div>',
       '<input type="checkbox" name="checkStack" value="true"><span style="font-size:13px;"> Stack On Charts</span><br>',
       '<input type="checkbox" name="checkSeparation" value="true" checked="checked" style="margin-bottom:8px;"><span style="font-size:13px;"> Stack Separation</span><br>',
@@ -343,24 +346,29 @@ var ChartTool = {
     }
 
     // Query TACLS metadata
-    $.ajax({
-      type: 'GET',
-      url: 'api/eseses/tacls',
-      dataType: 'json',
-      success: function (data) {
-        $('#selectVersion').empty()
-          $.each(data['versions'], function (key, value) {
-            $('#selectVersion').append($('<option></option>')
-              .attr('value', value)
-              .text(value));
-          });
-        // make sure first version is selected
-        ChartTool.version = data['versions'][0]
-      },
-      error: function (jqXHR, textStatus, errorThrown) {
-        console.error('Unable to retrieve TACLS metadata');
-      }
-    });
+    if (tacls == true) {
+      $.ajax({
+        type: 'GET',
+        url: 'api/eseses/tacls',
+        dataType: 'json',
+        success: function (data) {
+          $('#selectVersion').empty()
+            $.each(data['versions'], function (key, value) {
+              $('#selectVersion').append($('<option></option>')
+                .attr('value', value)
+                .text(value));
+            });
+          // make sure first version is selected
+          ChartTool.version = data['versions'][0]
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+          console.error('Unable to retrieve TACLS metadata');
+        }
+      });
+    } else {
+      $('#modelDiv').hide();
+      $('#SseDiv').hide();
+    }
 
     // load list of sites
     $.ajax({
