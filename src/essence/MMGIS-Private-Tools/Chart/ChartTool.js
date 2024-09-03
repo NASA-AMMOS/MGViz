@@ -980,9 +980,9 @@ var ChartTool = {
             }
           }
           if (existingOptions == false) {
-            // Don't stack more than 5 sites
-            if (ChartTool.siteOptionsList.length > 4) {
-              ChartTool.siteOptionsList = ChartTool.siteOptionsList.slice(ChartTool.siteOptionsList.length - 4, ChartTool.siteOptionsList.length);
+            // Don't stack more than 7 sites if tropospheric or 5 if geodetic
+            if (ChartTool.siteOptionsList.length >= ((mode == 'tropospheric') ? 7 : 5)) {
+              ChartTool.siteOptionsList = ChartTool.siteOptionsList.slice(ChartTool.siteOptionsList.length - ((mode == 'tropospheric') ? 6 : 4), ChartTool.siteOptionsList.length);
             }
             ChartTool.siteOptionsList.push(siteOptions);
           }
@@ -1010,8 +1010,8 @@ var ChartTool = {
         $('input[name=checkOffsets]').prop('checked', false);
       }
     }
-    if (sites.length > 5) {
-      alert("Too many sites selected for charting.")
+    if (sites.length > ((mode == 'tropospheric') ? 7 : 5)) {
+      alert("Too many data sets selected for charting.")
       return;
     }
     var site = sites[sites.length - 1];
