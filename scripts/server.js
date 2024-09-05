@@ -689,18 +689,20 @@ setups.getBackendSetups(function (setups) {
       });
 
   //tacls
-  app.get('/api/eseses/tacls/:site/:source/:fil/:type/:version/:neu', function(req, res) {
+  app.get('/api/eseses/tacls/:mode/:site/:source/:fil/:type/:version/:neu', function(req, res) {
+    const mode = encodeURIComponent(req.params.mode);
     const site = encodeURIComponent(req.params.site);
     const source = encodeURIComponent(req.params.source);
     const fil = encodeURIComponent(req.params.fil);
     const type = encodeURIComponent(req.params.type);
     const version = encodeURIComponent(req.params.version);
     const neu = encodeURIComponent(req.params.neu);
-    execFile('python3', ['private/eseses/tacls.py', site, source, fil, type, neu, version], {maxBuffer: 1024 * 1024},
+    execFile('python3', ['private/eseses/tacls.py', mode, site, source, fil, type, neu, version], {maxBuffer: 1024 * 1024},
     function(error, stdout, stderr) { res.send(stdout); console.log(stderr);});
   });
-  app.get('/api/eseses/tacls', function(req, res) {
-    execFile('python3', ['private/eseses/tacls.py'], {maxBuffer: 1024 * 1024},
+  app.get('/api/eseses/tacls/:mode', function(req, res) {
+    const mode = encodeURIComponent(req.params.mode);
+    execFile('python3', ['private/eseses/tacls.py', mode], {maxBuffer: 1024 * 1024},
     function(error, stdout, stderr) { res.send(stdout);});
   });
   

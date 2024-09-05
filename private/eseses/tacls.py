@@ -8,25 +8,29 @@ import re
 path = 'private/eseses/tacls'
 
 # get versions request
-if (len(sys.argv) == 1):
+if (len(sys.argv) == 2):
+    if str(sys.argv[1]).isalnum():   # mode
+        path = os.path.join(path, str(sys.argv[1]))
     versions = [item for item in os.listdir(path) if os.path.isdir(os.path.join(path, item))]
     results = {'versions': sorted(versions)}
     print(json.dumps(results))
     sys.exit()
 
 # Get args
-if str(sys.argv[1]).isalnum():   # site
-    site = sys.argv[1]
-if str(sys.argv[2]).isalnum():   # source
-    source = sys.argv[2]
-if str(sys.argv[3]).isalnum():   # Type
-    fil = sys.argv[3]
-if str(sys.argv[4]).isalnum():   # Trend/Detrend
-    ttype = sys.argv[4]
-if str(sys.argv[5]).isalnum():   # n e u
-    neu = sys.argv[5]
-if not re.search(r'[^a-zA-Z0-9_\-\.]', str(sys.argv[6])):   # version / source directory
-    version = re.sub(r'[^a-zA-Z0-9_\-\.]', '', str(sys.argv[6]))
+if str(sys.argv[1]).isalnum():   # mode
+    path = os.path.join(path, str(sys.argv[1]))
+if str(sys.argv[2]).isalnum():   # site
+    site = sys.argv[2]
+if str(sys.argv[3]).isalnum():   # source
+    source = sys.argv[3]
+if str(sys.argv[4]).isalnum():   # Type
+    fil = sys.argv[4]
+if str(sys.argv[5]).isalnum():   # Trend/Detrend
+    ttype = sys.argv[5]
+if str(sys.argv[6]).isalnum():   # n e u
+    neu = sys.argv[6]
+if not re.search(r'[^a-zA-Z0-9_\-\.]', str(sys.argv[7])):   # version / source directory
+    version = re.sub(r'[^a-zA-Z0-9_\-\.]', '', str(sys.argv[7]))
 else:
     print('Invalid characters in version')
     sys.exit()

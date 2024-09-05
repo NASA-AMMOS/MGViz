@@ -181,21 +181,20 @@ var ChartTool = {
       '<option value="trend">Trend</option>',
       '<option value="resid">Resid</option>',
       '</select><br>',
-      '<div id ="modelDiv">Model Version:<br>',
-      '<select id="selectVersion" style="color:black;margin-bottom:10px;">',
-      '<option selected="selected" value="default">default</option>',
-      '</select></div>',
-      '<br>',
       '<input type="checkbox" name="checknorth" value="n" checked="checked"><span style="font-size:13px;"> North</span><br>',
       '<input type="checkbox" name="checkeast" value="e" checked="checked"><span style="font-size:13px;"> East</span><br>',
       '<input type="checkbox" name="checkup" value="u" checked="checked"><span style="font-size:13px;"> Up</span><br>',
       '<input type="checkbox" name="checkOffsets" value="true" checked="checked"><span style="font-size:13px;"> Show Offsets</span><br>',
-      '<div id="SseDiv"><input type="checkbox" name="checkSse" value="true" checked="checked"><span style="font-size:13px;"> Slow-Slip Events</span><br></div>',
       '</div>',
       '<input type="checkbox" name="checkStack" value="true"><span style="font-size:13px;"> Stack On Charts</span><br>',
       '<input type="checkbox" name="checkSeparation" value="true" checked="checked" style="margin-bottom:8px;"><span style="font-size:13px;"> Stack Separation</span><br>',
       '<input id="textOffset" type="text" value="' + this.offset + '" name="offset" maxLength="4" style="color:#000000;width:40px;margin-bottom:10px;"/>',
-      '<span id="labelUnits" style="font-size:10px;"> ' + this.uom + '</span><button id="buttonApply" style="color:#000000;padding:2px;float:right;width:60px;font-size:11px;">Apply</button>',
+      '<span id="labelUnits" style="font-size:10px;"> ' + this.uom + '</span><button id="buttonApply" style="color:#000000;padding:2px;float:right;width:60px;font-size:11px;">Apply</button>',,
+      '<div id ="modelDiv">Model Version:<br>',
+      '<select id="selectVersion" style="color:black;margin-bottom:10px;">',
+      '<option selected="selected" value="default">default</option>',
+      '</select></div>',
+      '<div id="SseDiv"><input type="checkbox" name="checkSse" value="true" checked="checked"><span style="font-size:13px;"> Detected Events</span></div>',
       '<div id="sitesDiv" style="margin-top:4px;">',
       '<br>Site Code:<br>',
       '<input id="textSite" type="text" name="sitecode" style="color:#000000;width:60px;"/>',
@@ -346,29 +345,7 @@ var ChartTool = {
     }
 
     // Query TACLS metadata
-    if (tacls == true) {
-      $.ajax({
-        type: 'GET',
-        url: 'api/eseses/tacls',
-        dataType: 'json',
-        success: function (data) {
-          $('#selectVersion').empty()
-            $.each(data['versions'], function (key, value) {
-              $('#selectVersion').append($('<option></option>')
-                .attr('value', value)
-                .text(value));
-            });
-          // make sure first version is selected
-          ChartTool.version = data['versions'][0]
-        },
-        error: function (jqXHR, textStatus, errorThrown) {
-          console.error('Unable to retrieve TACLS metadata');
-        }
-      });
-    } else {
-      $('#modelDiv').hide();
-      $('#SseDiv').hide();
-    }
+    getTaclsModels(this.mode)
 
     // load list of sites
     $.ajax({
@@ -437,6 +414,7 @@ var ChartTool = {
         ChartTool.uom = 'mm';
         $('#labelUnits').text(' ' + ChartTool.uom);
       }
+      getTaclsModels(this.value);
     });
     $('#selectMode').on('change', function (e) {
       ChartTool.mode = this.value;
@@ -1421,6 +1399,44 @@ var ChartTool = {
                 optionst.series[2 * this.idx + 1].color = this.lineColors[this.idx];
               }
 
+              // experimental tacls data
+              if (ChartTool.sse && sites.length == 1) {
+                let sync_tacls = $.ajax({
+                  url: 'api/eseses/tacls/' + mode + '/' + site + '/' + source + '/' + fil + '/' + type + '/' + version + '/n',
+                  dataType: 'json',
+                  async: false,
+                  success: function (results) {
+                    let label = 'TACLS'
+                    for (var a = 0; a < results.metadata.length; a++) {  
+                      label = results.metadata[a].label
+                      var series = {
+                        name: label,
+                        color: results.metadata[a].color,
+                        opacity: 0.8,
+                        animation: false,
+                        marker: {
+                          enabled: false
+                        },
+                        legendIndex: 20+a
+                      }
+                      optionst.series.push(series)
+                      options.series.push(series)
+                    }             
+                    let plotlines = results.plotlines
+                    let plotbands = results.plotbands
+                    for (var i in optionst.xAxis.plotLines) {
+                      plotlines.push(optionst.xAxis.plotLines[i])
+                    }
+                    optionst.xAxis.plotLines = plotlines;
+                    optionst.xAxis.plotBands = plotbands;
+
+                  },
+                  error: function (jqXHR, textStatus, errorThrown) {
+                    console.log(errorThrown);
+                  }
+                })
+              }
+
             },
             error: function (jqXHR, textStatus, errorThrown) {
               optionst = null;
@@ -1499,7 +1515,7 @@ var ChartTool = {
               // experimental tacls data
               if (ChartTool.sse) {
                 let sync_tacls = $.ajax({
-                  url: 'api/eseses/tacls/' + site + '/' + source + '/' + fil + '/' + type + '/' + version + '/n',
+                  url: 'api/eseses/tacls/' + mode + '/' + site + '/' + source + '/' + fil + '/' + type + '/' + version + '/n',
                   dataType: 'json',
                   async: false,
                   success: function (results) {
@@ -1618,7 +1634,7 @@ var ChartTool = {
               // experimental tacls data
               if (ChartTool.sse) {
                 let sync_tacls = $.ajax({
-                  url: 'api/eseses/tacls/' + site + '/' + source + '/' + fil + '/' + type + '/' + version + '/e' ,
+                  url: 'api/eseses/tacls/' + mode + '/' + site + '/' + source + '/' + fil + '/' + type + '/' + version + '/e' ,
                   dataType: 'json',
                   async: false,
                   success: function (results) {
@@ -1737,7 +1753,7 @@ var ChartTool = {
               // experimental tacls data
               if (ChartTool.sse) {
                 let sync_tacls = $.ajax({
-                  url: 'api/eseses/tacls/' + site + '/' + source + '/' + fil + '/' + type + '/' + version + '/u',
+                  url: 'api/eseses/tacls/' + mode + '/' + site + '/' + source + '/' + fil + '/' + type + '/' + version + '/u',
                   dataType: 'json',
                   async: false,
                   success: function (results) {
@@ -1831,7 +1847,7 @@ var ChartTool = {
               let invalid_vals = [':', 'error'] 
               if (invalid_vals.some(val => this.name.includes(invalid_vals))) {
                 let sync_tacls_metadata = $.ajax({
-                  url: 'api/eseses/tacls/' + site + '/' + source + '/' + fil + '/' + type + '/n',
+                  url: 'api/eseses/tacls/' + mode + '/' + site + '/' + source + '/' + fil + '/' + type + '/n',
                   dataType: 'json',
                   async: false,
                   success: function (results) {
@@ -2446,16 +2462,33 @@ function interfaceWithMMGIS() {
   }
 }
 
-// function resizeChartTool() {
-//   if (window.innerHeight < 1255) {
-//     var height = window.innerHeight - 55;
-//   } else {
-//     var height = 1200; //recommended min height to avoid scrolling
-//   }
-//   $('#toolsWrapper').height(height);
-// }
-
 //Other functions
+
+function getTaclsModels(mode) {
+  if (tacls == true) {
+    $.ajax({
+      type: 'GET',
+      url: 'api/eseses/tacls/' + mode,
+      dataType: 'json',
+      success: function (data) {
+        $('#selectVersion').empty()
+          $.each(data['versions'], function (key, value) {
+            $('#selectVersion').append($('<option></option>')
+              .attr('value', value)
+              .text(value));
+          });
+        // make sure first version is selected
+        ChartTool.version = data['versions'][0]
+      },
+      error: function (jqXHR, textStatus, errorThrown) {
+        console.error('Unable to retrieve TACLS metadata');
+      }
+    });
+  } else {
+    $('#modelDiv').hide();
+    $('#SseDiv').hide();
+  }
+}
 
 function doy(dateObject) {
   var start = new Date(dateObject.getFullYear(), 0, 0);
