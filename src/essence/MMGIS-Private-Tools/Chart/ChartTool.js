@@ -949,7 +949,7 @@ var ChartTool = {
         $('input[name=checkStack]').prop('checked', false);
       }
       else {
-        if (ChartTool.siteOptionsList.length > 1) {
+        if (ChartTool.siteOptionsList.length > 0) {
           // Don't repeat same site options
           var existingOptions = false;
           for (var i = 0; i < ChartTool.siteOptionsList.length; i++) {
@@ -1871,13 +1871,13 @@ var ChartTool = {
               } else {
                 for (var i = ToolController_.activeTool.siteOptionsList.length - 1; i > -1; i--) {
                   if (sname.toLowerCase().includes(ToolController_.activeTool.siteOptionsList[i].sites[0]) &&
-                    sname.toLowerCase().includes(ToolController_.activeTool.siteOptionsList[i].source) &&
-                    sname.toLowerCase().replace(/ /g, '').replace('filter', "flt").includes(ToolController_.activeTool.siteOptionsList[i].fil)) {
-                    ToolController_.activeTool.siteOptionsList.splice(i, 1);
-                  }
+                    ((mode == 'geodetic') ? sname.toLowerCase().includes(ToolController_.activeTool.siteOptionsList[i].source) : sname.toLowerCase().includes(ToolController_.activeTool.siteOptionsList[i].date)) &&
+                    ((mode == 'geodetic') ? sname.toLowerCase().replace(/ /g, '').replace('filter', "flt").includes(ToolController_.activeTool.siteOptionsList[i].fil) : sname.toLowerCase().includes(ToolController_.activeTool.siteOptionsList[i].date)))
+                    {
+                      ToolController_.activeTool.siteOptionsList.splice(i, 1);
+                    }
                 }
                 sites = []
-                // var Chart0 = Highcharts.chart('chart0', options);
                 var Chart0 = Highcharts.charts.find(chart => chart && chart.renderTo.id === 'chart0');
                 // This catches multiple sites that are not stackOn
                 if (Chart0.series.length > 4 && ToolController_.activeTool.siteOptionsList.length == 0) {
@@ -1890,10 +1890,10 @@ var ChartTool = {
                 }
                 if (sites.length == 0 && ToolController_.activeTool.siteOptionsList.length == 0) {
                   // Don't display if all sites removed
-                  // $('#chart1').hide();
+                  $('#chart1').hide();
                   $('#chart2').hide();
                   $('#chart3').hide();
-                  // var Chart0 = $('#chart0').highcharts();
+                  var Chart0 = Highcharts.charts.find(chart => chart && chart.renderTo.id === 'chart0');
                   for (var i = Chart0.series.length - 1; i > -1; i--) {
                     if (Chart0.series[i].name.includes(sname) || Chart0.series[i].name.includes('Series')) {
                       Chart0.series[i].remove();
@@ -1904,29 +1904,23 @@ var ChartTool = {
                 if (ToolController_.activeTool.stackOn == false) {
                   ToolController_.activeTool.siteOptionsList = [];
                 }
-                // refresh chart with existing data
-                siteOptions = new SiteOptions(
-                  sites,
-                  ToolController_.activeTool.source,
-                  ToolController_.activeTool.fil,
-                  ToolController_.activeTool.type,
-                  ToolController_.activeTool.mode,
-                  ToolController_.activeTool.param,
-                  ToolController_.activeTool.date
-                );
-                ToolController_.activeTool.loadChart(
-                  siteOptions,
-                  [ToolController_.activeTool.north,
-                  ToolController_.activeTool.east,
-                  ToolController_.activeTool.up
-                  ],
-                  ToolController_.activeTool.coseismics,
-                  ToolController_.activeTool.offset,
-                  ToolController_.activeTool.stackOn,
-                  ToolController_.activeTool.version
-                );
+                for (var i = ChartTool.siteOptionsList.length - 1 ; i > -1; i--) {
+                  // refresh chart with existing data
+                  siteOptions = ChartTool.siteOptionsList[i];
+                  ChartTool.loadChart(
+                    siteOptions,
+                    [ChartTool.north,
+                      ChartTool.east,
+                      ChartTool.up
+                    ],
+                    ChartTool.coseismics,
+                    ChartTool.offset,
+                    ChartTool.stackOn,
+                    ChartTool.version
+                  );
+                }
                 // Remove from actual legend last
-                // var Chart0 = $('#chart0').highcharts();
+                var Chart0 = Highcharts.charts.find(chart => chart && chart.renderTo.id === 'chart0');
                 for (var i = Chart0.series.length - 1; i > -1; i--) {
                   if (Chart0.series[i].name.includes(sname) || Chart0.series[i].name.includes('Series')) {
                     Chart0.series[i].remove();
