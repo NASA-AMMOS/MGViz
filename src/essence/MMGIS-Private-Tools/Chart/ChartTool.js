@@ -223,7 +223,7 @@ var ChartTool = {
     var introHtml = ['<div style="text-align:center;font-size:24px;"><strong>Welcome to MGViz - the MMGIS GNSS Visualizer</strong></div><br></br>',
       '<div style="font-size:16px;">The map to the right displays GNSS sites and earthquakes. Select a site (blue circle) to display a time series plot of the site\'s data or use the ',
       '<strong>Load Saved Sites</strong> button near the bottom of the left panel to load a list of sites from an existing file.<br></br>',
-      'Use the Chart Options on the left to change the Source, Type, and Trend/Detrend.<br></br>',
+      'Use the Chart Options on the left to change various options. Use <strong>Mode</strong> to change between <strong>Geodetic</strong> and <strong>Tropospheric</strong> modes.<br></br>',
       'Check/uncheck plot display options as needed. <strong>Stack On Charts</strong> will add data for additionally selected sites (up to 5).',
       '<strong>Stack Separation</strong> will add a vertical buffer between selected sites to mitigate overlapping points.<br></br>',
       'More sites may be added by manually inputting the <strong>Site Code</strong> or selecting from the <strong>All Sites</strong> list. ',
