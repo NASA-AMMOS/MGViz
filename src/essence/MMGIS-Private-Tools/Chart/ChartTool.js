@@ -1266,6 +1266,7 @@ var ChartTool = {
         fil = ChartTool.siteOptionsList[i].fil;
         type = ChartTool.siteOptionsList[i].type;
         date = ChartTool.siteOptionsList[i].date;
+        param = ChartTool.siteOptionsList[i].param;
       } else {
         site = sites[i];
       }
