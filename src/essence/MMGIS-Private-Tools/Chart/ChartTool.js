@@ -224,8 +224,11 @@ var ChartTool = {
       '<div style="font-size:16px;">The map to the right displays GNSS sites and earthquakes. Select a site (blue circle) to display a time series plot of the site\'s data or use the ',
       '<strong>Load Saved Sites</strong> button near the bottom of the left panel to load a list of sites from an existing file.<br></br>',
       'Use the Chart Options on the left to change various options. Use <strong>Mode</strong> to change between <strong>Geodetic</strong> and <strong>Tropospheric</strong> modes.<br></br>',
-      'Check/uncheck plot display options as needed. <strong>Stack On Charts</strong> will add data for additionally selected sites (up to 5).',
-      '<strong>Stack Separation</strong> will add a vertical buffer between selected sites to mitigate overlapping points.<br></br>',
+      'Check/uncheck plot display options as needed.<br></br>',
+      '<strong>Stack On Charts</strong> will add data for additionally selected sites (up to 5 for <strong>Geodetic</strong> or 7 sites/dates for <strong>Tropospheric</strong>).',
+      'In <strong>Tropospheric</strong> mode, you can use the date picker to append multiple dates to the same chart if <strong>Stack On Charts</strong> is checked.',
+      '<strong>Stack Separation</strong> will add a vertical buffer between selected sites to mitigate overlapping points.',
+      'Note this may be undesirable when appending multiple dates for the same site and is off by default in <strong>Tropospheric</strong> mode.<br></br>',
       'More sites may be added by manually inputting the <strong>Site Code</strong> or selecting from the <strong>All Sites</strong> list. ',
       'Selected sites will show up under the <strong>Saved</strong> list. Deselecting the <strong>Append Site Selection</strong> ',
       'option will result in only a single site being loaded at a time.<br></br>',
@@ -408,11 +411,17 @@ var ChartTool = {
         $('#troposphericDiv').show();
         ChartTool.uom = 'm';
         $('#labelUnits').text(' ' + ChartTool.uom);
+        $('input[name=checkSeparation]').prop('checked', false);
+        $('#textOffset').val('0.1');
+        ChartTool.offset = 0;
       } else {
         $('#geodeticDiv').show();
         $('#troposphericDiv').hide()
         ChartTool.uom = 'mm';
         $('#labelUnits').text(' ' + ChartTool.uom);
+        $('input[name=checkSeparation]').prop('checked', true);
+        $('#textOffset').val('10');
+        ChartTool.offset = $('#textOffset').val();
       }
       getTaclsModels(this.value);
     });
@@ -510,12 +519,12 @@ var ChartTool = {
     });
     $('input[name=checkSeparation]').click(function () {
       if (this.checked) {
-        var offset = $('#textOffset').val();
+        ChartTool.offset = $('#textOffset').val();
       } else {
-        var offset = 0;
+        ChartTool.offset = 0;
       }
       var siteOptions = new SiteOptions($('#siteSelect').val(), ChartTool.source, ChartTool.fil, ChartTool.type, ChartTool.mode, ChartTool.param, ChartTool.date);
-      ToolController_.activeTool.loadChart(siteOptions, [ChartTool.north, ChartTool.east, ChartTool.up], ChartTool.coseismics, offset, ChartTool.stackOn, ChartTool.version);
+      ToolController_.activeTool.loadChart(siteOptions, [ChartTool.north, ChartTool.east, ChartTool.up], ChartTool.coseismics, ChartTool.offset, ChartTool.stackOn, ChartTool.version);
     });
     $('input[name=checkAppend]').click(function () {
       if (this.checked) {
