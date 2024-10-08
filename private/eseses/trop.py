@@ -126,7 +126,10 @@ for tm, val in times.items():
     except KeyError:
         data['data'] = []
     if param in ['TROTOT', 'TRODRY', 'TROWET', 'TGNWET', 'TGEWET']:
-        paramstd = param+'STDEV'
+        if param == 'TROWET':
+            paramstd = 'TROTOTSTDEV'  # TROWET/ZWD can use TROTOT/ZTD STDDEV
+        else:
+            paramstd = param + 'STDEV'
         try:
             error = [date,
                      val[param] - val[paramstd],
