@@ -643,6 +643,11 @@ setups.getBackendSetups(function (setups) {
     execFile('python3', ['private/eseses/psite.py'], {maxBuffer: 1024 * 1024},
     function(error, stdout, stderr) { res.send(stdout);});
   });
+  app.get('/api/eseses/psite/:state', function(req, res) {
+    const state = encodeURIComponent(req.params.state);
+    execFile('python3', ['private/eseses/psite.py', state], {maxBuffer: 1024 * 1024},
+    function(error, stdout, stderr) { res.send(stdout);});
+  });
 
   //velocity
   app.get('/api/eseses/velocity/:source', function(req, res) {

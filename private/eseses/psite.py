@@ -3,10 +3,17 @@ import urllib.request
 import subprocess
 import sys
 import os
-from datetime import datetime, timedelta
-
+from datetime import datetime
+import geopandas as gpd
 
 json = 'Missions/MGViz/Layers/Sites.json'
+
+# Get args
+if len(sys.argv) > 1:
+    if str(sys.argv[1]).replace('%20', '').isalnum():
+        state = sys.argv[1].replace('%20', ' ').lower()
+        json = json.replace('Sites', 'Sites-' + state)
+
 if os.path.exists(json):
     mtime = datetime.fromtimestamp(os.path.getmtime(json))
     diff = datetime.now() - mtime
@@ -41,11 +48,11 @@ if len(csvLines) < 2:   # an empty response from web service
 
 # Got some csv from the url, now in cvsLines
 with open('out.csv', 'w') as csvfile:
-    wtr = csv.writer( csvfile )
-    wtr.writerow( ('site', 'x', 'y' ))
+    wtr = csv.writer(csvfile)
+    wtr.writerow(('site', 'x', 'y'))
     try:
         for row in csvLines:
-            if "'Error'" in str(row): # use the old version if there is an error
+            if "'Error'" in str(row):  # use the old version if there is an error
                 with open(json, 'r') as out:
                     print(out.read())
                     sys.exit()
@@ -63,12 +70,33 @@ with open('out.csv', 'w') as csvfile:
 # ogr2ogr -f geojson -oo X_POSSIBLE_NAMES=x -oo Y_POSSIBLE_NAMES=y out.json out.csv
 # generate new json from the csv
 ogr2ogr_command_list = ["ogr2ogr", "-f", "geojson", "-oo", "X_POSSIBLE_NAMES=x", "-oo", "Y_POSSIBLE_NAMES=y", json, "out.csv"]
-process = subprocess.Popen(ogr2ogr_command_list,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+process = subprocess.Popen(ogr2ogr_command_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 process.wait()
 for output in process.stdout:
     print(output)
 for error in process.stderr:
     print(error)
+
+# filter by state if requested
+if state:
+    # Load the states json file
+    states_json_path = "./private/eseses/gz_2010_us_040_00_500k.json"
+    states_json = gpd.read_file(states_json_path)
+
+    # Use lowercase state names
+    states_json["name"] = states_json["NAME"].str.lower()
+
+    # Load the features json file
+    features_json = gpd.read_file(json)
+
+    # Filter the states GeoDataFrame to get the polygon of the specified state
+    state_polygon = states_json[states_json["name"] == state].geometry.values[0]
+
+    # Filter the features to keep only the features within the polygon
+    filtered_features_gdf = features_json[features_json.geometry.within(state_polygon)]
+
+    # Save the filtered json
+    filtered_features_gdf.to_file(json, driver="GeoJSON")
 
 # Now output the new json
 with open(json, 'r') as out:
