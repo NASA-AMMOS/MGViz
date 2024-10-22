@@ -31,7 +31,8 @@ import './ChartTool.css'
 window.jspdf = require("jspdf/dist/jspdf.es.min.js")
 window.svg2pdf = require("./external/svg2pdf.js")
 
-const tacls = true; // optional turn off tacls
+var tacls = false; // optional turn off tacls
+
 
 function SiteOptions(sites, source, fil, type, mode, param, date) {
   this.sites = sites;
@@ -114,7 +115,7 @@ var ChartTool = {
   param: 'TROTOT',
   date: d.toISOString().split('T')[0],
   coseismics: true,
-  sse: tacls,
+  sse: false,
   metric: true,
   stackOn: false,
   offset: 10,
@@ -127,7 +128,8 @@ var ChartTool = {
   calendarEnabledDates: null,
   make: function () {
     this.MMGISInterface = new interfaceWithMMGIS();
-    // window.addEventListener('resize', resizeChartTool);
+    tacls = L_.getToolVars('chart')['tacls'] ? L_.getToolVars('chart')['tacls'] : false;
+    this.sse = tacls;
 
     var chartOptions = ['<a href="#" style="float:left;display:none;" id="showInfo">&#187; Show Site Info</a>',
       '<br><br><b>Chart Options</b><br>',
@@ -165,8 +167,7 @@ var ChartTool = {
       '<select id="selectSource" style="color:black">',
       '<option selected="selected" value="comb">Combination</option>',
       '<option value="jpl">JPL</option>',
-      '<option value="sopac">SOPAC</option>',
-      '<option value="sopacR20">SOPACR20</option>',
+      '<option value="sopac">SOPAC</option>' + (tacls ? '<option value="sopacR20">SOPACR20</option>' : ''),
       '</select>',
       '<br>Type:<br>',
       '<select id="selectFilter" style="color:black">',

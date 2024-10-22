@@ -1,8 +1,13 @@
 {
     "defaultIcon": "information",
     "description": "Displays charts of selected data.",
-	"descriptionFull": "",
-    "hasVars": false,
+    "descriptionFull": {
+        "title": "Show a chart legend that maps colors and symbols to meaning.",
+        "example": {
+            "tacls": true
+        }
+    },
+    "hasVars": true,
     "name": "Chart",
     "paths": {
         "ChartTool": "essence/MMGIS-Private-Tools/Chart/ChartTool"
